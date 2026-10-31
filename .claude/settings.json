@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.production)",
+      "Edit(**/.prettierrc*)",
+      "Edit(**/prettier.config.*)",
+      "Edit(**/.eslintrc*)",
+      "Edit(**/eslint.config.*)"
+    ],
+    "allow": [
+      "Bash(yarn lint *)",
+      "Bash(yarn tsc *)",
+      "Bash(yarn typecheck *)",
+      "Bash(git diff *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(adb devices *)",
+      "Bash(adb logcat *)",
+      "Bash(adb shell screencap *)",
+      "Bash(adb pull /sdcard/*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-lint.js\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
