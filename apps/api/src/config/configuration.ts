@@ -20,6 +20,13 @@ export interface AppConfig {
     accessTtl: string;
     refreshTtlDays: number;
   };
+  mail: {
+    host?: string;
+    port: number;
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
 }
 
 /** Maps validated env values to the typed config read through ConfigService. */
@@ -39,6 +46,13 @@ export function buildConfig(env: EnvVars): AppConfig {
       accessSecret: env.JWT_ACCESS_SECRET,
       accessTtl: env.JWT_ACCESS_TTL,
       refreshTtlDays: env.REFRESH_TTL_DAYS,
+    },
+    mail: {
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS,
+      from: env.MAIL_FROM,
     },
   };
 }

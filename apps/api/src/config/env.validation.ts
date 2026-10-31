@@ -12,6 +12,11 @@ export interface EnvVars {
   JWT_ACCESS_SECRET: string;
   JWT_ACCESS_TTL: string;
   REFRESH_TTL_DAYS: number;
+  SMTP_HOST?: string;
+  SMTP_PORT: number;
+  SMTP_USER?: string;
+  SMTP_PASS?: string;
+  MAIL_FROM?: string;
 }
 
 const envSchema = Joi.object<EnvVars>({
@@ -26,7 +31,15 @@ const envSchema = Joi.object<EnvVars>({
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TTL: Joi.string().default('15m'),
   REFRESH_TTL_DAYS: Joi.number().integer().min(1).default(7),
-}).unknown(true);
+  // Mail is optional: an empty SMTP_HOST falls back to an Ethereal test account. Empty values count as unset.
+  SMTP_HOST: Joi.string().empty(''),
+  SMTP_PORT: Joi.number().port().empty('').default(587),
+  SMTP_USER: Joi.string().empty(''),
+  SMTP_PASS: Joi.string().empty(''),
+  MAIL_FROM: Joi.string().empty(''),
+})
+  .and('SMTP_USER', 'SMTP_PASS')
+  .unknown(true);
 
 /**
  * Validates raw env values and applies defaults. Throws a readable error so the app

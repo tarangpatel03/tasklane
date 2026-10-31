@@ -27,7 +27,23 @@ Validated at startup (the app refuses to start if one is missing or invalid).
 | `JWT_ACCESS_TTL`    | `15m`         | Access token lifetime               |
 | `REFRESH_TTL_DAYS`  | `7`           | Refresh token lifetime in days      |
 
-Other variables in `.env.example` (SMTP, seed) are validated when the checkpoint that uses them lands.
+Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin`.
+
+## Mail
+
+`MailService` (`src/modules/mail`) sends email over SMTP with `nodemailer`. `send(to, content)` never throws: a failure is logged (message only) and returns `false`, so mail cannot break a request. Templates for the four emails are functions in `src/modules/mail/templates/`. Emails contain no links.
+
+| Variable    | Default     | Notes                                                                |
+| ----------- | ----------- | -------------------------------------------------------------------- |
+| `SMTP_HOST` | empty       | Empty uses an Ethereal test account (see below)                      |
+| `SMTP_PORT` | `587`       | 587 uses STARTTLS, 465 uses TLS from the start                       |
+| `SMTP_USER` | empty       | Set together with `SMTP_PASS`                                        |
+| `SMTP_PASS` | empty       | For Gmail, an App Password                                           |
+| `MAIL_FROM` | `SMTP_USER` | Sender address. Gmail may replace it with the account address anyway |
+
+**Gmail:** turn on 2-Step Verification on the Google account, create an App Password (Google Account, Security, App passwords), and put the 16 characters without spaces in `SMTP_PASS`. Use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587` and your Gmail address as `SMTP_USER`. Your normal Google password does not work.
+
+**No setup (Ethereal):** leave `SMTP_HOST` empty or remove the `SMTP_*` lines. On the first email the API creates a free Ethereal test account. Nothing is delivered; each email's preview URL is printed in the API log. This needs internet access.
 
 ## Auth
 
