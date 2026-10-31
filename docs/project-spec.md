@@ -79,8 +79,8 @@ Task fields: `title` (required, max 120), `description` (optional, max 2000), `p
 
 - A seed script creates the first Admin from env variables. Credentials are never committed.
 - Admin creates a user with name, email (unique, case-insensitive) and role. The user starts as `invited` and becomes `active` after setting a password.
-- **No passwords by email.** The invite email contains a one-time **setup code** (8 characters, hashed in the database, valid 48 hours, invalidated after 5 wrong attempts). The user opens the mobile app, taps "Set up account", and enters email, code and a new password. Admin can resend the invite. A link is not used because a `localhost` link cannot open on a phone. Add a deep link when the app is deployed.
-- Forgot password and reset use the same code mechanism. The response never reveals whether an email exists.
+- **No passwords by email.** The invite email contains a one-time **setup link** (random 256-bit token, only its hash is stored, valid 48 hours, works once). The link opens a single page served by the API with a password and a confirm-password field. After saving, the user logs in to the mobile app with their email and that password. Admin can resend the invite, which invalidates the earlier link. `PUBLIC_BASE_URL` sets the link's host: `localhost` works on the same PC, and opening the link on a phone needs the PC's LAN IP (or the deployed URL later).
+- Forgot password and reset use the same mechanism: the mobile app asks for the email, an email with a reset link (valid 1 hour, works once) follows, and the same kind of page sets the new password and revokes all sessions. The response never reveals whether an email exists.
 - A user cannot be deactivated while they are on open tasks. The error lists those tasks so Admin can reassign them first. Admin cannot deactivate themselves or the last Admin. Deactivating blocks login and revokes tokens.
 - Login uses email and password. Short-lived access token (about 15 minutes) plus a rotating refresh token, stored hashed and revoked on logout, password change or deactivation. Login is rate-limited.
 - Global JWT guard with `@Public()` for open routes, plus a roles guard with `@Roles()`.
@@ -90,7 +90,7 @@ Task fields: `title` (required, max 120), `description` (optional, max 2000), `p
 
 Sent after the request succeeds. A mail failure is logged and never breaks the request.
 
-1. **Account created** to the new user: invite with setup code.
+1. **Account created** to the new user: invite with the setup link. A second email of the same kind carries the **password reset** link after "Forgot password".
 2. **Added to a task** to each newly added Employee, and to the task's Manager when someone else sets or changes it. A Manager who creates their own task gets no email.
 3. **Submitted for review** to the task's Manager, and to the task's creator if that is a different person (for example the Admin).
 4. **Review result** (approved, or rejected with comment) to every assignee.
@@ -101,7 +101,8 @@ Local development uses Mailpit (free local mail catcher). SMTP settings come fro
 
 Prefix `/api/v1`. Response envelope and error shape follow the `nest-backend` skill.
 
-- Auth: `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/setup-account`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/change-password`; `GET /auth/me`.
+- Auth: `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/change-password`; `GET /auth/me`.
+- Account pages (HTML, public): `GET` and `POST /account/setup?token=...` and `/account/reset?token=...`. They replace the earlier `/auth/setup-account` and `/auth/reset-password` JSON routes.
 - Users: `GET /users` (filter by role), `POST /users`, `GET /users/:id`, `PATCH /users/:id`, `DELETE /users/:id` (deactivate), `POST /users/:id/resend-invite`.
 - Tasks: `GET /tasks` (role-scoped; filters for status, assignee, priority, due date; pagination), `POST /tasks` (title, description, priority, dueDate, requiresReview, assigneeIds, managerId for Admin only), `GET /tasks/:id`, `PATCH /tasks/:id` (including assigneeIds), `DELETE /tasks/:id`, `POST /tasks/:id/transition` (action: START, SUBMIT, COMPLETE, APPROVE, REJECT; comment required for REJECT).
 - Comments: `GET /tasks/:id/comments`, `POST /tasks/:id/comments`.
@@ -114,7 +115,7 @@ Prefix `/api/v1`. Response envelope and error shape follow the `nest-backend` sk
 - `task_assignees`: task_id, user_id, added_at (primary key on both ids).
 - `task_comments`: id, task_id, author_id, body, created_at.
 - `task_status_history`: id, task_id, from_status, to_status, actor_id, comment, created_at.
-- `auth_codes`: id, user_id, type (setup, reset), code_hash, expires_at, attempts, used_at.
+- `auth_tokens`: id, user_id, type (setup, reset), token_hash, expires_at, used_at, created_at.
 - `refresh_tokens`: id, user_id, token_hash, expires_at, revoked_at.
 
 All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `tasks(manager_id, status)`, `tasks(created_by)`, `tasks(due_date)`, `task_assignees(user_id)`.
@@ -131,7 +132,7 @@ All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `
 
 ### Mobile app (React Native, Manager and Employee)
 
-- Everyone: login, set up account, forgot and reset password, task list with status filter and pull-to-refresh, task detail with actions, comments and status history, profile with change password and logout.
+- Everyone: login, "Forgot password" (asks for the email only; setting a password happens on the web page from the email link), task list with status filter and pull-to-refresh, task detail with actions, comments and status history, profile with change password and logout.
 - Employee: sees tasks they are assigned to, with Start, Submit, and Complete actions.
 - Manager adds: create tasks and pick Employees, add or remove assignees, review queue (tasks in review where they are the Manager, with approve or reject).
 - **Tablet:** tested on a physical tablet. On wide windows the task list sits on the left and the selected task's detail on the right; on phone, tapping a task opens a detail screen. Must work in portrait and landscape, handle safe areas, and keep the selection across rotation. Use window size classes, not device models (see `rn-responsive-ui`).

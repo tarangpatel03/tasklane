@@ -13,25 +13,26 @@ NestJS + TypeORM + PostgreSQL backend. Routes are served under `/api/v1`.
 
 Validated at startup (the app refuses to start if one is missing or invalid).
 
-| Variable            | Default       | Notes                               |
-| ------------------- | ------------- | ----------------------------------- |
-| `NODE_ENV`          | `development` | `development`, `production`, `test` |
-| `API_PORT`          | `3000`        |                                     |
-| `ADMIN_CORS_ORIGIN` | required      | Admin panel origin                  |
-| `DB_HOST`           | required      |                                     |
-| `DB_PORT`           | `5432`        |                                     |
-| `DB_USER`           | required      |                                     |
-| `DB_PASSWORD`       | required      |                                     |
-| `DB_NAME`           | required      |                                     |
-| `JWT_ACCESS_SECRET` | required      | At least 32 characters              |
-| `JWT_ACCESS_TTL`    | `15m`         | Access token lifetime               |
-| `REFRESH_TTL_DAYS`  | `7`           | Refresh token lifetime in days      |
+| Variable            | Default                       | Notes                                       |
+| ------------------- | ----------------------------- | ------------------------------------------- |
+| `NODE_ENV`          | `development`                 | `development`, `production`, `test`         |
+| `API_PORT`          | `3000`                        |                                             |
+| `ADMIN_CORS_ORIGIN` | required                      | Admin panel origin                          |
+| `DB_HOST`           | required                      |                                             |
+| `DB_PORT`           | `5432`                        |                                             |
+| `DB_USER`           | required                      |                                             |
+| `DB_PASSWORD`       | required                      |                                             |
+| `DB_NAME`           | required                      |                                             |
+| `JWT_ACCESS_SECRET` | required                      | At least 32 characters                      |
+| `JWT_ACCESS_TTL`    | `15m`                         | Access token lifetime                       |
+| `REFRESH_TTL_DAYS`  | `7`                           | Refresh token lifetime in days              |
+| `PUBLIC_BASE_URL`   | `http://localhost:<API_PORT>` | Host used in email links, see Account links |
 
 Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin`.
 
 ## Mail
 
-`MailService` (`src/modules/mail`) sends email over SMTP with `nodemailer`. `send(to, content)` never throws: a failure is logged (message only) and returns `false`, so mail cannot break a request. Templates for the four emails are functions in `src/modules/mail/templates/`. Emails contain no links.
+`MailService` (`src/modules/mail`) sends email over SMTP with `nodemailer`. `send(to, content)` never throws: a failure is logged (message only) and returns `false`, so mail cannot break a request. Templates for the emails are functions in `src/modules/mail/templates/`. Only the invite and the password reset email contain a link (see Account links).
 
 | Variable    | Default     | Notes                                                                |
 | ----------- | ----------- | -------------------------------------------------------------------- |
@@ -53,8 +54,35 @@ Every route needs `Authorization: Bearer <accessToken>` unless marked `@Public()
 - `POST /auth/refresh` (public, 10 per minute): `{ refreshToken }` returns a new pair. The old refresh token stops working. Reusing a revoked one revokes all of that user's sessions.
 - `POST /auth/logout`: `{ refreshToken }` revokes that token.
 - `GET /auth/me`: the current user.
+- `POST /auth/forgot-password` (public, 3 per minute): `{ email }` always answers 200. An active user gets a reset email; nobody else does, and at most one per minute.
 
-Refresh tokens are random strings stored as SHA-256 hashes in `refresh_tokens`. All other routes allow 100 requests per minute per IP.
+Refresh tokens are random strings stored as SHA-256 hashes in `refresh_tokens` (`RefreshTokensService`). All other routes allow 100 requests per minute per IP.
+
+## Users
+
+Lists are paginated (`page`, `limit` up to 100). Emails are stored lowercase and are unique.
+
+- `GET /users` (any role): filters `role`, `status`, `search` (part of name or email). Admin sees everyone, a Manager sees Employees and self, an Employee sees self.
+- `GET /users/:id` (any role): same visibility. A user the caller may not see returns 404.
+- `POST /users` (Admin): `{ name, email, role }` with role `MANAGER` or `EMPLOYEE`. The user starts `invited` with no password and gets an email with a setup link.
+- `POST /users/:id/resend-invite` (Admin): sends a new setup link to an `invited` user (409 otherwise). The earlier link stops working.
+- `PATCH /users/:id` (Admin): any of `name`, `email`, `role` (`MANAGER` or `EMPLOYEE`), `status` (`active` or `deactivated`).
+- `DELETE /users/:id` (Admin): same as `PATCH` with `status: deactivated`.
+
+Rules, all answered with 409:
+
+- An Admin cannot deactivate themselves or the last active Admin, and cannot change their own role. An Admin account's role cannot be changed, and Admin accounts cannot be created through the API (the seed script creates the first one).
+- Deactivating revokes the user's refresh tokens, and the access token stops working immediately. A user who is on open tasks cannot be deactivated; the error lists the tasks. This check is a stub until tasks exist (checkpoint 3.2).
+- Activating works only from `deactivated`. Someone who never set a password goes back to `invited` instead of `active`. An `invited` user becomes active by setting up their account.
+
+## Account links
+
+The invite and password reset emails carry a one-time link to a small web page served by the API, where the user enters a password and confirms it. Afterwards they log in to the app with their email and that password.
+
+- Pages (public, plain HTML, no scripts): `GET` and `POST /api/v1/account/setup?token=...` for invites (valid 48 hours) and `/api/v1/account/reset?token=...` for resets (valid 1 hour). A link works once, and a newer link for the same user replaces the older one. A reset signs the user out everywhere.
+- Opening the page does not use up the link, so a mail client previewing it is harmless. The token is 256 random bits and only its SHA-256 is stored (`auth_tokens`).
+- The link host comes from `PUBLIC_BASE_URL`. The default `http://localhost:3000` works when the email is opened on the same PC as the API. To open it on a phone, set `PUBLIC_BASE_URL=http://<your PC's LAN IP>:3000`, restart the API and allow port 3000 through the Windows firewall.
+- The page is deliberately plain: the design brief is still empty. Its colours, spacing and sizes are tokens at the top of `src/modules/auth/account-pages.html.ts`.
 
 ## Scripts
 

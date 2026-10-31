@@ -1,25 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
 import { UserStatus } from '@task-app/shared';
 import * as argon2 from 'argon2';
 import { plainToInstance } from 'class-transformer';
-import { createHash, randomBytes } from 'crypto';
-import { DataSource, IsNull, Repository } from 'typeorm';
-import { AppConfig } from '../../config/configuration';
+import { DataSource, EntityManager } from 'typeorm';
+import { AuthTokenType } from '../auth-tokens/auth-token-type';
+import { AuthTokensService, RESET_TOKEN_VALID_MINUTES } from '../auth-tokens/auth-tokens.service';
+import { MailService } from '../mail/mail.service';
+import { passwordResetEmail } from '../mail/templates/password-reset.template';
+import { RefreshTokensService } from '../refresh-tokens/refresh-tokens.service';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { RefreshToken } from './entities/refresh-token.entity';
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const RESET_COOLDOWN_SECONDS = 60;
 const INVALID_CREDENTIALS = 'Invalid email or password';
 const INVALID_REFRESH_TOKEN = 'Invalid or expired refresh token';
-
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
 
 @Injectable()
 export class AuthService {
@@ -27,10 +23,11 @@ export class AuthService {
   private dummyHash?: Promise<string>;
 
   constructor(
-    @InjectRepository(RefreshToken) private readonly refreshTokens: Repository<RefreshToken>,
+    private readonly refreshTokens: RefreshTokensService,
+    private readonly authTokens: AuthTokensService,
+    private readonly mail: MailService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly config: ConfigService<AppConfig, true>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -50,15 +47,12 @@ export class AuthService {
    * so every session of that user is revoked.
    */
   async refresh(token: string): Promise<AuthResponseDto> {
-    const stored = await this.refreshTokens.findOne({
-      where: { tokenHash: hashToken(token) },
-      relations: { user: true },
-    });
+    const stored = await this.refreshTokens.findByRawToken(token);
     if (!stored) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
     }
     if (stored.revokedAt) {
-      await this.revokeAllForUser(stored.userId);
+      await this.refreshTokens.revokeAllForUser(stored.userId);
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
     }
     if (stored.expiresAt <= new Date() || stored.user.status !== UserStatus.ACTIVE) {
@@ -66,47 +60,84 @@ export class AuthService {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      // The conditional update makes two concurrent refreshes with the same token race safely.
-      const result = await manager.update(
-        RefreshToken,
-        { id: stored.id, revokedAt: IsNull() },
-        { revokedAt: new Date() },
-      );
-      if (!result.affected) {
+      if (!(await this.refreshTokens.revokeIfActive(stored.id, manager))) {
         throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
       }
-      return this.issueTokens(stored.user, manager.getRepository(RefreshToken));
+      return this.issueTokens(stored.user, manager);
     });
   }
 
-  /** Revokes only the caller's own token. Unknown or already revoked tokens are ignored. */
   async logout(userId: string, token: string): Promise<void> {
-    await this.refreshTokens.update(
-      { tokenHash: hashToken(token), userId, revokedAt: IsNull() },
-      { revokedAt: new Date() },
-    );
+    await this.refreshTokens.revokeOwn(userId, token);
   }
 
-  /** For password change and deactivation (checkpoints 2.2 and 2.3). */
-  async revokeAllForUser(userId: string): Promise<void> {
-    await this.refreshTokens.update({ userId, revokedAt: IsNull() }, { revokedAt: new Date() });
-  }
-
-  private async issueTokens(
-    user: User,
-    repository: Repository<RefreshToken> = this.refreshTokens,
-  ): Promise<AuthResponseDto> {
-    const { refreshTtlDays } = this.config.get('auth', { infer: true });
-    const refreshToken = randomBytes(48).toString('base64url');
-    await repository.save(
-      repository.create({
-        userId: user.id,
-        tokenHash: hashToken(refreshToken),
-        expiresAt: new Date(Date.now() + refreshTtlDays * MS_PER_DAY),
-        revokedAt: null,
+  /**
+   * Emails a reset link to an active user. Unknown, invited and deactivated emails do nothing, and
+   * the mail is not awaited, so neither the response nor its timing says whether the email exists.
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      return;
+    }
+    // Stops the endpoint from being used to flood one person's inbox.
+    if (await this.authTokens.issuedWithin(user.id, AuthTokenType.RESET, RESET_COOLDOWN_SECONDS)) {
+      return;
+    }
+    const token = await this.authTokens.issue(user.id, AuthTokenType.RESET);
+    void this.mail.send(
+      user.email,
+      passwordResetEmail({
+        name: user.name,
+        resetUrl: this.authTokens.buildUrl(AuthTokenType.RESET, token),
+        validMinutes: RESET_TOKEN_VALID_MINUTES,
       }),
     );
+  }
 
+  /** For the page behind an email link: the account's email if the link can still be used. */
+  async previewToken(type: AuthTokenType, token: string): Promise<{ email: string } | null> {
+    const stored = await this.authTokens.findValid(token, type);
+    return stored && this.canRedeem(type, stored.user) ? { email: stored.user.email } : null;
+  }
+
+  /**
+   * Sets the password from a setup or reset link. The link works once. A reset also signs the
+   * user out everywhere. Returns null when the link is not usable.
+   */
+  async redeem(
+    type: AuthTokenType,
+    token: string,
+    password: string,
+  ): Promise<{ email: string } | null> {
+    if (!(await this.previewToken(type, token))) {
+      return null;
+    }
+    const passwordHash = await argon2.hash(password);
+
+    return this.dataSource.transaction(async (manager) => {
+      const stored = await this.authTokens.findValid(token, type, manager);
+      if (!stored || !this.canRedeem(type, stored.user)) {
+        return null;
+      }
+      if (!(await this.authTokens.consume(stored.id, manager))) {
+        return null;
+      }
+      await this.usersService.setPassword(stored.userId, passwordHash, UserStatus.ACTIVE, manager);
+      if (type === AuthTokenType.RESET) {
+        await this.refreshTokens.revokeAllForUser(stored.userId, manager);
+      }
+      return { email: stored.user.email };
+    });
+  }
+
+  /** A setup link is for someone who has no password yet, a reset link for someone who has one. */
+  private canRedeem(type: AuthTokenType, user: User): boolean {
+    return user.status === (type === AuthTokenType.SETUP ? UserStatus.INVITED : UserStatus.ACTIVE);
+  }
+
+  private async issueTokens(user: User, manager?: EntityManager): Promise<AuthResponseDto> {
+    const refreshToken = await this.refreshTokens.issue(user.id, manager);
     const accessToken = await this.jwtService.signAsync({ sub: user.id });
     return plainToInstance(
       AuthResponseDto,

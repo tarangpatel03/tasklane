@@ -3,7 +3,7 @@
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
 **Last updated:** 2026-10-31
-**Current checkpoint:** 2.2 - Users module: Admin CRUD, deactivate with open-task check (next)
+**Current checkpoint:** 3.1 - Task, assignee, comment and status-history entities, migration (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -20,17 +20,17 @@ Status values: `Done`, `Next`, `Pending`.
 
 ### Phase 2: Users and email
 
-| #   | Checkpoint                                                      | Status  |
-| --- | --------------------------------------------------------------- | ------- |
-| 2.1 | Mail module with Mailpit and templates                          | Done    |
-| 2.2 | Users module: Admin CRUD, deactivate with open-task check       | Next    |
-| 2.3 | Invite flow: setup code, setup-account, resend, forgot or reset | Pending |
+| #   | Checkpoint                                                      | Status |
+| --- | --------------------------------------------------------------- | ------ |
+| 2.1 | Mail module with Mailpit and templates                          | Done   |
+| 2.2 | Users module: Admin CRUD, deactivate with open-task check       | Done   |
+| 2.3 | Invite flow: setup code, setup-account, resend, forgot or reset | Done   |
 
 ### Phase 3: Tasks
 
 | #   | Checkpoint                                                                   | Status  |
 | --- | ---------------------------------------------------------------------------- | ------- |
-| 3.1 | Task, assignee, comment and status-history entities, migration               | Pending |
+| 3.1 | Task, assignee, comment and status-history entities, migration               | Next    |
 | 3.2 | Task CRUD with one Manager and several Employees, role scoping, "added" mail | Pending |
 | 3.3 | Workflow transitions, review and reject, submitted and result emails         | Pending |
 | 3.4 | Dashboard summary endpoint and demo seed data                                | Pending |
@@ -66,8 +66,12 @@ Status values: `Done`, `Next`, `Pending`.
 
 ## Open items for me
 
-- 2.2 and 2.3 must call `AuthService.revokeAllForUser` on deactivation and password change.
-- 2.3 imports `MailModule` and does the first real Gmail send check.
+- Real Gmail check (Claude cannot read `.env`): as Admin create a user with my own Gmail address (`POST /users`), open the email on the same PC, set a password on the page, log in. For the phone, set `PUBLIC_BASE_URL=http://<PC LAN IP>:3000` in `.env`, restart the API and allow port 3000 in the Windows firewall.
+- Mobile 5.2 no longer needs set-up-account or reset-password screens, only login and "Forgot password" (email field). The 5.2 label is unchanged until I edit it.
+- The invite page design is deliberately plain because `docs/design-brief.md` is empty. Restyle the tokens at the top of `src/modules/auth/account-pages.html.ts` once the brief exists.
+- Change-password (spec 8) is built in 5.6 and must call `RefreshTokensService.revokeAllForUser`.
+- 3.2 must replace the `findOpenTasks` stub in `UsersService` (deactivation, and ideally role change, check open tasks).
+- Admin panel 4.3 activates and deactivates users with `PATCH /users/:id` and `status`.
 - Spec sections 7 and 14 and the 2.1 checklist label still say Mailpit (dropped for Gmail plus Ethereal). Left unchanged until I say so.
 
 ## Details
@@ -134,6 +138,52 @@ Details are added when a checkpoint is planned, and completed when it is finishe
 - Templates in `modules/mail/templates/` (`layout.ts` with `escapeHtml`, `account-created`, `added-to-task`, `submitted-for-review`, `review-result`); subjects are forced to one line. `MailModule` exports `MailService` and is not imported in `AppModule` yet.
 - API README documents SMTP, the Gmail App Password steps (2-Step Verification, 16 characters without spaces), the Ethereal option and the Gmail From rewrite.
 - Verified with a temporary script (deleted): five Ethereal sends returned `true` with preview URLs, `<script>` and a line break in a task title stayed escaped, a bad host logged `ECONNREFUSED`, returned `false` and did not throw (no password logged). A real Gmail send is not verified yet (see Open items).
+
+### 2.2 Users module - Done
+
+**Goal:** Admin create, edit, list, activate and deactivate users, plus the role-scoped read rules (spec 4, 6, 8). Not in 2.2: invite email, setup code and resend-invite (2.3), and the real open-task check (needs tasks, 3.1/3.2).
+
+**Plan:**
+
+1. Extract `RefreshTokensService` (1.4 refactor, avoids a Users to Auth import cycle). New `modules/refresh-tokens/` with module, service and the `RefreshToken` entity moved from `modules/auth/entities/`. The service owns token persistence: `issue`, `findByRawToken`, `revokeIfActive`, `revokeOwn`, `revokeAllForUser(userId, manager?)`. `AuthService` uses it; behaviour is unchanged. No migration (`migration:generate` must show no drift).
+2. `common/dto/pagination-query.dto.ts`: `page` (default 1), `limit` (default 20, max 100).
+3. DTOs in `modules/users/dto/`, no new dependency: `CreateUserDto` (name, lowercase email, role MANAGER or EMPLOYEE), `UpdateUserDto` (optional name, email, role, `status` of `active` or `deactivated`; written by hand, `PartialType` needs `@nestjs/mapped-types`), `QueryUsersDto` (pagination, role, status, search).
+4. `UsersService`: `create` (status `invited`, no password, readable 409 on duplicate email); `list` and `getVisible` (Admin all, Manager Employees and self, Employee self; others 404; escaped parameterised `ILIKE` search; sorted by name then id); `update` in one transaction:
+   - role only between MANAGER and EMPLOYEE, never for an Admin account or on yourself (409).
+   - to `deactivated`: 409 for yourself, the last active Admin, or open tasks (tasks listed in `details`); sets the status and revokes all refresh tokens in the same transaction.
+   - to `active`: only from `deactivated` (409 otherwise); a user who never set a password goes back to `invited`.
+   - same status is a no-op.
+   - `findOpenTasks(userId)` is a stub returning an empty list until 3.2.
+5. `UsersController`: `GET /users`, `GET /users/:id` (any role, scoped in the service), `POST`, `PATCH /:id`, `DELETE /:id` (Admin only, `ParseUUIDPipe`). `DELETE` is kept per spec and calls the same deactivate path as `PATCH`.
+6. API README (users endpoints, rules, the stub) and this file.
+
+**Decisions:** open-task check is a stub until 3.2. Reactivation through `PATCH` (not in the spec; the admin panel will use it). Admin accounts cannot be created, promoted to or demoted from through the API. No new dependencies, no migration, no env changes.
+
+**Manual steps for me:** none. `JWT_ACCESS_SECRET` is already in `.env`; SMTP values are not needed until 2.3.
+
+**Verification:** typecheck, build, `format:check`, no `migration:generate` drift; 1.4 regression (login, refresh rotation and reuse, logout); a temporary script (deleted afterwards) inserts throwaway users into the dev database, runs the HTTP checks (create, duplicates, validation, 403 and 401, list scoping and filters, patch rules, deactivate then login, access token and refresh all 401 with tokens revoked, activate restores login, invited cannot be activated, deactivated never-set-password user returns to `invited`) and deletes every row it created. `.env` is not read. The last-Admin rule is a race safety net and is covered by code review only.
+
+**Done:** everything above as planned. The check script passed every check (one assertion in it had a wrong expected count of 7 instead of 6; the API returned the correct total) and deleted its rows (0 left). `migration:generate` found no drift after the entity move. 1.4 regression (login, rotation, reuse 401, logout) passed after the refactor. A deactivated user's access token, refresh token and login all return 401 at once, and their tokens are marked revoked.
+
+**Deviations:** `AuthService.revokeAllForUser` no longer exists; it moved to `RefreshTokensService`. The last-Admin check locks the active Admin rows inside the transaction. Updating with the same status is a no-op. Role changes are blocked on yourself and on Admin accounts. API README has a Users section.
+
+### 2.3 Invite and reset by email link - Done
+
+**Goal:** the invite and reset emails carry a link; the link opens a browser page (served by the API) with password and confirm password; afterwards the user logs in with email and that password. This reverses spec section 6 (setup code, no link).
+
+**Decisions:** no new dependencies. Spec sections 6 to 10 rewritten for the link flow (`auth_tokens` replaces `auth_codes`, reset email added, `/account/...` pages replace the `/auth/setup-account` and `/auth/reset-password` JSON routes, mobile needs login and "Forgot password" only); checklist labels (2.3, 5.2) and Mailpit wording left unchanged. Reverses the 2.1 "no links in emails" rule for these two emails. No attempts counter (256-bit token, only its SHA-256 stored). Invite link valid 48 hours, reset link 1 hour. Change-password stays in 5.6.
+
+**Done:**
+
+- Optional `PUBLIC_BASE_URL` (default `http://localhost:<API_PORT>`) in config and `.env.example`.
+- `modules/auth-tokens/` (`AuthToken` entity, migration `CreateAuthTokens`, `AuthTokensService`: `issue` replaces older unused tokens, `findValid`, single-use `consume`, `issuedWithin`, `buildUrl`).
+- Mail: `accountCreatedEmail` takes a `setupUrl`, new `passwordResetEmail`, `renderLinkButton` in the layout; `escapeHtml` moved to `common/utils/escape-html.ts`.
+- `POST /users` creates the user and setup token in one transaction and sends the invite after commit (unawaited); `POST /users/:id/resend-invite` (Admin, 409 unless `invited`).
+- `POST /auth/forgot-password` (3/min, always 200, active users only, 60 s cooldown). `AuthService.previewToken` and `redeem` (a reset also revokes all refresh tokens).
+- Pages `GET` and `POST /api/v1/account/setup` and `/account/reset`: plain HTML form, no scripts, GET does not use up the link, POST 10/min, `no-store`, `no-referrer`, strict CSP, everything escaped. A hidden username field helps password managers.
+- Verified (41 checks, temporary script deleted, Ethereal only, no real mail, `.env` not read): invite email and link, page form, wrong confirm and short password re-render with the link still valid, success then login, link single use, resend (409, 403, 404, old link dies), forgot (unknown, invited, deactivated get nothing; cooldown), reset (old password and refresh tokens die, wrong-type, expired and deactivated-user links invalid), headers, name escaping in the email. Screenshots at 320 px and 1280 px look right. Migration run, revert, run; no drift.
+
+**Deviations:** no JSON `setup-account` or `reset-password` endpoints. The page is plain because the design brief is empty. The real Gmail send is not verified yet (see Open items).
 
 ## Update rules for Claude
 

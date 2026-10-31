@@ -9,8 +9,14 @@ export interface MailContent {
 
 export interface AccountCreatedInput {
   name: string;
-  setupCode: string;
+  setupUrl: string;
   validHours: number;
+}
+
+export interface PasswordResetInput {
+  name: string;
+  resetUrl: string;
+  validMinutes: number;
 }
 
 export interface AddedToTaskInput {

@@ -1,19 +1,11 @@
+import { escapeHtml } from '../../../common/utils/escape-html';
+
 const DAY_FORMAT: Intl.DateTimeFormatOptions = {
   day: 'numeric',
   month: 'short',
   year: 'numeric',
   timeZone: 'UTC',
 };
-
-/** Every user-controlled value (names, task titles, comments) must go through this before it enters HTML. */
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 /** Subjects must be a single line, so a task title with line breaks cannot add mail headers. */
 export function toSingleLine(value: string): string {
@@ -34,6 +26,17 @@ export function renderDetails(rows: [label: string, value: string][]): string {
     )
     .join('');
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;font-size:15px;">${cells}</table>`;
+}
+
+/** A call-to-action link styled as a button, with the plain URL below it for clients that block links. */
+export function renderLinkButton(label: string, url: string): string {
+  return (
+    `<p style="margin:0 0 16px;"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 20px;` +
+    `background:#111827;color:#ffffff;border-radius:6px;font-size:16px;font-weight:600;text-decoration:none;">` +
+    `${escapeHtml(label)}</a></p>` +
+    `<p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#6b7280;word-break:break-all;">` +
+    `${escapeHtml(url)}</p>`
+  );
 }
 
 export function renderParagraph(text: string): string {

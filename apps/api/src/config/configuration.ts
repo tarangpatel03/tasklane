@@ -8,6 +8,8 @@ export interface AppConfig {
   nodeEnv: EnvVars['NODE_ENV'];
   port: number;
   adminCorsOrigin: string;
+  /** Host that email links point to, without a trailing slash. */
+  publicBaseUrl: string;
   database: {
     host: string;
     port: number;
@@ -35,6 +37,7 @@ export function buildConfig(env: EnvVars): AppConfig {
     nodeEnv: env.NODE_ENV,
     port: env.API_PORT,
     adminCorsOrigin: env.ADMIN_CORS_ORIGIN,
+    publicBaseUrl: (env.PUBLIC_BASE_URL ?? `http://localhost:${env.API_PORT}`).replace(/\/+$/, ''),
     database: {
       host: env.DB_HOST,
       port: env.DB_PORT,

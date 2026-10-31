@@ -4,6 +4,7 @@ export interface EnvVars {
   NODE_ENV: 'development' | 'production' | 'test';
   API_PORT: number;
   ADMIN_CORS_ORIGIN: string;
+  PUBLIC_BASE_URL?: string;
   DB_HOST: string;
   DB_PORT: number;
   DB_USER: string;
@@ -23,6 +24,7 @@ const envSchema = Joi.object<EnvVars>({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   API_PORT: Joi.number().port().default(3000),
   ADMIN_CORS_ORIGIN: Joi.string().uri().required(),
+  PUBLIC_BASE_URL: Joi.string().uri().empty(''),
   DB_HOST: Joi.string().required(),
   DB_PORT: Joi.number().port().default(5432),
   DB_USER: Joi.string().required(),
