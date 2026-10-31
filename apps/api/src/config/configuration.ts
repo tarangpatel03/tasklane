@@ -15,6 +15,11 @@ export interface AppConfig {
     password: string;
     name: string;
   };
+  auth: {
+    accessSecret: string;
+    accessTtl: string;
+    refreshTtlDays: number;
+  };
 }
 
 /** Maps validated env values to the typed config read through ConfigService. */
@@ -29,6 +34,11 @@ export function buildConfig(env: EnvVars): AppConfig {
       username: env.DB_USER,
       password: env.DB_PASSWORD,
       name: env.DB_NAME,
+    },
+    auth: {
+      accessSecret: env.JWT_ACCESS_SECRET,
+      accessTtl: env.JWT_ACCESS_TTL,
+      refreshTtlDays: env.REFRESH_TTL_DAYS,
     },
   };
 }

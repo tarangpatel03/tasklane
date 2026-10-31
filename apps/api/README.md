@@ -23,13 +23,30 @@ Validated at startup (the app refuses to start if one is missing or invalid).
 | `DB_USER`           | required      |                                     |
 | `DB_PASSWORD`       | required      |                                     |
 | `DB_NAME`           | required      |                                     |
+| `JWT_ACCESS_SECRET` | required      | At least 32 characters              |
+| `JWT_ACCESS_TTL`    | `15m`         | Access token lifetime               |
+| `REFRESH_TTL_DAYS`  | `7`           | Refresh token lifetime in days      |
 
-Other variables in `.env.example` (JWT, SMTP, seed) are validated when the checkpoint that uses them lands.
+Other variables in `.env.example` (SMTP, seed) are validated when the checkpoint that uses them lands.
+
+## Auth
+
+Every route needs `Authorization: Bearer <accessToken>` unless marked `@Public()`. `@Roles(...)` limits a route to roles. Deactivated or not-yet-active users are rejected on every request.
+
+- `POST /auth/login` (public, 5 per minute): `{ email, password }` returns `accessToken`, `refreshToken`, `user`.
+- `POST /auth/refresh` (public, 10 per minute): `{ refreshToken }` returns a new pair. The old refresh token stops working. Reusing a revoked one revokes all of that user's sessions.
+- `POST /auth/logout`: `{ refreshToken }` revokes that token.
+- `GET /auth/me`: the current user.
+
+Refresh tokens are random strings stored as SHA-256 hashes in `refresh_tokens`. All other routes allow 100 requests per minute per IP.
 
 ## Scripts
 
 - `yarn workspace @task-app/api build | start | start:dev | typecheck`
-- `yarn workspace @task-app/api typeorm <command>`: TypeORM CLI using `src/database/data-source.ts`. `synchronize` is off, so schema changes go through migrations in `src/database/migrations/`.
+- `yarn workspace @task-app/api typeorm <command> -d src/database/data-source.ts`: raw TypeORM CLI. `synchronize` is off, so schema changes go through migrations in `src/database/migrations/`.
+- `yarn workspace @task-app/api migration:generate src/database/migrations/<Name>`, `migration:run`, `migration:revert`. Read generated SQL before running. TypeORM cannot generate expression indexes (such as `lower(email)`), so add those by hand.
+- `yarn workspace @task-app/api seed:admin`: creates the first Admin from `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` (min 8 characters) in the root `.env`. It does nothing if an Admin already exists.
+- After `yarn add`, run `yarn install` once more if `tsc` reports a TypeScript 6 error. `@nestjs/cli` ships its own TypeScript 6, and `yarn add` can relink `tsc` to it.
 
 ## Response shape
 

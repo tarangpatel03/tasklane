@@ -1,0 +1,49 @@
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { plainToInstance } from 'class-transformer';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
+import { AuthUser } from '../../common/types/auth-user';
+import { UserResponseDto } from '../users/dto/user-response.dto';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
+    return this.authService.login(dto.email, dto.password);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refresh(@Body() dto: RefreshTokenDto): Promise<AuthResponseDto> {
+    return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@CurrentUser() user: AuthUser, @Body() dto: RefreshTokenDto): Promise<null> {
+    await this.authService.logout(user.id, dto.refreshToken);
+    return null;
+  }
+
+  @Get('me')
+  async me(@CurrentUser() user: AuthUser): Promise<UserResponseDto> {
+    const found = await this.usersService.findById(user.id);
+    return plainToInstance(UserResponseDto, found, { excludeExtraneousValues: true });
+  }
+}

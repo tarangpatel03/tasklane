@@ -5,6 +5,13 @@ export enum Role {
   EMPLOYEE = 'EMPLOYEE',
 }
 
+/** Account lifecycle: invited until the user sets a password, deactivated blocks login. */
+export enum UserStatus {
+  INVITED = 'invited',
+  ACTIVE = 'active',
+  DEACTIVATED = 'deactivated',
+}
+
 /** Task status belongs to the whole task, not to each assignee. */
 export enum TaskStatus {
   TODO = 'TODO',
