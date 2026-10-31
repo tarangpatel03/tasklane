@@ -1,14 +1,16 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role, UserStatus } from '@task-app/shared';
-import { DataSource, EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
+import { Role, TaskStatus, UserStatus } from '@task-app/shared';
+import { DataSource, EntityManager, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { PaginatedResult } from '../../common/types/paginated-result';
 import { AuthUser } from '../../common/types/auth-user';
+import { escapeLike } from '../../common/utils/escape-like';
 import { AuthTokenType } from '../auth-tokens/auth-token-type';
 import { AuthTokensService, SETUP_TOKEN_VALID_HOURS } from '../auth-tokens/auth-tokens.service';
 import { MailService } from '../mail/mail.service';
 import { accountCreatedEmail } from '../mail/templates/account-created.template';
 import { RefreshTokensService } from '../refresh-tokens/refresh-tokens.service';
+import { Task } from '../tasks/entities/task.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { SettableStatus, UpdateUserDto } from './dto/update-user.dto';
@@ -19,11 +21,6 @@ const EMAIL_TAKEN = 'A user with this email already exists';
 interface OpenTaskSummary {
   id: string;
   title: string;
-}
-
-/** Makes `%`, `_` and `\` in user input match literally inside an ILIKE pattern. */
-function escapeLike(value: string): string {
-  return value.replace(/[\\%_]/g, '\\$&');
 }
 
 @Injectable()
@@ -38,6 +35,10 @@ export class UsersService {
 
   findById(id: string): Promise<User | null> {
     return this.users.findOneBy({ id });
+  }
+
+  findByIds(ids: string[]): Promise<User[]> {
+    return this.users.findBy({ id: In(ids) });
   }
 
   /** Emails are stored lowercase, so the lookup lowercases the input. */
@@ -141,6 +142,7 @@ export class UsersService {
       }
       if (dto.role !== undefined && dto.role !== user.role) {
         this.assertRoleChangeAllowed(actor, user);
+        await this.assertNoOpenTasks(user.id, manager);
         user.role = dto.role;
       }
       if (dto.status !== undefined) {
@@ -218,16 +220,7 @@ export class UsersService {
         throw new ConflictException('The last Admin cannot be deactivated');
       }
     }
-    const openTasks = await this.findOpenTasks(user.id);
-    if (openTasks.length > 0) {
-      throw new ConflictException({
-        message: 'This user is on open tasks. Reassign them first',
-        details: openTasks.map((task) => ({
-          field: 'tasks',
-          messages: [`${task.title} (${task.id})`],
-        })),
-      });
-    }
+    await this.assertNoOpenTasks(user.id, manager);
 
     user.status = UserStatus.DEACTIVATED;
     await this.refreshTokens.revokeAllForUser(user.id, manager);
@@ -245,8 +238,35 @@ export class UsersService {
     );
   }
 
-  /** Stub until tasks exist: checkpoint 3.2 returns the tasks the user is on that are not completed. */
-  private findOpenTasks(_userId: string): Promise<OpenTaskSummary[]> {
-    return Promise.resolve([]);
+  private async assertNoOpenTasks(userId: string, manager: EntityManager): Promise<void> {
+    const openTasks = await this.findOpenTasks(userId, manager);
+    if (openTasks.length > 0) {
+      throw new ConflictException({
+        message: 'This user is on open tasks. Reassign them first',
+        details: openTasks.map((task) => ({
+          field: 'tasks',
+          messages: [`${task.title} (${task.id})`],
+        })),
+      });
+    }
+  }
+
+  /**
+   * Tasks that are not completed or deleted where the user is the Manager or an assignee. It queries the
+   * Task entity directly because importing TasksModule here would make the modules depend on each other.
+   */
+  private findOpenTasks(userId: string, manager: EntityManager): Promise<OpenTaskSummary[]> {
+    return manager
+      .getRepository(Task)
+      .createQueryBuilder('task')
+      .select(['task.id', 'task.title'])
+      .where('task.status != :done', { done: TaskStatus.COMPLETED })
+      .andWhere(
+        '(task.managerId = :userId OR EXISTS (SELECT 1 FROM task_assignees ta WHERE ta.task_id = task.id AND ta.user_id = :userId))',
+        { userId },
+      )
+      .orderBy('task.createdAt', 'ASC')
+      .take(50)
+      .getMany();
   }
 }

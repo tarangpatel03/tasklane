@@ -12,6 +12,7 @@ import { AppConfig, ENV_FILE_PATH, loadConfig } from './config/configuration';
 import { buildDatabaseOptions } from './database/database.options';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { UsersModule } from './modules/users/users.module';
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
     HealthModule,
     UsersModule,
     AuthModule,
+    TasksModule,
   ],
   providers: [
     // Guard order matters: throttle first, then authenticate, then check roles.

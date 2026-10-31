@@ -84,6 +84,16 @@ The invite and password reset emails carry a one-time link to a small web page s
 - The link host comes from `PUBLIC_BASE_URL`. The default `http://localhost:3000` works when the email is opened on the same PC as the API. To open it on a phone, set `PUBLIC_BASE_URL=http://<your PC's LAN IP>:3000`, restart the API and allow port 3000 through the Windows firewall.
 - The page is deliberately plain: the design brief is still empty. Its colours, spacing and sizes are tokens at the top of `src/modules/auth/account-pages.html.ts`.
 
+## Tasks
+
+Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_assignees` (primary key on task and user), `task_comments` and `task_status_history`. Deleting a task row cascades to its assignees, comments and history; users referenced by any of them cannot be hard-deleted. `tasks.manager_id` is nullable so an Admin can own a task without a Manager.
+
+- `GET /api/v1/tasks` (filters: `status`, `priority`, `assigneeId`, `managerId`, `dueFrom`, `dueTo`, `search`; paginated, newest first) and `GET /api/v1/tasks/:id`. Admin sees every task, a Manager the tasks they manage, an Employee the tasks they are assigned to. Anything else is a 404.
+- `POST /api/v1/tasks`, `PATCH /api/v1/tasks/:id`, `DELETE /api/v1/tasks/:id` (soft delete) for Admin and Manager. A Manager can only create tasks they manage and edit those; only an Admin sets, changes or clears the Manager. A task needs at least one assignee. `assigneeIds` on `PATCH` replaces the whole set.
+- Assignees must be Employees and the Manager a Manager, neither deactivated. A new task starts as `TODO` with a first `task_status_history` row. `status` cannot be set here (transitions come in 3.3).
+- No email is sent for task changes.
+- A user on a task that is not completed or deleted (as Manager or assignee) cannot be deactivated or change role. The 409 lists the tasks in `details`.
+
 ## Scripts
 
 - `yarn workspace @task-app/api build | start | start:dev | typecheck`

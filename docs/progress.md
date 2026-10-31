@@ -3,7 +3,7 @@
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
 **Last updated:** 2026-10-31
-**Current checkpoint:** 3.1 - Task, assignee, comment and status-history entities, migration (next)
+**Current checkpoint:** 3.3 - Workflow transitions, review and reject, submitted and result emails (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -30,9 +30,9 @@ Status values: `Done`, `Next`, `Pending`.
 
 | #   | Checkpoint                                                                   | Status  |
 | --- | ---------------------------------------------------------------------------- | ------- |
-| 3.1 | Task, assignee, comment and status-history entities, migration               | Next    |
-| 3.2 | Task CRUD with one Manager and several Employees, role scoping, "added" mail | Pending |
-| 3.3 | Workflow transitions, review and reject, submitted and result emails         | Pending |
+| 3.1 | Task, assignee, comment and status-history entities, migration               | Done    |
+| 3.2 | Task CRUD with one Manager and several Employees, role scoping, "added" mail | Done    |
+| 3.3 | Workflow transitions, review and reject, submitted and result emails         | Next    |
 | 3.4 | Dashboard summary endpoint and demo seed data                                | Pending |
 
 ### Phase 4: Admin panel
@@ -70,7 +70,7 @@ Status values: `Done`, `Next`, `Pending`.
 - Mobile 5.2 no longer needs set-up-account or reset-password screens, only login and "Forgot password" (email field). The 5.2 label is unchanged until I edit it.
 - The invite page design is deliberately plain because `docs/design-brief.md` is empty. Restyle the tokens at the top of `src/modules/auth/account-pages.html.ts` once the brief exists.
 - Change-password (spec 8) is built in 5.6 and must call `RefreshTokensService.revokeAllForUser`.
-- 3.2 must replace the `findOpenTasks` stub in `UsersService` (deactivation, and ideally role change, check open tasks).
+- 3.3 also adds the comments endpoints (`GET/POST /tasks/:id/comments`); a task may have no Manager, so Admin must be able to approve it.
 - Admin panel 4.3 activates and deactivates users with `PATCH /users/:id` and `status`.
 - Spec sections 7 and 14 and the 2.1 checklist label still say Mailpit (dropped for Gmail plus Ethereal). Left unchanged until I say so.
 
@@ -184,6 +184,59 @@ Details are added when a checkpoint is planned, and completed when it is finishe
 - Verified (41 checks, temporary script deleted, Ethereal only, no real mail, `.env` not read): invite email and link, page form, wrong confirm and short password re-render with the link still valid, success then login, link single use, resend (409, 403, 404, old link dies), forgot (unknown, invited, deactivated get nothing; cooldown), reset (old password and refresh tokens die, wrong-type, expired and deactivated-user links invalid), headers, name escaping in the email. Screenshots at 320 px and 1280 px look right. Migration run, revert, run; no drift.
 
 **Deviations:** no JSON `setup-account` or `reset-password` endpoints. The page is plain because the design brief is empty. The real Gmail send is not verified yet (see Open items).
+
+### 3.1 Task entities and migration - Done
+
+**Done:** four entities, `TasksModule` (imported in `AppModule`), migration `CreateTasks`, API README section. Migration run, revert, run work and `migration:generate` finds no drift. Temporary SQL script (deleted, rows removed) confirmed defaults, duplicate assignee rejected (23505), referenced user delete rejected, task delete cascades. Typecheck, build and `/health` OK.
+
+**Deviations:** `tasks.manager_id` is nullable (my decision: an Admin can own a task with no Manager); this changes spec section 5 and the "Manager is required" rule, so 3.2 must allow a null Manager (Admin only) and 3.3 must handle review on a task without one (Admin approves). The generated migration declared the `task_status` enum twice (once for `tasks`, once for the history table); I removed the duplicate `CREATE TYPE` and `DROP TYPE` by hand before applying it.
+
+**Plan (as approved):**
+
+**Goal:** the `tasks`, `task_assignees`, `task_comments` and `task_status_history` tables, as entities plus one migration. No controller, service, DTO, endpoint or email (those start in 3.2).
+
+**Plan:**
+
+1. Entities in `apps/api/src/modules/tasks/entities/`, same style as `user.entity.ts` (explicit snake_case `name:`, Postgres enums with `enumName`):
+   - `task.entity.ts`: `title` (120), `description` (2000, nullable), `priority` (`task_priority`, default MEDIUM), `status` (`task_status`, default TODO), `due_date`, `requires_review` (default true), `manager_id`, `created_by`, `completed_at`, timestamps, `deleted_at` (`@DeleteDateColumn`). User FKs `ON DELETE RESTRICT`.
+   - `task-assignee.entity.ts`: composite PK (`task_id`, `user_id`), `added_at`. `task_id` CASCADE, `user_id` RESTRICT.
+   - `task-comment.entity.ts`: `task_id` (CASCADE), `author_id` (RESTRICT), `body` text, `created_at`.
+   - `task-status-history.entity.ts`: `task_id` (CASCADE), `from_status` (nullable), `to_status`, `actor_id` (RESTRICT), `comment` (nullable), `created_at`.
+2. Indexes: `tasks(manager_id, status)`, `tasks(created_by)`, `tasks(due_date)`, `task_assignees(user_id)`, plus `task_comments(task_id, created_at)` and `task_status_history(task_id, created_at)`.
+3. `TasksModule` (`TypeOrmModule.forFeature` for the four entities) imported in `AppModule`; follow how `data-source.ts` finds entities.
+4. Migration `CreateTasks` via `yarn migration:generate`; read the SQL before keeping it.
+5. API README note on the new tables.
+
+**Decisions:** `from_status` nullable so creation can be logged as the first history row (3.2 decides). Assignees being Employees and the manager being a Manager are service rules (3.2), not DB constraints. `completed_at` is set by the service in 3.3. No new dependencies, env changes, tsconfig or shared-package changes.
+
+**Manual steps for me:** none. Local PostgreSQL must be running.
+
+**Verification:** typecheck, build, `format:check`; migration run, revert, run; `migration:generate` shows no drift; temporary SQL script (deleted afterwards, rows removed) checks duplicate assignee rejected, deleting a referenced user rejected, task delete cascades; API starts and `/health` is OK.
+
+### 3.2 Task CRUD and role scoping - Done
+
+**Done:** all plan items. `TasksService` / `TasksController` / DTOs in `modules/tasks/`, `findOpenTasks` in `UsersService` replaced (also blocks role changes), `escapeLike` moved to `common/utils/escape-like.ts`, `UsersService.findByIds` added, API README updated. Typecheck, build and no migration drift. A temporary script (deleted, 0 rows left) ran 63 HTTP checks, all passing: create/validation per role, scoping, filters and paging, patch rules, soft delete, no email sent, deactivation and role change blocked on open tasks and allowed after completion.
+
+**Deviations:** `UsersService` imports the `Task` entity (not `TasksModule`) to avoid a module cycle. The first `find`-based open-task query returned a 500 and was rewritten as a query builder with an EXISTS subquery. `addedToTaskEmail` stays unused. Spec section 7 and the 3.2 label still mention the "added" email.
+
+**Plan (as approved):**
+
+**Goal:** `GET/POST /tasks`, `GET/PATCH/DELETE /tasks/:id` with role scoping, one nullable Manager and several Employees, and the real open-task check in `UsersService`. No email in 3.2: the "added to task" email is dropped by my decision (only submitted-for-review and review-result emails remain, both in 3.3).
+
+**Plan:**
+
+1. DTOs in `modules/tasks/dto/`: `CreateTaskDto`, `UpdateTaskDto` (hand-written, `null` clears description, dueDate, managerId; `assigneeIds` replaces the set, min 1), `QueryTasksDto` (pagination, status, priority, assigneeId, managerId, dueFrom, dueTo, search), `TaskResponseDto` with `UserSummaryDto` (id, name, role).
+2. `TasksService`: create (Admin may omit or pass the Manager; a Manager becomes the Manager, passing another is 403; one transaction with assignees and a first history row `null` to TODO); people validation (assignees active-or-invited Employees, Manager an active-or-invited Manager, else 400); list scoped by role (Admin all, Manager `manager_id`, Employee assignee EXISTS) with two-step pagination; `getVisible` (invisible is 404); update (Admin any, Manager own tasks, only Admin changes the Manager, assignee diff, row lock); soft delete.
+3. `TasksController` at `/api/v1/tasks`; writes `@Roles(ADMIN, MANAGER)`; `ParseUUIDPipe`.
+4. `TasksModule` imports `UsersModule`; registered in `AppModule` already.
+5. Replace `findOpenTasks` in `UsersService` (non-deleted, non-COMPLETED tasks as assignee or Manager, queried through the transaction's `Task` repository to avoid a module cycle); also block role changes while a user is on open tasks.
+6. API README section replaced; this file updated.
+
+**Decisions:** comments endpoints move to 3.3. No new dependencies, migration, env, tsconfig or shared changes. Editing a COMPLETED task is allowed. Spec section 7 and the 3.2 label still mention the "added" email until I edit them.
+
+**Manual steps for me:** none.
+
+**Verification:** typecheck, build, `format:check`, no migration drift; temporary script (deleted afterwards, rows removed) covers create/list/read/patch/delete per role, validation errors, filters and paging, no mail sent, deactivation 409 with open tasks and success after completion, role change blocked; `/health` OK.
 
 ## Update rules for Claude
 
