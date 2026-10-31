@@ -11,6 +11,7 @@ import { createValidationPipe } from './common/pipes/validation.pipe';
 import { AppConfig, ENV_FILE_PATH, loadConfig } from './config/configuration';
 import { buildDatabaseOptions } from './database/database.options';
 import { AuthModule } from './modules/auth/auth.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { UsersModule } from './modules/users/users.module';
@@ -29,6 +30,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     AuthModule,
     TasksModule,
+    DashboardModule,
   ],
   providers: [
     // Guard order matters: throttle first, then authenticate, then check roles.

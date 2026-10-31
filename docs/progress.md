@@ -3,7 +3,7 @@
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
 **Last updated:** 2026-10-31
-**Current checkpoint:** 3.3 - Workflow transitions, review and reject, submitted and result emails (next)
+**Current checkpoint:** 4.1 - Scaffold: React and TypeScript, routing, API client, auth, design tokens (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -28,18 +28,18 @@ Status values: `Done`, `Next`, `Pending`.
 
 ### Phase 3: Tasks
 
-| #   | Checkpoint                                                                   | Status  |
-| --- | ---------------------------------------------------------------------------- | ------- |
-| 3.1 | Task, assignee, comment and status-history entities, migration               | Done    |
-| 3.2 | Task CRUD with one Manager and several Employees, role scoping, "added" mail | Done    |
-| 3.3 | Workflow transitions, review and reject, submitted and result emails         | Next    |
-| 3.4 | Dashboard summary endpoint and demo seed data                                | Pending |
+| #   | Checkpoint                                                                   | Status |
+| --- | ---------------------------------------------------------------------------- | ------ |
+| 3.1 | Task, assignee, comment and status-history entities, migration               | Done   |
+| 3.2 | Task CRUD with one Manager and several Employees, role scoping, "added" mail | Done   |
+| 3.3 | Workflow transitions, review and reject, submitted and result emails         | Done   |
+| 3.4 | Dashboard summary endpoint and demo seed data                                | Done   |
 
 ### Phase 4: Admin panel
 
 | #   | Checkpoint                                                               | Status  |
 | --- | ------------------------------------------------------------------------ | ------- |
-| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Pending |
+| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Next    |
 | 4.2 | Login and layout shell                                                   | Pending |
 | 4.3 | Users pages                                                              | Pending |
 | 4.4 | Tasks pages: list, filter, create, assign, review                        | Pending |
@@ -70,7 +70,7 @@ Status values: `Done`, `Next`, `Pending`.
 - Mobile 5.2 no longer needs set-up-account or reset-password screens, only login and "Forgot password" (email field). The 5.2 label is unchanged until I edit it.
 - The invite page design is deliberately plain because `docs/design-brief.md` is empty. Restyle the tokens at the top of `src/modules/auth/account-pages.html.ts` once the brief exists.
 - Change-password (spec 8) is built in 5.6 and must call `RefreshTokensService.revokeAllForUser`.
-- 3.3 also adds the comments endpoints (`GET/POST /tasks/:id/comments`); a task may have no Manager, so Admin must be able to approve it.
+- Mobile 5.3 needs a task status history read endpoint (none exists yet; spec section 8 does not list one).
 - Admin panel 4.3 activates and deactivates users with `PATCH /users/:id` and `status`.
 - Spec sections 7 and 14 and the 2.1 checklist label still say Mailpit (dropped for Gmail plus Ethereal). Left unchanged until I say so.
 
@@ -237,6 +237,52 @@ Details are added when a checkpoint is planned, and completed when it is finishe
 **Manual steps for me:** none.
 
 **Verification:** typecheck, build, `format:check`, no migration drift; temporary script (deleted afterwards, rows removed) covers create/list/read/patch/delete per role, validation errors, filters and paging, no mail sent, deactivation 409 with open tasks and success after completion, role change blocked; `/health` OK.
+
+### 3.3 Workflow transitions, review, comments, emails - Done
+
+**Done:** all plan items. `TaskAction` in `packages/shared`; `task-workflow.service.ts` with a rules table and `POST /tasks/:id/transition`; `task-comments.service.ts` / controller; `TasksService.assertVisible` and `loadOrFail` made public; `TasksModule` imports `MailModule`; API README updated. Typecheck, build, no migration drift. A temporary script (deleted, 0 rows left) ran 44 checks, all passing: both paths with history rows and `completed_at`, 409/400/403/404 cases, Admin reviewing a task with no Manager, parallel START (one 200, one 409), email counts from the API log (forced to Ethereal), and comments.
+
+**Deviations:** none from the plan. The `submittedForReviewEmail` doc comment now says "creator when an Admin". No history read endpoint yet (5.3 adds it). Spec section 7 item 2 and the 3.2 label still mention the "added" email; `addedToTaskEmail` stays unused.
+
+**Plan (as approved):**
+
+**Goal:** status transitions (spec 5) with history, the submitted-for-review and review-result emails, and the comments endpoints deferred from 3.2.
+
+**Plan:**
+
+1. Add `TaskAction` (`START`, `SUBMIT`, `COMPLETE`, `APPROVE`, `REJECT`) to `packages/shared`; rebuild it.
+2. `POST /tasks/:id/transition` (`action`, optional `comment`, max 2000) in a new `task-workflow.service.ts`: visibility first (invisible is 404), then one transaction with the task row locked and the status re-read. START (TODO to WORKING), SUBMIT (WORKING to IN_REVIEW, only if `requiresReview`), COMPLETE (WORKING to COMPLETED, only if not `requiresReview`) by an assignee; APPROVE (IN_REVIEW to COMPLETED) and REJECT (IN_REVIEW to WORKING, comment required) by the task's Manager or an Admin. Wrong status 409, not allowed to act 403. Sets or clears `completed_at`, inserts a `task_status_history` row each time.
+3. Emails after commit, never failing the request, deactivated users skipped: SUBMIT goes to the Manager and to the creator if the creator is an Admin and not the Manager; APPROVE and REJECT go to every assignee. `TasksModule` imports `MailModule`.
+4. Comments: `GET` (paginated, oldest first) and `POST` (body 1-2000) at `/tasks/:taskId/comments`, for anyone who can see the task. No edit or delete.
+5. API README and this file.
+
+**Decisions:** submitted email recipients are my answer above. No history read endpoint yet (5.3 adds it). No new dependencies, migration, env or tsconfig changes.
+
+**Manual steps for me:** none. The test script forces Ethereal so no real mail is sent.
+
+**Verification:** build shared, typecheck, build, `format:check`, no drift; temporary script (deleted, rows removed) covers the happy and reject paths, no-review path, 409/400/403/404 cases, parallel START, email counts from Ethereal log lines, and comments.
+
+### 3.4 Dashboard summary and demo seed - Done
+
+**Done:** all plan items. `modules/dashboard/` with `GET /dashboard/summary` (Admin only); `seeds/seed-demo.ts` + `seeds/demo-data.ts`; `loadDemoSeedEnv()`; `seed:demo` script; `.env.example` comment for `SEED_DEMO_PASSWORD`; API README sections. Typecheck, build, no migration drift. A temporary script (deleted) ran 24 checks, all passing: seed ran twice (second did nothing), 7 users and 14 tasks, history chains consistent and ending at each task's status, `completed_at` only on completed tasks; dashboard totals, overdue count and per-Manager rows equal independent SQL counts before and after a soft delete; idle active Manager listed, deactivated one not; Manager and Employee 403, no token 401. All test rows removed (0 left), so the dev database has no demo data yet.
+
+**Deviations:** none. `SEED_DEMO_PASSWORD` was already in `.env.example` (added by me/you); I added a comment above it.
+
+**Plan (as approved):**
+
+**Goal:** `GET /dashboard/summary` for the admin panel dashboard, and a `seed:demo` script with sample users and tasks (spec 8, 10, 11).
+
+**Plan:**
+
+1. `modules/dashboard/` (module, controller, service, response DTO). `GET /dashboard/summary`, Admin only, soft-deleted tasks ignored. Returns `totals` (total and all four statuses), `overdue` (count plus the 10 oldest-due open tasks with their Manager) and `perManager` (every active Manager including zero rows, other Managers who still have tasks, and a last row for tasks with no Manager; each with total, by status, overdue). Three aggregate queries with `FILTER`, parameterised, read through `DataSource` like `UsersService.findOpenTasks`.
+2. `yarn seed:demo` (`seeds/seed-demo.ts`, `seeds/demo-data.ts`): needs an existing Admin and `SEED_DEMO_PASSWORD` (validated by a new `loadDemoSeedEnv()`). Creates 2 Managers and 5 Employees (`@demo.test` emails, active, argon2) and about 14 tasks covering every status (2 to 3 overdue open ones, one no-review completed, one Admin-created without a Manager), a few comments, consistent history rows and `completed_at`. One transaction. Skips if the demo Managers already exist. No email is sent.
+3. `DashboardModule` in `AppModule`, `seed:demo` script, `SEED_DEMO_PASSWORD` in `.env.example`, API README, this file.
+
+**Decisions:** all active Managers listed even with zero tasks; demo password only from env; skip-if-present instead of reset (README explains manual removal). No new dependencies, migration, tsconfig or shared changes.
+
+**Manual steps for me:** add `SEED_DEMO_PASSWORD` to `.env`; run `yarn workspace @task-app/api seed:demo` myself when done (my test rows are removed afterwards).
+
+**Verification:** typecheck, build, `format:check`, no drift; seed run twice with a throwaway password (second run does nothing); dashboard numbers equal independent SQL counts, role checks 403/401, soft-deleted task not counted; all test rows removed.
 
 ## Update rules for Claude
 

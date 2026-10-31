@@ -20,6 +20,15 @@ export enum TaskStatus {
   COMPLETED = 'COMPLETED',
 }
 
+/** What a user asks the workflow to do; the backend decides the resulting status. */
+export enum TaskAction {
+  START = 'START',
+  SUBMIT = 'SUBMIT',
+  COMPLETE = 'COMPLETE',
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+}
+
 export enum TaskPriority {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',

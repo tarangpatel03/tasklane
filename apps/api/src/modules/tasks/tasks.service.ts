@@ -185,14 +185,14 @@ export class TasksService {
     return qb;
   }
 
-  private async assertVisible(actor: AuthUser, id: string): Promise<void> {
+  async assertVisible(actor: AuthUser, id: string): Promise<void> {
     const visible = await this.scopedQuery(actor).andWhere('task.id = :id', { id }).getExists();
     if (!visible) {
       throw new NotFoundException(TASK_NOT_FOUND);
     }
   }
 
-  private async loadOrFail(id: string): Promise<Task> {
+  async loadOrFail(id: string): Promise<Task> {
     const task = await this.tasks.findOne({
       where: { id },
       relations: { manager: true, creator: true, assignees: { user: true } },

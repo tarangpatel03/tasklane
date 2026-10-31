@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -18,8 +20,10 @@ import { PaginatedResult } from '../../common/types/paginated-result';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { TransitionTaskDto } from './dto/transition-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
+import { TaskWorkflowService } from './task-workflow.service';
 import { TasksService } from './tasks.service';
 
 /** Flattens the assignee join rows to plain users before exposing only the allowed fields. */
@@ -33,7 +37,10 @@ function toResponse(task: Task): TaskResponseDto {
 
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly workflowService: TaskWorkflowService,
+  ) {}
 
   @Get()
   async list(
@@ -74,6 +81,17 @@ export class TasksController {
     @Body() dto: UpdateTaskDto,
   ): Promise<TaskResponseDto> {
     return toResponse(await this.tasksService.update(actor, id, dto));
+  }
+
+  /** Open to every role: who may do which action is decided by the workflow service. */
+  @Post(':id/transition')
+  @HttpCode(HttpStatus.OK)
+  async transition(
+    @CurrentUser() actor: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TransitionTaskDto,
+  ): Promise<TaskResponseDto> {
+    return toResponse(await this.workflowService.transition(actor, id, dto));
   }
 
   @Roles(Role.ADMIN, Role.MANAGER)

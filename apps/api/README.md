@@ -28,7 +28,7 @@ Validated at startup (the app refuses to start if one is missing or invalid).
 | `REFRESH_TTL_DAYS`  | `7`                           | Refresh token lifetime in days              |
 | `PUBLIC_BASE_URL`   | `http://localhost:<API_PORT>` | Host used in email links, see Account links |
 
-Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin`.
+Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin` (`SEED_ADMIN_*`) and `seed:demo` (`SEED_DEMO_PASSWORD`).
 
 ## Mail
 
@@ -91,8 +91,32 @@ Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_a
 - `GET /api/v1/tasks` (filters: `status`, `priority`, `assigneeId`, `managerId`, `dueFrom`, `dueTo`, `search`; paginated, newest first) and `GET /api/v1/tasks/:id`. Admin sees every task, a Manager the tasks they manage, an Employee the tasks they are assigned to. Anything else is a 404.
 - `POST /api/v1/tasks`, `PATCH /api/v1/tasks/:id`, `DELETE /api/v1/tasks/:id` (soft delete) for Admin and Manager. A Manager can only create tasks they manage and edit those; only an Admin sets, changes or clears the Manager. A task needs at least one assignee. `assigneeIds` on `PATCH` replaces the whole set.
 - Assignees must be Employees and the Manager a Manager, neither deactivated. A new task starts as `TODO` with a first `task_status_history` row. `status` cannot be set here (transitions come in 3.3).
-- No email is sent for task changes.
+- `POST /api/v1/tasks/:id/transition` with `action` and an optional `comment` (max 2000, stored in `task_status_history`). Every transition is checked on the server and recorded with who did it:
+
+  | Action     | Change                 | Who                             | Rule                                  |
+  | ---------- | ---------------------- | ------------------------------- | ------------------------------------- |
+  | `START`    | TODO to WORKING        | an assignee                     |                                       |
+  | `SUBMIT`   | WORKING to IN_REVIEW   | an assignee                     | only if the task requires review      |
+  | `COMPLETE` | WORKING to COMPLETED   | an assignee                     | only if the task does not need review |
+  | `APPROVE`  | IN_REVIEW to COMPLETED | the task's Manager, or an Admin |                                       |
+  | `REJECT`   | IN_REVIEW to WORKING   | the task's Manager, or an Admin | `comment` required                    |
+
+  A task the caller cannot see is a 404, an action the caller may not do is a 403, a wrong current status is a 409. Admin and Manager cannot start, submit or complete. A task with no Manager is reviewed by an Admin.
+
+- `GET` and `POST /api/v1/tasks/:taskId/comments` (body 1-2000 characters, oldest first, paginated) for anyone who can see the task, including on completed tasks. No edit or delete.
+- Emails: only two. Submitting for review emails the task's Manager and, if the creator is an Admin and not the Manager, the creator. Approving or rejecting emails every assignee (with the comment). Nothing else sends mail.
 - A user on a task that is not completed or deleted (as Manager or assignee) cannot be deactivated or change role. The 409 lists the tasks in `details`.
+
+## Dashboard
+
+`GET /api/v1/dashboard/summary` (Admin only) returns `totals` (task count and a count for each status), `overdue` (count plus the 10 oldest-due tasks that are not completed) and `perManager` (one row per active Manager, even with no tasks, plus any other Manager who still has tasks, and a last row with `manager: null` for tasks without a Manager; each row has `total`, `byStatus` and `overdue`). Soft-deleted tasks are not counted.
+
+## Demo data
+
+`yarn workspace @task-app/api seed:demo` fills the database for demos: 2 Managers, 5 Employees and 14 sample tasks in every status (some overdue, one without a Manager, comments and status history included). It needs an Admin (`seed:admin` first) and `SEED_DEMO_PASSWORD` (min 8 characters) in the root `.env`, which becomes the password of every demo account.
+
+- Demo logins: `maya@demo.test` and `daniel@demo.test` (Managers); `aisha@`, `ben@`, `chloe@`, `diego@` and `emma@demo.test` (Employees). The `.test` domain never receives mail, and the seed sends none.
+- Running it again does nothing while the demo accounts exist. To start over, delete the demo data in SQL: `DELETE FROM tasks WHERE id IN (SELECT task_id FROM task_assignees WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@demo.test'));` then `DELETE FROM users WHERE email LIKE '%@demo.test';`, and run the seed again.
 
 ## Scripts
 

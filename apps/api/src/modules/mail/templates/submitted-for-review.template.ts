@@ -1,7 +1,7 @@
 import { MailContent, SubmittedForReviewInput } from '../mail.types';
 import { renderDetails, renderLayout, renderParagraph, toSingleLine } from './layout';
 
-/** Sent to the task's Manager, and to its creator when that is someone else. */
+/** Sent to the task's Manager, and to its creator when the creator is an Admin and someone else. */
 export function submittedForReviewEmail(input: SubmittedForReviewInput): MailContent {
   const intro = `Hi ${input.recipientName}, ${input.submittedByName} submitted a task for review.`;
   const rows: [string, string][] = [['Task', input.taskTitle]];
