@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 import { CloseIcon } from './icons';
 import { useDialog } from './use-dialog';
 import styles from './drawer.module.css';
@@ -9,10 +9,12 @@ interface DrawerProps {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  /** Panel width in pixels from 640px up; the panel is full width below that. Defaults to 480. */
+  width?: number;
 }
 
 /** Right-hand panel on a native dialog: slides in, closes on Esc, the scrim or the close button. */
-export function Drawer({ open, title, onClose, children, footer }: DrawerProps): ReactNode {
+export function Drawer({ open, title, onClose, children, footer, width }: DrawerProps): ReactNode {
   const titleId = useId();
   const { ref, visible, leaving, onCancel, onClick } = useDialog(open, onClose);
   if (!visible) return null;
@@ -22,6 +24,7 @@ export function Drawer({ open, title, onClose, children, footer }: DrawerProps):
       ref={ref}
       className={`${styles.dialog} ${leaving ? styles.leaving : ''}`}
       aria-labelledby={titleId}
+      style={width ? ({ '--drawer-width': `${width}px` } as CSSProperties) : undefined}
       onCancel={onCancel}
       onClick={onClick}
     >

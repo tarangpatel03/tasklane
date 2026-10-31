@@ -25,8 +25,21 @@ export interface ManagerSummaryDto {
   overdue: number;
 }
 
+/** One recent status change, for the dashboard feed. `fromStatus` is null for a task's creation. */
+export interface ActivityDto {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  fromStatus: TaskStatus | null;
+  toStatus: TaskStatus;
+  actor: ManagerRefDto;
+  comment: string | null;
+  createdAt: Date;
+}
+
 export interface DashboardSummaryResponseDto {
   totals: { total: number; byStatus: StatusCounts };
   overdue: { count: number; tasks: OverdueTaskDto[] };
   perManager: ManagerSummaryDto[];
+  recentActivity: ActivityDto[];
 }

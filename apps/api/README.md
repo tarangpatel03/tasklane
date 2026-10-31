@@ -104,12 +104,13 @@ Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_a
   A task the caller cannot see is a 404, an action the caller may not do is a 403, a wrong current status is a 409. Admin and Manager cannot start, submit or complete. A task with no Manager is reviewed by an Admin.
 
 - `GET` and `POST /api/v1/tasks/:taskId/comments` (body 1-2000 characters, oldest first, paginated) for anyone who can see the task, including on completed tasks. No edit or delete.
+- `GET /api/v1/tasks/:taskId/history` returns the task's status changes (`fromStatus` is null for the creation row, `toStatus`, `actor`, `comment`, `createdAt`), oldest first and paginated, for anyone who can see the task. Read-only.
 - Emails: only two. Submitting for review emails the task's Manager and, if the creator is an Admin and not the Manager, the creator. Approving or rejecting emails every assignee (with the comment). Nothing else sends mail.
 - A user on a task that is not completed or deleted (as Manager or assignee) cannot be deactivated or change role. The 409 lists the tasks in `details`.
 
 ## Dashboard
 
-`GET /api/v1/dashboard/summary` (Admin only) returns `totals` (task count and a count for each status), `overdue` (count plus the 10 oldest-due tasks that are not completed) and `perManager` (one row per active Manager, even with no tasks, plus any other Manager who still has tasks, and a last row with `manager: null` for tasks without a Manager; each row has `total`, `byStatus` and `overdue`). Soft-deleted tasks are not counted.
+`GET /api/v1/dashboard/summary` (Admin only) returns `totals` (task count and a count for each status), `overdue` (count plus the 10 oldest-due tasks that are not completed) and `perManager` (one row per active Manager, even with no tasks, plus any other Manager who still has tasks, and a last row with `manager: null` for tasks without a Manager; each row has `total`, `byStatus` and `overdue`). It also returns `recentActivity`: the 8 latest status changes (`taskId`, `taskTitle`, `fromStatus`, `toStatus`, `actor`, `comment`, `createdAt`, newest first) on tasks that still exist. Soft-deleted tasks are not counted.
 
 ## Demo data
 

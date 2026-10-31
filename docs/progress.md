@@ -3,7 +3,7 @@
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
 **Last updated:** 2026-11-01
-**Current checkpoint:** 4.4 - Tasks pages (next)
+**Current checkpoint:** 5.1 - Mobile scaffold (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -37,19 +37,19 @@ Status values: `Done`, `Next`, `Pending`.
 
 ### Phase 4: Admin panel
 
-| #   | Checkpoint                                                               | Status  |
-| --- | ------------------------------------------------------------------------ | ------- |
-| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Done    |
-| 4.2 | Login and layout shell                                                   | Done    |
-| 4.3 | Users pages                                                              | Done    |
-| 4.4 | Tasks pages: list, filter, create, assign, review                        | Next    |
-| 4.5 | Dashboard                                                                | Pending |
+| #   | Checkpoint                                                               | Status |
+| --- | ------------------------------------------------------------------------ | ------ |
+| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Done   |
+| 4.2 | Login and layout shell                                                   | Done   |
+| 4.3 | Users pages                                                              | Done   |
+| 4.4 | Tasks pages: list, filter, create, assign, review                        | Done   |
+| 4.5 | Dashboard                                                                | Done   |
 
 ### Phase 5: Mobile
 
 | #   | Checkpoint                                                                       | Status  |
 | --- | -------------------------------------------------------------------------------- | ------- |
-| 5.1 | Scaffold: navigation, theme tokens, API client, secure storage, safe areas, hook | Pending |
+| 5.1 | Scaffold: navigation, theme tokens, API client, secure storage, safe areas, hook | Next    |
 | 5.2 | Auth screens: login, set up account, reset password                              | Pending |
 | 5.3 | Task list and detail on phone, with actions, comments and history                | Pending |
 | 5.4 | Manager flows: create task, pick Employees, review queue                         | Pending |
@@ -359,6 +359,60 @@ Details are added when a checkpoint is planned, and completed when it is finishe
 **Manual steps for me:** keep PostgreSQL, `yarn dev:api` and `yarn dev:admin` running; optionally run `yarn workspace @task-app/api seed:demo` (needs `SEED_DEMO_PASSWORD` in `.env`) for open tasks and more than 8 users. Admin login `admin@gmail.com`.
 
 **Verification:** admin typecheck, build, Prettier; Chrome at 1440, 1280, 1024, 768, 390, 320; all flows against the real API (create, duplicate email, edit, resend, deactivate, reactivate, blocked deactivation, own-row protections); keyboard and reduced motion.
+
+### 4.4 Tasks pages - Done
+
+**Done:** all plan items. API: `GET /tasks/:id/history` (`TaskHistoryController`, `TaskHistoryService`, `TaskHistoryResponseDto`, API README). Admin: `api/tasks.ts`, `features/tasks/` (hooks, toolbar, list, form drawer, detail drawer, reject and delete dialogs, person picker), shared task badges, avatar stack, switch, segmented control, text area field, Drawer `width` prop, status and priority tokens, `pages/tasks-page.tsx`, admin README. Typecheck, build and Prettier pass for admin and API. Checked in Chrome (about 1000 and 1440 px wide, no horizontal overflow): empty state, create validation, create with Manager and two Employees, list and cards, detail drawer opened from `?task=<id>` (people, comments, history), comment post, Reject (reason required) and Approve (row menu and drawer), edit (Manager cleared, Employee removed), delete, filters (status, priority, search, empty result, Clear filters, due range), paging, `?status=&priority=` presets. Also rechecked from 4.3: the blocked-deactivation list with "Go to Tasks".
+
+**Not verified:** Manager and Employee filters in the toolbar, widths below about 500 px (the Chrome window will not go lower) and 768, keyboard tab order, reduced motion, the Admin-created-task email path (no mail was inspected), edit user, resend invite and Users filters (4.3 leftovers).
+
+**Deviations:** the task `history` endpoint is new (API change in 4.4, as approved). Separate Change Manager and Change assignees modals are folded into the edit drawer. Pickers load up to 100 users per role. Test data in the dev database: users `check.person@example.test` (Manager), `maya.employee@example.test` and `noah.employee@example.test` (Employees, active, throwaway password set by a script that was deleted), and 8 open test tasks plus one completed task. Remove them when you want a clean database.
+
+**Plan (as approved):**
+
+**Goal:** the Tasks screen from `docs/design/admin/Admin Panel.dc.html`: list with filters and paging, create and edit drawer (Manager and Employees), detail drawer with comments and status history, Approve, Reject, delete. One small API addition: `GET /tasks/:id/history`.
+
+**Plan (as approved):**
+
+1. API: `GET /tasks/:id/history`, read-only, same visibility as `getVisible` (invisible is 404), oldest first, paginated like comments; `TaskHistoryResponseDto` (`fromStatus`, `toStatus`, `actor`, `comment`, `createdAt`), a small service and route in the tasks module, API README. No migration.
+2. `src/api/tasks.ts`: `TaskDto`, `listTasks` (items and `meta`), `getTask`, `createTask`, `updateTask` (null clears description, due date, Manager), `deleteTask`, `transitionTask`, comments and history calls. Pickers reuse `listUsers` (role filter, limit 100, deactivated hidden).
+3. Shared components (CSS Modules, tokens only): status badge, priority tag, avatar stack, switch, textarea field, date field, person picker rows, segmented control (extracted only if reused as-is); status and priority tokens from the brief; extra icons.
+4. `src/features/tasks/`: query and mutation hooks (same shape as users); toolbar (debounced title search, Status, Priority, Manager, Assignee, due From and To, Clear filters, Refresh, New task); table from 1024 and cards below with skeleton, empty and error states and an "Overdue" cue; row menu (Open, Edit, Approve, Reject on IN_REVIEW, Delete); task form drawer (520px: title, description, priority, due date, requires review, Manager, Employees min 1, server errors mapped to fields); detail drawer (640px: badges, due, review rule, people, description, comments with composer, history timeline, actions); Reject modal (reason required); delete confirm.
+5. `pages/tasks-page.tsx` replaces the placeholder; selected task in `?task=<id>`, initial `status` and `priority` filters read from the URL (Dashboard 4.5 links use it).
+6. READMEs (admin and API) and this file.
+
+**Decisions and deviations from the design:** no column sorting (API sorts by `createdAt` descending only). Change Manager and Change assignees modals are folded into the edit drawer. Pickers load up to 100 users per role. Overdue means due date passed and not COMPLETED. An Admin may leave the Manager empty (3.1). No new dependencies, tsconfig or lint changes.
+
+**Manual steps for me:** keep PostgreSQL, `yarn dev:api` (restart after the history endpoint is added) and `yarn dev:admin` running; optionally run `yarn workspace @task-app/api seed:demo` for tasks in every status. Test rows created in the dev database stay unless I ask for removal.
+
+**Verification:** API typecheck, build, `format:check`, no drift, history endpoint checked per role with a throwaway script (deleted, rows removed); admin typecheck, build, Prettier; Chrome at 1440, 1280, 1024, 768 and the narrowest allowed for every flow above, keyboard and reduced motion; recheck the 4.3 items left unverified.
+
+### 4.5 Dashboard - Done
+
+**Done:** all plan items. API: `recentActivity` (latest 8 status changes on existing tasks) added to `GET /dashboard/summary`, API README. Admin: `api/dashboard.ts`, `features/dashboard/` (status tiles, overdue list, tasks per Manager, recent activity, panel), `hooks/use-count-up.ts`, `pages/dashboard-page.tsx`, `PageHeader` gets an optional `action`, `managerId` preset in `pages/tasks-page.tsx`, admin README. Typecheck, build and Prettier pass for admin and API. Checked in Chrome at 1280 and 600 px (no horizontal overflow): tile counts equal the Tasks totals, overdue list with day counts, Manager bars with legend and "No Manager" row, activity feed, tile link (`?status=`), Manager link (`?managerId=` preselects the Manager filter), activity item opens the task drawer, refresh. API: Employee gets 403 and no token 401 on `/dashboard/summary`.
+
+**Not verified:** the error and empty states of each block, reduced motion (count-up jumps straight to the value by code), widths 768, 1024 and 1440, keyboard order, the Admin 200 response read directly (only seen through the page), the demo seed data on the dashboard.
+
+**Deviations:** `PageHeader` has a new optional `action` slot (used for the refresh button). The overdue list shows 5 of the 10 the API returns; its "View all tasks" link goes to the unfiltered Tasks page (no overdue filter exists). Two more open test tasks with past due dates were created for the Manager `check.person@example.test`.
+
+**Plan (as approved):**
+
+**Goal:** the Dashboard from `docs/design/admin/Admin Panel.dc.html`: four status tiles that link to Tasks, an overdue list, tasks per Manager as stacked status bars, and a recent activity feed. One small API addition: `recentActivity` in `GET /dashboard/summary`.
+
+**Plan (as approved):**
+
+1. API: add `recentActivity` (latest 8 `task_status_history` rows for non-deleted tasks, newest first: `id`, `taskId`, `taskTitle`, `fromStatus`, `toStatus`, `actor` id and name, `comment`, `createdAt`) to `DashboardSummaryResponseDto` and `dashboard.service.ts` (query builder through the existing `DataSource`, parameterised, `LIMIT 8`); API README. No migration.
+2. `src/api/dashboard.ts`: summary types and `getDashboardSummary()`.
+3. `src/features/dashboard/`: summary query hook; status tiles (tint, icon, label, count-up 800ms skipped under reduced motion, link to `/tasks?status=`, 70ms stagger); overdue list (5 rows, priority tag, "overdue by n days", link to `/tasks?task=<id>`, View all); tasks per Manager (avatar, total, overdue count, stacked bar with legend and text label, link to `/tasks?managerId=`, "No Manager" row without link); recent activity (avatar, sentence, relative time, reject comment quote, link to the task); skeletons, empty and error states, refresh.
+4. `pages/dashboard-page.tsx` composes them: tiles, then two columns from 1024, one column below.
+5. `pages/tasks-page.tsx`: `initialFilters` also reads `managerId` from the URL.
+6. READMEs (admin and API) and this file.
+
+**Decisions and deviations from the design:** overdue list shows 5 of the 10 the API returns. Overdue means due date passed and not COMPLETED. Count-up is a small `requestAnimationFrame` hook, no animation library. Manager rows link by `managerId` only (no per-status segment links). Activity limited to 8 entries. No new dependencies, tsconfig or lint changes.
+
+**Manual steps for me:** keep PostgreSQL, `yarn dev:api` and `yarn dev:admin` running; optionally run `yarn workspace @task-app/api seed:demo` for richer data.
+
+**Verification:** API typecheck, build, `format:check`, no drift; `/dashboard/summary` as Admin, Manager (403) and without token (401) with a throwaway script (deleted); admin typecheck, build, Prettier; Chrome at 1440, 1280, 1024, 768 and the narrowest allowed: tile counts equal Tasks totals, every click-through, empty and error states, refresh, count-up, reduced motion.
 
 ## Update rules for Claude
 

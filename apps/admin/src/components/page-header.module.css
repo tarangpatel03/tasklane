@@ -5,6 +5,13 @@
   margin-bottom: var(--space-6);
 }
 
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .title {
   font: var(--text-headline);
   letter-spacing: -0.015em;

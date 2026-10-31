@@ -113,6 +113,6 @@
 
 @media (min-width: 640px) {
   .panel {
-    width: 480px;
+    width: var(--drawer-width, 480px);
   }
 }

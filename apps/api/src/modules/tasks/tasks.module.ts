@@ -8,6 +8,8 @@ import { TaskStatusHistory } from './entities/task-status-history.entity';
 import { Task } from './entities/task.entity';
 import { TaskCommentsController } from './task-comments.controller';
 import { TaskCommentsService } from './task-comments.service';
+import { TaskHistoryController } from './task-history.controller';
+import { TaskHistoryService } from './task-history.service';
 import { TaskWorkflowService } from './task-workflow.service';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
@@ -18,7 +20,7 @@ import { TasksService } from './tasks.service';
     UsersModule,
     MailModule,
   ],
-  controllers: [TasksController, TaskCommentsController],
-  providers: [TasksService, TaskWorkflowService, TaskCommentsService],
+  controllers: [TasksController, TaskCommentsController, TaskHistoryController],
+  providers: [TasksService, TaskWorkflowService, TaskCommentsService, TaskHistoryService],
 })
 export class TasksModule {}

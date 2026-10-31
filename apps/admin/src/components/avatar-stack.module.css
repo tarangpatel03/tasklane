@@ -1,0 +1,23 @@
+.stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.item {
+  display: inline-flex;
+  margin-left: -8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+.item:first-child {
+  margin-left: 0;
+}
+
+.more {
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-variant);
+  color: var(--color-text-strong);
+  font: var(--text-label-s);
+}

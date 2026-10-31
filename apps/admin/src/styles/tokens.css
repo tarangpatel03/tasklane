@@ -35,6 +35,22 @@
   --color-success-bg: #d5f5e3;
   --color-success-text: #17653f;
 
+  /* Task status and priority (background / text) */
+  --status-todo-bg: #ece8ff;
+  --status-todo-text: #4b3fb0;
+  --status-working-bg: #ddebff;
+  --status-working-text: #1e58b8;
+  --status-review-bg: #ffe8d1;
+  --status-review-text: #8f4a00;
+  --status-done-bg: #d5f5e3;
+  --status-done-text: #17653f;
+  --priority-low-bg: #e3eaf2;
+  --priority-low-text: #3d4f63;
+  --priority-medium-bg: #ffefc2;
+  --priority-medium-text: #6b4b00;
+  --priority-high-bg: #ffdad8;
+  --priority-high-text: #8a1e22;
+
   /* Type */
   --font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   --text-display: 800 36px/42px var(--font-family);

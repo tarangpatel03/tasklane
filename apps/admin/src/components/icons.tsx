@@ -1,3 +1,4 @@
+import { TaskStatus } from '@task-app/shared';
 import type { ReactNode } from 'react';
 
 interface IconProps {
@@ -211,6 +212,107 @@ export function ChevronRightIcon(props: IconProps): ReactNode {
     <Svg {...props}>
       <path d="M8.5 5l6 6-6 6" />
     </Svg>
+  );
+}
+
+export function TrashIcon(props: IconProps): ReactNode {
+  return (
+    <Svg {...props}>
+      <path d="M4 6h14M8.5 6V4.5h5V6M6 6l.8 11a1.5 1.5 0 001.5 1.4h5.4a1.5 1.5 0 001.5-1.4L16 6M9.5 9.5v6M12.5 9.5v6" />
+    </Svg>
+  );
+}
+
+export function ClockIcon(props: IconProps): ReactNode {
+  return (
+    <Svg {...props}>
+      <circle cx="11" cy="11" r="7.5" />
+      <path d="M11 6.8V11l2.8 1.8" />
+    </Svg>
+  );
+}
+
+export function ThumbsUpIcon(props: IconProps): ReactNode {
+  return (
+    <Svg {...props}>
+      <path d="M4 10h3v8H4zM7 10l3.2-6c1.4 0 2.3 1 2 2.4L11.8 9H17a1.5 1.5 0 011.5 1.8l-1.2 6A1.6 1.6 0 0115.7 18H7" />
+    </Svg>
+  );
+}
+
+export function SendIcon(props: IconProps): ReactNode {
+  return (
+    <Svg {...props}>
+      <path d="M18.5 3.5L9 13M18.5 3.5L12.5 18.5l-3.5-5.5L3.5 9.5l15-6z" />
+    </Svg>
+  );
+}
+
+/** Task status as a ring: empty, half filled, clock hands, or a filled check. */
+export function StatusIcon({ status, size = 18 }: IconProps & { status: TaskStatus }): ReactNode {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      style={{ flex: 'none' }}
+    >
+      {status === TaskStatus.COMPLETED ? (
+        <>
+          <circle cx="10" cy="10" r="9" fill="currentColor" />
+          <path
+            d="M6 10.2l2.8 2.8L14 7.4"
+            stroke="#fff"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
+      ) : (
+        <>
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth={2} />
+          {status === TaskStatus.WORKING && <path d="M10 2a8 8 0 010 16z" fill="currentColor" />}
+          {status === TaskStatus.IN_REVIEW && (
+            <path
+              d="M10 5.8V10l2.8 1.6"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+            />
+          )}
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Priority as three bars, filled 1, 2 or 3 of 3. */
+export function PriorityIcon({ level, size = 16 }: IconProps & { level: 1 | 2 | 3 }): ReactNode {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      focusable="false"
+      style={{ flex: 'none' }}
+    >
+      {[0, 1, 2].map((i) => (
+        <rect
+          key={i}
+          x={1.5 + i * 5}
+          y={10 - i * 4}
+          width={3.5}
+          height={5 + i * 4}
+          rx={1.2}
+          fill="currentColor"
+          opacity={i < level ? 1 : 0.28}
+        />
+      ))}
+    </svg>
   );
 }
 

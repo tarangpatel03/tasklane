@@ -1,0 +1,59 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font: var(--text-label-s);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-panel) var(--ease-standard),
+    color var(--duration-panel) var(--ease-standard);
+}
+
+.todo {
+  background: var(--status-todo-bg);
+  color: var(--status-todo-text);
+}
+
+.working {
+  background: var(--status-working-bg);
+  color: var(--status-working-text);
+}
+
+.review {
+  background: var(--status-review-bg);
+  color: var(--status-review-text);
+}
+
+.done {
+  background: var(--status-done-bg);
+  color: var(--status-done-text);
+}
+
+.priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-xs);
+  font: var(--text-label-s);
+  white-space: nowrap;
+}
+
+.low {
+  background: var(--priority-low-bg);
+  color: var(--priority-low-text);
+}
+
+.medium {
+  background: var(--priority-medium-bg);
+  color: var(--priority-medium-text);
+}
+
+.high {
+  background: var(--priority-high-bg);
+  color: var(--priority-high-text);
+}

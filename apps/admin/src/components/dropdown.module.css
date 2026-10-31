@@ -1,0 +1,130 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  color: var(--color-text-strong);
+  font: 700 13px/18px var(--font-family);
+}
+
+.control {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  padding: 0 18px;
+  border: 1.5px solid var(--color-outline);
+  border-radius: var(--radius-m);
+  background: var(--color-field);
+  color: var(--color-text);
+  font: 600 16px/24px var(--font-family);
+  text-align: left;
+  outline: none;
+  transition:
+    border-color var(--duration-fade) var(--ease-standard),
+    box-shadow var(--duration-fade) var(--ease-standard),
+    background-color var(--duration-fade) var(--ease-standard);
+}
+
+.trigger svg {
+  flex: none;
+  color: var(--color-text-muted);
+  transition: transform var(--duration-fade) var(--ease-standard);
+}
+
+.trigger:focus-visible,
+.trigger[aria-expanded='true'] {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+  background: var(--color-surface);
+}
+
+.trigger[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.invalid {
+  border: 2px solid var(--color-error);
+}
+
+.list {
+  position: absolute;
+  top: 62px;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 300px;
+  padding: 6px;
+  overflow: auto;
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-3);
+  opacity: 0;
+  transform: scale(0.95);
+  transform-origin: top left;
+  pointer-events: none;
+  transition:
+    opacity 150ms var(--ease-standard),
+    transform var(--duration-fade) var(--ease-emphasized);
+}
+
+.open {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--color-text);
+  font: 600 14px/20px var(--font-family);
+  text-align: left;
+  white-space: nowrap;
+  outline: none;
+}
+
+.option:hover {
+  background: var(--color-background);
+}
+
+.option:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.selected {
+  background: var(--color-primary-tint);
+  color: var(--color-on-primary-container);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-error-text);
+  font: 600 13px/18px var(--font-family);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list {
+    transform: none;
+  }
+}

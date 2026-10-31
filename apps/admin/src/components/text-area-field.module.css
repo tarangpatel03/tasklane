@@ -1,0 +1,26 @@
+.area {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-4) var(--space-5);
+  border: 1.5px solid var(--color-outline);
+  border-radius: var(--radius-m);
+  background: var(--color-field);
+  color: var(--color-text);
+  font: var(--text-body-l);
+  outline: none;
+  resize: vertical;
+  transition:
+    border-color var(--duration-fade) var(--ease-standard),
+    box-shadow var(--duration-fade) var(--ease-standard),
+    background-color var(--duration-fade) var(--ease-standard);
+}
+
+.area::placeholder {
+  color: var(--color-disabled-text);
+}
+
+.area:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+  background: var(--color-surface);
+}

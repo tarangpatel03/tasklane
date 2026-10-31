@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Role, TaskStatus, UserStatus } from '@task-app/shared';
 import { DataSource, In, LessThan, Not, SelectQueryBuilder } from 'typeorm';
+import { TaskStatusHistory } from '../tasks/entities/task-status-history.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { User } from '../users/entities/user.entity';
 import {
+  ActivityDto,
   DashboardSummaryResponseDto,
   ManagerSummaryDto,
   OverdueTaskDto,
@@ -11,6 +13,7 @@ import {
 } from './dto/dashboard-summary-response.dto';
 
 const OVERDUE_LIST_SIZE = 10;
+const ACTIVITY_LIST_SIZE = 8;
 
 interface RawCounts {
   managerId?: string | null;
@@ -42,7 +45,7 @@ export class DashboardService {
    */
   async getSummary(): Promise<DashboardSummaryResponseDto> {
     const now = new Date();
-    const [totalsRaw, groupsRaw, overdueTasks, overdueCount] = await Promise.all([
+    const [totalsRaw, groupsRaw, overdueTasks, overdueCount, recentActivity] = await Promise.all([
       this.countQuery().getRawOne<RawCounts>(),
       this.countQuery()
         .addSelect('task.managerId', 'managerId')
@@ -52,6 +55,7 @@ export class DashboardService {
       this.dataSource
         .getRepository(Task)
         .countBy({ status: Not(TaskStatus.COMPLETED), dueDate: LessThan(now) }),
+      this.findRecentActivity(),
     ]);
 
     return {
@@ -61,7 +65,42 @@ export class DashboardService {
       },
       overdue: { count: overdueCount, tasks: overdueTasks },
       perManager: await this.buildPerManager(groupsRaw),
+      recentActivity,
     };
+  }
+
+  /** The latest status changes across tasks that still exist (the inner join skips soft-deleted ones). */
+  private async findRecentActivity(): Promise<ActivityDto[]> {
+    const rows = await this.dataSource
+      .getRepository(TaskStatusHistory)
+      .createQueryBuilder('history')
+      .innerJoin('history.task', 'task')
+      .innerJoin('history.actor', 'actor')
+      .select([
+        'history.id',
+        'history.fromStatus',
+        'history.toStatus',
+        'history.comment',
+        'history.createdAt',
+        'task.id',
+        'task.title',
+        'actor.id',
+        'actor.name',
+      ])
+      .orderBy('history.createdAt', 'DESC')
+      .addOrderBy('history.id', 'ASC')
+      .limit(ACTIVITY_LIST_SIZE)
+      .getMany();
+    return rows.map((row) => ({
+      id: row.id,
+      taskId: row.task.id,
+      taskTitle: row.task.title,
+      fromStatus: row.fromStatus,
+      toStatus: row.toStatus,
+      actor: { id: row.actor.id, name: row.actor.name },
+      comment: row.comment,
+      createdAt: row.createdAt,
+    }));
   }
 
   private countQuery(): SelectQueryBuilder<Task> {
