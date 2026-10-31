@@ -38,6 +38,7 @@ Yarn classic workspaces: `apps/*` and `packages/*`.
 1. `yarn install`
 2. Copy `.env.example` to `.env` and fill in the values.
 3. `yarn build:shared` builds `packages/shared` (`@task-app/shared`).
+4. API setup (database, env variables, scripts): see `apps/api/README.md`.
 
 Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile` (the `dev:*` scripts work once those apps exist).
 
