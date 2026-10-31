@@ -1,2 +1,16 @@
 .claude/settings.local.json
 .claude/tmp/
+
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.DS_Store
+
+.env
+.env.*
+!.env.example
+
+android/.gradle/
+android/app/build/

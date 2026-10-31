@@ -27,11 +27,11 @@ Project rules live in `CLAUDE.md` and `.claude/skills/` (nest-backend, rn-respon
 
 ## 3. Roles, clients and task people
 
-| Role | Client | Notes |
-|---|---|---|
-| Admin | Admin panel only | Created by a seed script. Never an assignee. |
-| Manager | Mobile app | Reviews tasks. |
-| Employee | Mobile app | Does the work. |
+| Role     | Client           | Notes                                        |
+| -------- | ---------------- | -------------------------------------------- |
+| Admin    | Admin panel only | Created by a seed script. Never an assignee. |
+| Manager  | Mobile app       | Reviews tasks.                               |
+| Employee | Mobile app       | Does the work.                               |
 
 There are **no teams or reporting lines**. Managers and Employees are free members, and each task picks its own people:
 
@@ -44,18 +44,18 @@ The backend enforces every rule below. Clients only hide UI that a role cannot u
 
 ## 4. Permissions
 
-| Action | Admin | Manager | Employee |
-|---|---|---|---|
-| Create, edit, deactivate users | Yes | No | No |
-| View users | All | All Employees (to pick assignees), and self | Self |
-| Create task | Yes (picks the Manager and Employees) | Yes (becomes the task's Manager, picks Employees) | No |
-| Set or change a task's Manager | Yes | No | No |
-| Add or remove assignees | Any task | Tasks they are Manager of | No |
-| View tasks | All | Tasks they are Manager of | Tasks they are assigned to |
-| Start, submit, complete a task | No | No | Any assignee of that task |
-| Approve or reject | Any task | Tasks they are Manager of | No |
-| Edit or delete (soft) a task | Any | Tasks they are Manager of | No |
-| Comment on a task | Anyone who can view it | Same | Same |
+| Action                         | Admin                                 | Manager                                           | Employee                   |
+| ------------------------------ | ------------------------------------- | ------------------------------------------------- | -------------------------- |
+| Create, edit, deactivate users | Yes                                   | No                                                | No                         |
+| View users                     | All                                   | All Employees (to pick assignees), and self       | Self                       |
+| Create task                    | Yes (picks the Manager and Employees) | Yes (becomes the task's Manager, picks Employees) | No                         |
+| Set or change a task's Manager | Yes                                   | No                                                | No                         |
+| Add or remove assignees        | Any task                              | Tasks they are Manager of                         | No                         |
+| View tasks                     | All                                   | Tasks they are Manager of                         | Tasks they are assigned to |
+| Start, submit, complete a task | No                                    | No                                                | Any assignee of that task  |
+| Approve or reject              | Any task                              | Tasks they are Manager of                         | No                         |
+| Edit or delete (soft) a task   | Any                                   | Tasks they are Manager of                         | No                         |
+| Comment on a task              | Anyone who can view it                | Same                                              | Same                       |
 
 Assignees must be Employees. A task's Manager must be a Manager.
 
@@ -63,13 +63,13 @@ Assignees must be Employees. A task's Manager must be a Manager.
 
 Statuses: `TODO`, `WORKING`, `IN_REVIEW`, `COMPLETED`. The status belongs to the whole task, not to each assignee.
 
-| Transition | Who | Rule |
-|---|---|---|
-| TODO to WORKING | Any assignee | |
-| WORKING to IN_REVIEW | Any assignee | Only if `requires_review` is true |
-| WORKING to COMPLETED | Any assignee | Only if `requires_review` is false |
-| IN_REVIEW to COMPLETED | Task's Manager, or Admin | Approve |
-| IN_REVIEW to WORKING | Task's Manager, or Admin | Reject, comment required |
+| Transition             | Who                      | Rule                               |
+| ---------------------- | ------------------------ | ---------------------------------- |
+| TODO to WORKING        | Any assignee             |                                    |
+| WORKING to IN_REVIEW   | Any assignee             | Only if `requires_review` is true  |
+| WORKING to COMPLETED   | Any assignee             | Only if `requires_review` is false |
+| IN_REVIEW to COMPLETED | Task's Manager, or Admin | Approve                            |
+| IN_REVIEW to WORKING   | Task's Manager, or Admin | Reject, comment required           |
 
 All transitions are validated in the task service, never trusted from the client. Any other transition returns 409. Every transition is recorded in `task_status_history` with who did it, when, and the comment.
 
@@ -122,6 +122,7 @@ All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `
 ## 10. Clients
 
 ### Admin panel (React, Admin only)
+
 - Login, layout shell.
 - Dashboard: counts by status, overdue tasks, tasks per Manager.
 - Users: list with search and filters, create, edit, deactivate, resend invite.
@@ -129,6 +130,7 @@ All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `
 - Responsive from desktop down to phone width. Visual direction comes from `docs/design-brief.md`.
 
 ### Mobile app (React Native, Manager and Employee)
+
 - Everyone: login, set up account, forgot and reset password, task list with status filter and pull-to-refresh, task detail with actions, comments and status history, profile with change password and logout.
 - Employee: sees tasks they are assigned to, with Start, Submit, and Complete actions.
 - Manager adds: create tasks and pick Employees, add or remove assignees, review queue (tasks in review where they are the Manager, with approve or reject).
@@ -155,23 +157,27 @@ Per-assignee progress and separate submissions, several Managers on one task, du
 Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed to X.Z (<name>)?` and wait.
 
 **Phase 1: Foundation**
+
 - 1.1 Monorepo skeleton: workspaces, `packages/shared`, root scripts, ESLint and Prettier baseline, `.gitignore`, `.env.example`
 - 1.2 API scaffold: config validation, TypeORM connection, global pipe, filter and interceptor, response envelope
 - 1.3 User entity, first migration, Admin seed script
 - 1.4 Auth: login, refresh, logout, `/auth/me`, global JWT guard, roles guard
 
 **Phase 2: Users and email**
+
 - 2.1 Mail module with Mailpit and templates
 - 2.2 Users module: Admin CRUD, deactivate with open-task check
 - 2.3 Invite flow: setup code, setup-account, resend, forgot and reset password
 
 **Phase 3: Tasks**
+
 - 3.1 Task, assignee, comment and status-history entities, migration
 - 3.2 Task CRUD with one Manager and several Employees, role scoping, and "added to task" email
 - 3.3 Workflow transitions, review and reject, submitted and result emails
 - 3.4 Dashboard summary endpoint and demo seed data
 
 **Phase 4: Admin panel**
+
 - 4.1 Scaffold: React and TypeScript, routing, API client, auth, design tokens from the brief
 - 4.2 Login and layout shell
 - 4.3 Users pages
@@ -179,6 +185,7 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 - 4.5 Dashboard
 
 **Phase 5: Mobile**
+
 - 5.1 Scaffold: navigation, theme tokens, API client, secure token storage, safe areas, window-size hook
 - 5.2 Auth screens: login, set up account, reset password
 - 5.3 Task list and detail on phone, with actions, comments and history
@@ -187,6 +194,7 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 - 5.6 Profile, loading, empty and error states, animations
 
 **Phase 6: Polish**
+
 - 6.1 READMEs, Swagger, screenshots, demo walkthrough
 - 6.2 Security checklist pass
 - 6.3 Final check on phone and tablet

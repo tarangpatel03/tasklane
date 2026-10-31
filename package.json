@@ -1,0 +1,20 @@
+{
+  "name": "task-management-app",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build:shared": "yarn workspace @task-app/shared build",
+    "dev:api": "yarn workspace @task-app/api start:dev",
+    "dev:admin": "yarn workspace @task-app/admin dev",
+    "dev:mobile": "yarn workspace @task-app/mobile start"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}

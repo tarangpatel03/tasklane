@@ -3,23 +3,13 @@
     "context7": {
       "type": "stdio",
       "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "@upstash/context7-mcp"
-      ],
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp"],
       "env": {}
     },
     "chrome-devtools": {
       "type": "stdio",
       "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ],
+      "args": ["/c", "npx", "-y", "chrome-devtools-mcp@latest"],
       "env": {}
     }
   }

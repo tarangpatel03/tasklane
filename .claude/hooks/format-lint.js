@@ -17,7 +17,16 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const LINT_EXT = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
-const FORMAT_EXT = new Set([...LINT_EXT, '.json', '.css', '.scss', '.html', '.md', '.yml', '.yaml']);
+const FORMAT_EXT = new Set([
+  ...LINT_EXT,
+  '.json',
+  '.css',
+  '.scss',
+  '.html',
+  '.md',
+  '.yml',
+  '.yaml',
+]);
 const ESLINT_CONFIGS = [
   'eslint.config.js',
   'eslint.config.mjs',
@@ -97,7 +106,9 @@ function main(input) {
   if (prettierBin) {
     const res = run(prettierBin, ['--write', file], fileDir);
     if (res.status !== 0) {
-      problems.push(`Prettier could not format ${file} (likely a syntax error):\n${trim(res.stderr.trim())}`);
+      problems.push(
+        `Prettier could not format ${file} (likely a syntax error):\n${trim(res.stderr.trim())}`,
+      );
     }
   }
 

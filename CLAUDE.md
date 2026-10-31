@@ -1,10 +1,11 @@
 # Project rules
 
-Stack: 
+Stack:
+
 - Language: TypeScript (strict)
 - Framework: React Native CLI(Mobile App), React(Admin Dashboard)
 - Backend: NestJS
-- DB:  PostgreSQL (TypeORM)
+- DB: PostgreSQL (TypeORM)
 - Package manager: yarn
 
 ## Reporting (keep output tiny)

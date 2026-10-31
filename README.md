@@ -19,17 +19,27 @@ Project-local setup. Nothing here touches `~/.claude`.
 
 ## What each file does
 
-| File | Purpose |
-|---|---|
-| `CLAUDE.md` | Always-loaded rules: one-line reports, checkpoints, minimal diffs, TypeScript rules, "formatting is not your job". Kept short on purpose. |
-| `.claude/settings.json` | Blocks edits to ESLint/Prettier configs and reading `.env`; runs the format/lint hook after every edit. |
-| `.claude/hooks/format-lint.js` | Runs `eslint --fix` then `prettier --write` on the edited file. Remaining lint errors go back to Claude. |
-| `.claude/output-styles/terse.md` | Reinforces one-line status replies at system-prompt level. |
-| `.claude/skills/ui-design-quality/` | Brief-first design process, tokens, color/type rules, anti-"AI look" checklist. Loaded only for UI work. |
-| `.claude/skills/rn-responsive-ui/` | React Native: insets, window size classes, list-detail split, foldables, device screenshots. |
-| `.claude/skills/web-responsive-motion/` | Web: fluid layout, animation rules, accessibility, verification. |
-| `.claude/skills/nest-backend/` | NestJS + PostgreSQL + TypeORM: feature-module structure, guards/pipes, DTOs, response envelope, migrations. Loaded only for backend work. |
-| `docs/design-brief.md` | Per-project design direction you fill in. |
+| File                                    | Purpose                                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md`                             | Always-loaded rules: one-line reports, checkpoints, minimal diffs, TypeScript rules, "formatting is not your job". Kept short on purpose. |
+| `.claude/settings.json`                 | Blocks edits to ESLint/Prettier configs and reading `.env`; runs the format/lint hook after every edit.                                   |
+| `.claude/hooks/format-lint.js`          | Runs `eslint --fix` then `prettier --write` on the edited file. Remaining lint errors go back to Claude.                                  |
+| `.claude/output-styles/terse.md`        | Reinforces one-line status replies at system-prompt level.                                                                                |
+| `.claude/skills/ui-design-quality/`     | Brief-first design process, tokens, color/type rules, anti-"AI look" checklist. Loaded only for UI work.                                  |
+| `.claude/skills/rn-responsive-ui/`      | React Native: insets, window size classes, list-detail split, foldables, device screenshots.                                              |
+| `.claude/skills/web-responsive-motion/` | Web: fluid layout, animation rules, accessibility, verification.                                                                          |
+| `.claude/skills/nest-backend/`          | NestJS + PostgreSQL + TypeORM: feature-module structure, guards/pipes, DTOs, response envelope, migrations. Loaded only for backend work. |
+| `docs/design-brief.md`                  | Per-project design direction you fill in.                                                                                                 |
+
+## Monorepo setup
+
+Yarn classic workspaces: `apps/*` and `packages/*`.
+
+1. `yarn install`
+2. Copy `.env.example` to `.env` and fill in the values.
+3. `yarn build:shared` builds `packages/shared` (`@task-app/shared`).
+
+Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile` (the `dev:*` scripts work once those apps exist).
 
 ## Modes and models
 
