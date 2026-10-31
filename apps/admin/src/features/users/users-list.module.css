@@ -1,0 +1,144 @@
+/* Cards below 1024px; a five-column grid table from 1024px. */
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 0;
+}
+
+.head {
+  display: none;
+}
+
+.rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-3);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'user menu'
+    'meta meta';
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3) var(--space-4) var(--space-4);
+  border-radius: var(--radius-l);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+  animation: row-in var(--duration-panel) var(--ease-emphasized) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.user {
+  grid-area: user;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  font: 700 15px/20px var(--font-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.you {
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-tint);
+  color: var(--color-on-primary-container);
+  font: var(--text-label-s);
+}
+
+.email {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font: var(--text-body-m);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.added {
+  color: var(--color-text-muted);
+  font: var(--text-body-m);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu {
+  grid-area: menu;
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .table {
+    min-width: 760px;
+  }
+
+  .head {
+    display: grid;
+    grid-template-columns: 2.6fr 1fr 1.2fr 1.1fr 56px;
+    gap: var(--space-4);
+    padding: 0 var(--space-5) var(--space-2);
+    color: var(--color-text-muted);
+    font: var(--text-label-s);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .row {
+    grid-template-columns: 2.6fr 1fr 1.2fr 1.1fr 56px;
+    grid-template-areas: 'user role status added menu';
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .meta {
+    display: contents;
+  }
+
+  .addedLabel {
+    display: none;
+  }
+}

@@ -1,0 +1,33 @@
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font: 700 14px/16px var(--font-family);
+}
+
+.tone0 {
+  background: #c9c1ff;
+  color: #2f2791;
+}
+
+.tone1 {
+  background: #bfe0ff;
+  color: #12407f;
+}
+
+.tone2 {
+  background: #ffd9b8;
+  color: #6e3900;
+}
+
+.tone3 {
+  background: #c8f0da;
+  color: #17653f;
+}
+
+.tone4 {
+  background: #ffd0e0;
+  color: #7a1e45;
+}

@@ -1,0 +1,88 @@
+.dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog::backdrop {
+  background: var(--scrim);
+  animation: fade-in var(--duration-fade) var(--ease-standard) both;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 460px;
+  max-height: 100%;
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-3);
+  animation: scale-in var(--duration-panel) var(--ease-emphasized) both;
+}
+
+.leaving::backdrop {
+  animation: fade-out var(--duration-exit) var(--ease-accelerate) both;
+}
+
+.leaving .panel {
+  animation: fade-out var(--duration-exit) var(--ease-accelerate) both;
+}
+
+.title {
+  font: var(--text-title-l);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  color: var(--color-text-muted);
+  font: var(--text-body-l);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}

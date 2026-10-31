@@ -1,0 +1,77 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font: 700 13px/18px var(--font-family);
+  color: var(--color-text-strong);
+}
+
+.control {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  height: 56px;
+  padding: 0 var(--space-5);
+  border: 1.5px solid var(--color-outline);
+  border-radius: var(--radius-m);
+  background: var(--color-field);
+  color: var(--color-text);
+  font: var(--text-body-l);
+  outline: none;
+  transition:
+    border-color var(--duration-fade) var(--ease-standard),
+    box-shadow var(--duration-fade) var(--ease-standard),
+    background-color var(--duration-fade) var(--ease-standard);
+}
+
+.input::placeholder {
+  color: var(--color-disabled-text);
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+  background: var(--color-surface);
+}
+
+.invalid {
+  border: 2px solid var(--color-error);
+  background: var(--color-error-tint);
+}
+
+.control:has(.toggle) .input {
+  padding-right: 64px;
+}
+
+.toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background-color var(--duration-fade) var(--ease-standard);
+}
+
+.toggle:hover {
+  background: var(--color-primary-tint);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 13px/18px var(--font-family);
+  color: var(--color-error-text);
+}

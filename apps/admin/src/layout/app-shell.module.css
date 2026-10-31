@@ -1,0 +1,76 @@
+.shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-4) var(--space-8);
+  outline: none;
+  animation: page-in var(--duration-page) var(--ease-emphasized) both;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background: var(--scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-slide) var(--ease-smooth);
+}
+
+.scrimOn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.skip {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 60;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: #fff;
+  font: var(--text-label-l);
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: var(--space-2) var(--space-6) var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    padding: var(--space-2) var(--space-7) var(--space-8);
+  }
+}

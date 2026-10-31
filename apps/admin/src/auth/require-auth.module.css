@@ -1,0 +1,17 @@
+.splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  animation: pulse 1.4s var(--ease-standard) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.45;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

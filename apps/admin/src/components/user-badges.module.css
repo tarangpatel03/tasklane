@@ -1,0 +1,45 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font: var(--text-label-s);
+  white-space: nowrap;
+}
+
+.active {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.invited {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.deactivated {
+  background: var(--color-disabled-bg);
+  color: var(--color-text-muted);
+}
+
+.role {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-xs);
+  font: var(--text-label-s);
+  white-space: nowrap;
+}
+
+.manager {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+.employee {
+  background: var(--color-surface-variant);
+  color: var(--color-text-strong);
+}

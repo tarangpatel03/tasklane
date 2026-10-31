@@ -1,0 +1,42 @@
+import { useId, type ReactNode } from 'react';
+import { CloseIcon } from './icons';
+import { useDialog } from './use-dialog';
+import styles from './drawer.module.css';
+
+interface DrawerProps {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  footer?: ReactNode;
+}
+
+/** Right-hand panel on a native dialog: slides in, closes on Esc, the scrim or the close button. */
+export function Drawer({ open, title, onClose, children, footer }: DrawerProps): ReactNode {
+  const titleId = useId();
+  const { ref, visible, leaving, onCancel, onClick } = useDialog(open, onClose);
+  if (!visible) return null;
+
+  return (
+    <dialog
+      ref={ref}
+      className={`${styles.dialog} ${leaving ? styles.leaving : ''}`}
+      aria-labelledby={titleId}
+      onCancel={onCancel}
+      onClick={onClick}
+    >
+      <div className={styles.panel}>
+        <header className={styles.header}>
+          <h2 id={titleId} className={styles.title}>
+            {title}
+          </h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label="Close panel">
+            <CloseIcon />
+          </button>
+        </header>
+        <div className={styles.body}>{children}</div>
+        {footer && <footer className={styles.footer}>{footer}</footer>}
+      </div>
+    </dialog>
+  );
+}

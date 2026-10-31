@@ -2,8 +2,8 @@
 
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
-**Last updated:** 2026-10-31
-**Current checkpoint:** 4.1 - Scaffold: React and TypeScript, routing, API client, auth, design tokens (next)
+**Last updated:** 2026-11-01
+**Current checkpoint:** 4.4 - Tasks pages (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -39,10 +39,10 @@ Status values: `Done`, `Next`, `Pending`.
 
 | #   | Checkpoint                                                               | Status  |
 | --- | ------------------------------------------------------------------------ | ------- |
-| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Next    |
-| 4.2 | Login and layout shell                                                   | Pending |
-| 4.3 | Users pages                                                              | Pending |
-| 4.4 | Tasks pages: list, filter, create, assign, review                        | Pending |
+| 4.1 | Scaffold: React and TypeScript, routing, API client, auth, design tokens | Done    |
+| 4.2 | Login and layout shell                                                   | Done    |
+| 4.3 | Users pages                                                              | Done    |
+| 4.4 | Tasks pages: list, filter, create, assign, review                        | Next    |
 | 4.5 | Dashboard                                                                | Pending |
 
 ### Phase 5: Mobile
@@ -283,6 +283,82 @@ Details are added when a checkpoint is planned, and completed when it is finishe
 **Manual steps for me:** add `SEED_DEMO_PASSWORD` to `.env`; run `yarn workspace @task-app/api seed:demo` myself when done (my test rows are removed afterwards).
 
 **Verification:** typecheck, build, `format:check`, no drift; seed run twice with a throwaway password (second run does nothing); dashboard numbers equal independent SQL counts, role checks 403/401, soft-deleted task not counted; all test rows removed.
+
+### 4.1 Admin scaffold - Done
+
+**Goal:** a working `apps/admin` base (Vite, React, TypeScript, routing, API client with token refresh, auth state) for 4.2 to 4.5.
+
+**Done:** all plan items. `apps/admin` with `src/api/client.ts`, `src/auth/` (token store, `AuthProvider`, `useAuth`, `RequireAuth`), router, placeholder login, home and not-found pages, README, `apps/admin/.env.example`. Typecheck and build pass. In the browser (dev server, API off): `/` redirects to `/login`, the page renders and the shared enums resolve through Vite. Versions are newer than usual: Vite 8, React 19.3, react-router 8 (`RouterProvider` from `react-router/dom`).
+
+**Not verified:** login, reload keeping the session, the 401 refresh-and-retry, logout and the non-Admin rejection were not run (API was off and `.env` credentials are not readable by Claude). Check them by hand or at the start of 4.2.
+
+**Deviations:** `VITE_API_PROXY_TARGET` lives in `apps/admin/.env.example` (Vite reads env from the app folder, not the root). `yarn install` had to be rerun after adding deps (the TypeScript 6 relink noted in 1.4). `format:check` still flags `CLAUDE.md` and `packages/shared/tsconfig.json`, which were not touched.
+
+**Plan (as approved):**
+
+1. `apps/admin` as workspace `@task-app/admin`, hand-written (no generator): `package.json` (`dev`, `build`, `typecheck`), app-local strict `tsconfig.json` (`moduleResolution: bundler`), `vite.config.ts` (port 5173, `/api` proxy), `index.html`. Root `.prettierrc` is used.
+2. Make sure Vite resolves the CommonJS `@task-app/shared` enums; if not, fix it in `vite.config.ts`, not in the shared package.
+3. `src/api/client.ts`: fetch wrapper for `/api/v1`, unwraps `ApiResponse<T>`, throws a typed `ApiRequestError` (with `details`), adds the Bearer token, on 401 does one single-flight `POST /auth/refresh` and retries once; refresh failure clears the session.
+4. `src/auth/`: token store (access token in memory, refresh token in `sessionStorage`), `AuthProvider` and `useAuth` (`login`, `logout`, user from `GET /auth/me`, non-Admin login rejected and logged out), `RequireAuth`.
+5. `src/main.tsx`, `src/app/router.tsx` (`/login`, `/`, `*`; protected routes behind `RequireAuth`), `QueryClientProvider`. Unstyled stub pages, replaced in 4.2.
+6. Optional `VITE_API_PROXY_TARGET` (default `http://localhost:3000`) in `.env.example`.
+7. `apps/admin/README.md`, root README line if it lists apps, this file.
+
+**Decisions:** deps `vite`, `@vitejs/plugin-react`, `react`, `react-dom`, `react-router`, `@tanstack/react-query` plus types (no axios, no UI library). Dev proxy instead of CORS (CORS stays for deployment). Design tokens are deferred until I give them after the mobile scaffold, so no tokens file and no styling beyond a bare reset (deviation from the 4.1 label).
+
+**Manual steps for me:** run `yarn install` after the deps are added and `yarn build:shared`; Postgres, the API and a seeded Admin running for the login check.
+
+**Verification:** admin `typecheck`, `build`, `format:check`; login as Admin through the proxy, reload keeps the session, expired access token refreshes once and retries, logout clears storage, non-Admin rejected, `/` redirects to `/login` when signed out (Chrome DevTools MCP).
+
+### 4.2 Login and layout shell - Done
+
+**Goal:** the designed Tasklane login page and the app layout shell (sidebar, top bar, profile menu) with tokens from `docs/design-brief.md`, so 4.3 to 4.5 only add page content.
+
+**Done:** all plan items. Typecheck, build and Prettier pass. Checked in Chrome at 1280, 768, 390 and 320 wide (no horizontal overflow, no console errors): login, validation errors, wrong password banner, successful login with redirect back to the requested page, reload keeps the session, logout clears `sessionStorage` and returns to `/login`, drawer opens and closes with Esc and returns focus, profile menu, reduced motion.
+
+**Not verified:** 401 refresh-and-retry and non-Admin rejection (no expired token or non-Admin account used), keyboard tab order beyond Esc, 1024 and 1440 widths, side-by-side comparison with the design file.
+
+**Deviations:** a second dev Admin (`admin@gmail.com`) was inserted once with a throwaway script because `seed:admin` skips when an Admin exists; the script was deleted. The "Forgot password?" link and "Change password" menu item from the design are left out (see plan). Toast is not built yet (4.3).
+
+**Plan (as approved):**
+
+1. `src/styles/tokens.css` (CSS variables from the brief) and `global.css` (reset, focus ring, reduced motion); Plus Jakarta Sans via the Google Fonts link in `index.html`; favicon from the Tasklane mark.
+2. Components (CSS Modules, no new dependencies): logo, icons (inline SVG), button, text field, avatar, page header, empty state.
+3. Login page: split hero and form at 1024 and up, stacked below; client validation, server error banner, loading state; existing auth logic and redirect-back kept. No "Forgot password?" link.
+4. Layout shell: sidebar (Dashboard, Tasks, Users; collapsible on desktop, off-canvas below 1024 with scrim, Esc and focus return), top bar with breadcrumb and profile menu (name, email, role, Log out; no "Change password" until its endpoint exists), page-change fade, skip link.
+5. Routes `/`, `/tasks`, `/users` behind `RequireAuth` > `AppShell` with placeholder pages and an empty state; styled loading and 404 states; `home-page.tsx` removed.
+6. README "Layout and styling" section.
+
+**Decisions:** toast, table, filter bar, drawer and modal are built when first used (4.3 to 4.5). Collapsed sidebar is not animated by width. No tsconfig, lint or dependency changes.
+
+**Manual steps for me:** start PostgreSQL, `yarn dev:api` and `yarn dev:admin`; enter the Admin credentials in the browser for the login checks (Claude does not read `.env`).
+
+**Verification:** typecheck, build, `format:check`; Chrome DevTools screenshots at 320, 390, 768, 1024, 1280, 1440; keyboard and reduced-motion checks; the 4.1 items left unverified (login, reload, 401 refresh, logout, non-Admin rejection, redirect-back).
+
+### 4.3 Users pages - Done
+
+**Done:** all plan items. `api/users.ts`, toast, drawer, modal (native `<dialog>` with `use-dialog`), select field, pagination, skeleton, user badges, row menu, button variants (`variant`, `compact`), `features/users/`, new Users page, README. Typecheck, build and Prettier pass. Checked in Chrome at 1280 and a narrow window (cards, no horizontal overflow, no console errors): list and counts, empty-form validation, duplicate email mapped to the Email field, create as Manager (toast, row, counts), row menu, deactivate confirm (counts update), reactivate (a never-set-up user goes back to `invited`).
+
+**Not verified:** edit, resend invite, filters and search, paging (fewer than 9 users), the blocked-deactivation list with "Go to Tasks" (no open tasks in the dev data), 1024 and 768 widths, 320 px (the Chrome window will not go below about 500 px), keyboard tab order, reduced motion.
+
+**Deviations:** the row menu is portalled to the body (the page's entrance animation offsets fixed children). Admin rows only offer Edit (no deactivate). A test user `check.person@example.test` (Manager, invited) was created in the dev database; the invite email went to the configured SMTP. Added the `--color-warning-*`, `--color-success-*` and `--color-primary-container-hover` tokens.
+
+**Plan (as approved):**
+
+**Goal:** the Users screen from `docs/design/admin/Admin Panel.dc.html`: list with search, role and status filters and paging, create and edit in a drawer, resend invite, deactivate and reactivate. Built on the existing Users API; no backend change.
+
+**Plan (as approved):**
+
+1. `src/api/users.ts`: `UserDto`, `listUsers` (via `apiEnvelope`, returns items and `meta`), `createUser`, `updateUser`, `resendInvite`.
+2. Shared components (CSS Modules, tokens only, no new dependencies): toast (provider mounted in `main.tsx`), drawer and modal on the native `<dialog>` with a `use-dialog` hook, styled native `select-field`, pagination, skeleton, badges (user status and role), popover row menu; extra icons.
+3. `src/features/users/`: query hooks and mutations (list with `keepPreviousData`, three `limit=1` queries for the summary counts), toolbar (debounced search, Role and Status selects, Clear filters, Refresh, New user), table from 1024 and cards below (row stagger, skeleton, empty and error states), user drawer (name, email read-only unless invited or new, role segmented, server errors mapped to fields or a banner), deactivate dialog (confirm, then the API's 409 turns it into a "Cannot deactivate" list of blocking tasks with a "Go to Tasks" link).
+4. `pages/users-page.tsx` replaces the placeholder; README and this file updated.
+
+**Decisions and deviations from the design:** columns are Name, Role, Status and Added (`createdAt`); Open tasks, Last active and column sorting are not built because the API has no such fields or sort (they wait for a later API step). Email is read-only after the invite is accepted in the UI only. Native selects and `<dialog>` instead of custom listboxes and hand-made focus traps. Filters and page live in component state. Page size 8. Toast copy does not claim email delivery.
+
+**Manual steps for me:** keep PostgreSQL, `yarn dev:api` and `yarn dev:admin` running; optionally run `yarn workspace @task-app/api seed:demo` (needs `SEED_DEMO_PASSWORD` in `.env`) for open tasks and more than 8 users. Admin login `admin@gmail.com`.
+
+**Verification:** admin typecheck, build, Prettier; Chrome at 1440, 1280, 1024, 768, 390, 320; all flows against the real API (create, duplicate email, edit, resend, deactivate, reactivate, blocked deactivation, own-row protections); keyboard and reduced motion.
 
 ## Update rules for Claude
 

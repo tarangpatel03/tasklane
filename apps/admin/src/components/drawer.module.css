@@ -1,0 +1,118 @@
+.dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  /* Why: `clip` (not `hidden`) stops the browser scrolling the dialog to reveal the off-screen panel when it focuses a field, which skipped the slide. */
+  overflow: clip;
+}
+
+.dialog::backdrop {
+  background: var(--scrim);
+  animation: fade-in var(--duration-slide) var(--ease-standard) both;
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-3);
+  animation: slide-in var(--duration-slide) var(--ease-smooth) both;
+}
+
+.leaving::backdrop {
+  animation: fade-out var(--duration-exit) var(--ease-standard) both;
+}
+
+.leaving .panel {
+  animation: slide-out var(--duration-exit) var(--ease-accelerate) both;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-surface-variant);
+}
+
+.title {
+  font: var(--text-title-l);
+}
+
+.close {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background-color var(--duration-fade) var(--ease-standard);
+}
+
+.close:hover {
+  background: var(--color-primary-tint);
+}
+
+.body {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-surface-variant);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes slide-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .panel {
+    width: 480px;
+  }
+}
