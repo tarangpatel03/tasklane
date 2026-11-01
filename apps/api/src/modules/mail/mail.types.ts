@@ -1,5 +1,3 @@
-import { Role, TaskPriority } from '@task-app/shared';
-
 /** A finished email, produced by one of the template functions and passed to `MailService.send`. */
 export interface MailContent {
   subject: string;
@@ -17,16 +15,6 @@ export interface PasswordResetInput {
   name: string;
   resetUrl: string;
   validMinutes: number;
-}
-
-export interface AddedToTaskInput {
-  recipientName: string;
-  taskTitle: string;
-  /** Employees are added as assignees, a Manager is added as the task's reviewer. */
-  recipientRole: Role.EMPLOYEE | Role.MANAGER;
-  addedByName: string;
-  priority: TaskPriority;
-  dueDate?: Date | null;
 }
 
 export interface SubmittedForReviewInput {

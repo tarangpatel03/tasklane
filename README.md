@@ -37,7 +37,7 @@ apps/api         NestJS API (see apps/api/README.md)
 apps/admin       Admin panel (see apps/admin/README.md)
 apps/mobile      Mobile app (see apps/mobile/README.md)
 packages/shared  Shared enums and response types (see packages/shared/README.md)
-docs/            Spec, design brief, build progress, demo walkthrough, screenshots
+docs/            Spec, design brief, build progress, screenshots
 ```
 
 ## Quick start
@@ -49,7 +49,7 @@ Needs Node.js, Yarn 1, PostgreSQL, and for the mobile app the Android SDK with a
 3. `yarn build:shared`
 4. Create the database: `psql -U postgres -c "CREATE DATABASE task_management;"`
 5. `yarn workspace @task-app/api migration:run`
-6. `yarn workspace @task-app/api seed:admin`, then `yarn workspace @task-app/api seed:demo` for sample users and tasks
+6. `yarn workspace @task-app/api seed:admin`
 7. `yarn dev:api` (http://localhost:3000), `yarn dev:admin` (http://localhost:5173), and for the phone `yarn dev:mobile` plus `yarn workspace @task-app/mobile android`
 
 Setup details, environment variables and troubleshooting are in each app's README.
@@ -58,15 +58,9 @@ Setup details, environment variables and troubleshooting are in each app's READM
 
 With the API running outside production, Swagger UI is at http://localhost:3000/api/docs (use Authorize with an access token from `POST /auth/login`). Routes live under `/api/v1`.
 
-## Demo
-
-[docs/demo-walkthrough.md](docs/demo-walkthrough.md) is a scripted tour with the demo accounts: create a task, work it, reject it, approve it, and watch it on the dashboard.
-
 ## More docs
 
 - [docs/project-spec.md](docs/project-spec.md): scope, permissions, workflow, API and data model
 - [docs/design-brief.md](docs/design-brief.md): visual design direction
-- [docs/progress.md](docs/progress.md): build checkpoints and decisions
-- [docs/claude-setup.md](docs/claude-setup.md): the Claude Code setup used to build this repo
 
 Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile`.

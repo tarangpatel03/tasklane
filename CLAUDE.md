@@ -54,13 +54,7 @@ Stack:
 
 - Before any backend work, load the `nest-backend` skill: feature-module folders, guards and pipes by default, one response envelope, migrations only.
 
-## Progress tracking
-
-- `docs/progress.md` tracks the checkpoints from `docs/project-spec.md` section 13. Read it before planning a checkpoint.
-- After I approve a checkpoint plan, write the plan under that checkpoint in Details. When a checkpoint is finished, update its status, the Done notes, any deviation from the spec, and which checkpoint is Next.
-- Do not mention these file updates in the final one-line reply.
-
 ## Checkpoint workflow
 
-- "Plan checkpoint X.Y": read docs/project-spec.md, docs/progress.md and any skill relevant to the work. Plan only that checkpoint. List manual steps I must do (database setup, deleting generated Prettier configs, and so on). Show the plan and wait for my approval, then write it under that checkpoint in docs/progress.md.
-- "Proceed with checkpoint X.Y": follow the approved plan in docs/progress.md. If there is no approved plan, say so and stop. Do only that checkpoint, then update docs/progress.md and reply with the checkpoint line.
+- "Plan checkpoint X.Y": read docs/project-spec.md and any skill relevant to the work. Plan only that checkpoint. List manual steps I must do (database setup, deleting generated Prettier configs, and so on). Show the plan and wait for my approval.
+- "Proceed with checkpoint X.Y": follow the plan I approved in this conversation. If there is no approved plan, say so and stop. Do only that checkpoint, then reply with the checkpoint line.

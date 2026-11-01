@@ -6,7 +6,7 @@ interface LogoProps {
   size?: number;
 }
 
-/** The Tasklane mark: three lanes filling from empty to done (docs/design/logo/tasklane-mark.svg). */
+/** The Tasklane mark: three lanes filling from empty to done. */
 export function Logo({ size = 64 }: LogoProps): ReactNode {
   return (
     <Svg width={size} height={size} viewBox="0 0 64 64" accessibilityLabel="Tasklane">

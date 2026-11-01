@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  From docs/design/logo/tasklane-icon-foreground.svg. Android vectors have no masks, so the
+  Drawn from the original logo SVG. Android vectors have no masks, so the
   check that the SVG cuts out of the right lane is drawn in the gradient's mid colour instead.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

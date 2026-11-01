@@ -33,7 +33,7 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 ## Fonts and icon
 
 - Plus Jakarta Sans (500, 600, 700, 800) lives in `android/app/src/main/assets/fonts/`; the family names are in `src/theme/typography.ts`.
-- The launcher icon is an adaptive icon drawn as vectors from `docs/design/logo/tasklane-icon-*.svg` (`res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26`). Android 7.0 and 7.1 still show the React Native default PNGs; replace them from `docs/design/logo/tasklane-icon-full-1024.png` if those versions matter.
+- The launcher icon is an adaptive icon drawn as vectors (`res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26`). Android 7.0 and 7.1 still show the React Native default PNGs; replace them with a PNG of the icon if those versions matter.
 
 ## Native modules
 

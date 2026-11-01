@@ -36,7 +36,7 @@ Validated at startup (the app refuses to start if one is missing or invalid).
 | `REFRESH_TTL_DAYS`  | `7`                           | Refresh token lifetime in days              |
 | `PUBLIC_BASE_URL`   | `http://localhost:<API_PORT>` | Host used in email links, see Account links |
 
-Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin` (`SEED_ADMIN_*`) and `seed:demo` (`SEED_DEMO_PASSWORD`).
+Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin` (`SEED_ADMIN_*`).
 
 ## Mail
 
@@ -120,13 +120,6 @@ Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_a
 ## Dashboard
 
 `GET /api/v1/dashboard/summary` (Admin only) returns `totals` (task count and a count for each status), `overdue` (count plus the 10 oldest-due tasks that are not completed) and `perManager` (one row per active Manager, even with no tasks, plus any other Manager who still has tasks, and a last row with `manager: null` for tasks without a Manager; each row has `total`, `byStatus` and `overdue`). It also returns `recentActivity`: the 8 latest status changes (`taskId`, `taskTitle`, `fromStatus`, `toStatus`, `actor`, `comment`, `createdAt`, newest first) on tasks that still exist. Soft-deleted tasks are not counted.
-
-## Demo data
-
-`yarn workspace @task-app/api seed:demo` fills the database for demos: 2 Managers, 5 Employees and 14 sample tasks in every status (some overdue, one without a Manager, comments and status history included). It needs an Admin (`seed:admin` first) and `SEED_DEMO_PASSWORD` (min 8 characters) in the root `.env`, which becomes the password of every demo account.
-
-- Demo logins: `maya@demo.test` and `daniel@demo.test` (Managers); `aisha@`, `ben@`, `chloe@`, `diego@` and `emma@demo.test` (Employees). The `.test` domain never receives mail, and the seed sends none.
-- Running it again does nothing while the demo accounts exist. To start over, delete the demo data in SQL: `DELETE FROM tasks WHERE id IN (SELECT task_id FROM task_assignees WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@demo.test'));` then `DELETE FROM users WHERE email LIKE '%@demo.test';`, and run the seed again.
 
 ## Scripts
 

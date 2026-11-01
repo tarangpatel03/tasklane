@@ -78,20 +78,3 @@ export function validateSeedEnv(raw: Record<string, unknown>): SeedEnvVars {
 export function loadSeedEnv(): SeedEnvVars {
   return validateSeedEnv(process.env);
 }
-
-export interface DemoSeedEnvVars {
-  SEED_DEMO_PASSWORD: string;
-}
-
-const demoSeedEnvSchema = Joi.object<DemoSeedEnvVars>({
-  SEED_DEMO_PASSWORD: Joi.string().min(8).required(),
-}).unknown(true);
-
-/** The demo seed has its own variable so it can run without the Admin seed values. */
-export function loadDemoSeedEnv(): DemoSeedEnvVars {
-  const { error, value } = demoSeedEnvSchema.validate(process.env, { abortEarly: false });
-  if (error) {
-    throw new Error(`Invalid demo seed environment: ${error.message}`);
-  }
-  return value as DemoSeedEnvVars; // Joi validated the shape above
-}

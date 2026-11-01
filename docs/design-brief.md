@@ -44,7 +44,7 @@ Fill this once per project. Claude reads it before any UI work. Vague answers pr
 
 # Brand and shared tokens
 
-Source: the Tasklane design project (`Tasklane Brand`, `Task App Tokens and Components`). Light theme only. Material 3 structure with a violet primary, 24px card radii, pill controls and violet-tinted shadows. Every interactive element is at least 48px tall (44px for dense table controls on the admin panel). Status and priority always pair colour, icon and text.
+Source: the Tasklane design project. Light theme only. Material 3 structure with a violet primary, 24px card radii, pill controls and violet-tinted shadows. Every interactive element is at least 48px tall (44px for dense table controls on the admin panel). Status and priority always pair colour, icon and text.
 
 ## Brand
 
@@ -53,7 +53,6 @@ Source: the Tasklane design project (`Tasklane Brand`, `Task App Tokens and Comp
 - Variants: colour mark on transparent; one-colour dark `#1C1B2E` (outlined lanes, check cut out, flat fill); one-colour white on `#5B4FD6`.
 - Horizontal logo: mark plus "Tasklane" in Plus Jakarta Sans 800, tracking -2%, `#1C1B2E`. Clear space of one column width. The check is the first detail to drop at 29px, so use the mark at 20px or larger.
 - App icon, 1024 square: background gradient `#6A5EE6` to `#4338B8` (x .2, y 0 to x .8, y 1), full bleed, no rounding. Foreground is white lanes at 30%, 30% and 70% with the check cut out, scaled 10.4x and centred. The farthest corner stays inside the 66% (676px) safe-zone circle. The full icon is both layers combined, square, for iOS and stores. It must survive circle, squircle, rounded-square and square launcher masks.
-- Files in `docs/design/logo/` (SVG, metadata stripped): `tasklane-mark`, `tasklane-mark-mono`, `tasklane-mark-mono-white`, `tasklane-logo-horizontal`, `tasklane-icon-background`, `tasklane-icon-foreground`, `tasklane-icon-full`. The 1024px PNGs (`*-1024.png`) are in the same folder for the mobile app icon (checkpoint 5.1). The horizontal SVG names the font; convert text to outlines before print use.
 - Wordmark use: lavender wash `linear-gradient(160deg, #E4DEFF, #F6F4FD)` behind headers and the login hero only.
 
 ## Color
@@ -125,7 +124,7 @@ Staggered list entrance: 40ms per row, maximum 8 rows. Count-up on summary numbe
 
 # Admin panel
 
-Admin only, React web. Reference screens: `docs/design/admin/Admin Panel.dc.html` (open it in a browser; it has a Responsive preview switcher that is design-only and not part of the product). Reuses everything above; only admin-specific values are listed here.
+Admin only, React web. Reuses everything above; only admin-specific values are listed here.
 
 ## Admin tokens
 
@@ -156,12 +155,12 @@ Admin only, React web. Reference screens: `docs/design/admin/Admin Panel.dc.html
 
 # Mobile app
 
-Manager and Employee, React Native. Reference screens in `docs/design/mobile/` (open the `.dc.html` files in a browser; role, width and orientation switchers are design-only): `Task App Tokens and Components` (tokens), `Task App Phone Screens` (Tasks, Task detail), `Task App Phone Screens B3` (Login, Create task, Review queue, Profile), `Task App Tablet` (Tasks split pane, portrait), `Task App Tablet B2` (Login, Create task, Review queue, Profile on all three size classes). Where a screen and the token sheet disagree, this section says which wins. Reuses everything above; only mobile-specific values are listed.
+Manager and Employee, React Native. Where a screen and the token sheet disagree, this section says which wins. Reuses everything above; only mobile-specific values are listed.
 
 ## Layout and size classes
 
 - Screen margin 20 (16 at 320 wide), plus safe-area insets. Sticky bottom content sits at 12 + bottom inset. Checked widths 320, 390, 430; tablet 1180 x 820 and 820 x 1180.
-- Compact (below 600): phone layouts. Medium (600 to 899): portrait tablet layout. Expanded (900 and up): split pane. The split starts at 900 for both Tasks and Review (`Task App Tablet B2`); this overrides the `rn-responsive-ui` skill's 840. `useWindowClass()` is the only place these numbers live.
+- Compact (below 600): phone layouts. Medium (600 to 899): portrait tablet layout. Expanded (900 and up): split pane. The split starts at 900 for both Tasks and Review; this overrides the `rn-responsive-ui` skill's 840. `useWindowClass()` is the only place these numbers live.
 - Animation library: `react-native-reanimated`. Greeting text is "Hello,".
 - Header wash on every top-level screen: `linear-gradient(160deg, #E4DEFF, #F6F4FD)` (the token sheet shows `#E9E4FF`; the screens use `#E4DEFF`, which wins), bottom radius 32 (40 on Login and Profile).
 - Floating bottom nav: 72px pill, white at 94%, L3 shadow, 16px side margin (token sheet; phone screens draw 12, the token sheet wins), 8px inner padding. Items: Tasks, Review (Managers only, red `#C2282D` count badge), Profile. Employees see Tasks and Profile. Active item is a tonal pill (`#E6E1FF`, text `#2F2791`, icon and 13/16 label side by side); inactive items stack icon over an 11/14 label in `#5F5C74`. Icons 22px.
@@ -187,7 +186,7 @@ Manager and Employee, React Native. Reference screens in `docs/design/mobile/` (
 
 - **Expanded (900 and up, design 1180 x 820):** 420px list pane with a 1px `#E6E2F3` right border and 24px padding; tiles 2 columns, cards 1 column; the selected card is `#F1EEFF` with a 2.5px inset `#5B4FD6` ring. Nav pill is 388 wide inside the list pane; the "New task" button sits at the right edge of that pane. The detail pane (`#FBFAFF`) fills the rest: wash header, padding 32, title 30/36, body in two columns (Description and People left; Comments and Status history right), and a 104px action bar at the foot (white, 1px `#EEEAF8` top border, buttons right-aligned, 40px padding). Selecting a card swaps the detail with a 300ms fade and 24px slide. The first task is selected on load in the design; keep the selection across rotation.
 - **Medium (600 to 899, design 820 x 1180):** list full width, tiles in one row of four, cards in two columns, nav pill 480 wide centred. A card opens the detail in a 560px side sheet from the right (radius 32 on the left corners, scrim, 450ms emphasized, round close button in the header, single column body). The Reject sheet is 520 wide, centred.
-- **Login, Create task, Review queue, Profile** (`Task App Tablet B2`): page margins 20 compact, 40 medium. Login is a centred white card on the lavender wash (max 480, radius 32, padding 32, 20 compact). Create and Edit task are full screen on compact and a centred modal on medium and expanded (max 560 wide, radius 32, max height viewport minus 96, scrim, header with a round close button, scrolling body, fixed white footer with a 1px `#EEEAF8` top border). Profile is a centred column, max 640. Review queue: medium is a single pane whose cards keep inline Reject and Approve; expanded is a 420px queue with the selected card highlighted (`#F1EEFF`, 2.5px inset `#5B4FD6` ring) and the task detail on the right with Reject and Approve in the 104px foot bar; the selection survives size changes; with nothing selected the right pane reads "Nothing in review" and "Select a task from the queue when one arrives."; buttons on a queue card never change the selection. The right-hand detail is the full Task detail (B2 omits Comments and People, the app keeps them). Nav pill: 12px side margins on compact, 480 wide centred on medium, 388 wide inside the list pane on expanded. The Reject sheet is full width on compact and 520 wide centred otherwise.
+- **Login, Create task, Review queue, Profile**: page margins 20 compact, 40 medium. Login is a centred white card on the lavender wash (max 480, radius 32, padding 32, 20 compact). Create and Edit task are full screen on compact and a centred modal on medium and expanded (max 560 wide, radius 32, max height viewport minus 96, scrim, header with a round close button, scrolling body, fixed white footer with a 1px `#EEEAF8` top border). Profile is a centred column, max 640. Review queue: medium is a single pane whose cards keep inline Reject and Approve; expanded is a 420px queue with the selected card highlighted (`#F1EEFF`, 2.5px inset `#5B4FD6` ring) and the task detail on the right with Reject and Approve in the 104px foot bar; the selection survives size changes; with nothing selected the right pane reads "Nothing in review" and "Select a task from the queue when one arrives."; buttons on a queue card never change the selection. The right-hand detail is the full Task detail (B2 omits Comments and People, the app keeps them). Nav pill: 12px side margins on compact, 480 wide centred on medium, 388 wide inside the list pane on expanded. The Reject sheet is full width on compact and 520 wide centred otherwise.
 
 ## Mobile motion
 

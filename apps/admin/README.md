@@ -29,7 +29,7 @@ The dev server proxies `/api` to the API, so the browser sees one origin and no 
 
 ## Layout and styling
 
-- Design source: `docs/design-brief.md` (tokens, brand, responsive rules) and `docs/design/admin/`.
+- Design source: `docs/design-brief.md` (tokens, brand, responsive rules).
 - `src/styles/tokens.css` holds every design token as a CSS variable; components use these only. `global.css` has the reset, focus ring and reduced-motion rules. Components use CSS Modules (`*.module.css`); there is no UI library.
 - `src/layout/`: `AppShell` (sidebar, top bar, routed content), `Sidebar`, `TopBar`, `ProfileMenu`. Breakpoints are 640 and 1024: from 1024 the sidebar is fixed and collapsible, below it slides in as a drawer.
 - Plus Jakarta Sans is loaded from Google Fonts in `index.html`, so the first load needs internet access.

@@ -91,11 +91,10 @@ Task fields: `title` (required, max 120), `description` (optional, max 2000), `p
 Sent after the request succeeds. A mail failure is logged and never breaks the request.
 
 1. **Account created** to the new user: invite with the setup link. A second email of the same kind carries the **password reset** link after "Forgot password".
-2. **Added to a task** to each newly added Employee, and to the task's Manager when someone else sets or changes it. A Manager who creates their own task gets no email.
-3. **Submitted for review** to the task's Manager, and to the task's creator if that is a different person (for example the Admin).
-4. **Review result** (approved, or rejected with comment) to every assignee.
+2. **Submitted for review** to the task's Manager, and to the task's creator if that is a different person (for example the Admin).
+3. **Review result** (approved, or rejected with comment) to every assignee.
 
-Local development uses Mailpit (free local mail catcher). SMTP settings come from env variables so a real provider can be added later. Templates are simple HTML with a plain-text fallback.
+SMTP settings come from env variables (Gmail with an App Password); without them the API uses an Ethereal test mailbox and logs a preview URL. Templates are simple HTML with a plain-text fallback.
 
 ## 8. API (draft)
 
@@ -145,7 +144,6 @@ All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `
 - CORS limited to the admin panel origin; login rate-limited.
 - No secrets, tokens or passwords in logs or the repo; `.env.example` stays current.
 - Migrations only, `synchronize` off.
-- Demo seed data: 1 Admin, 2 Managers, 5 Employees, and sample tasks in every status.
 - Every app has a README. The API has Swagger docs.
 - No automated tests unless requested.
 
@@ -166,16 +164,16 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 
 **Phase 2: Users and email**
 
-- 2.1 Mail module with Mailpit and templates
+- 2.1 Mail module and templates
 - 2.2 Users module: Admin CRUD, deactivate with open-task check
-- 2.3 Invite flow: setup code, setup-account, resend, forgot and reset password
+- 2.3 Invite flow: setup link, resend, forgot and reset password
 
 **Phase 3: Tasks**
 
 - 3.1 Task, assignee, comment and status-history entities, migration
-- 3.2 Task CRUD with one Manager and several Employees, role scoping, and "added to task" email
+- 3.2 Task CRUD with one Manager and several Employees, and role scoping
 - 3.3 Workflow transitions, review and reject, submitted and result emails
-- 3.4 Dashboard summary endpoint and demo seed data
+- 3.4 Dashboard summary endpoint
 
 **Phase 4: Admin panel**
 
@@ -188,7 +186,7 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 **Phase 5: Mobile**
 
 - 5.1 Scaffold: navigation, theme tokens, API client, secure token storage, safe areas, window-size hook
-- 5.2 Auth screens: login, set up account, reset password
+- 5.2 Auth screens: login, forgot password
 - 5.3 Task list and detail on phone, with actions, comments and history
 - 5.4 Manager flows: create task, pick Employees, review queue
 - 5.5 Tablet split-pane layout and rotation checks on the real phone and tablet
@@ -196,7 +194,7 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 
 **Phase 6: Polish**
 
-- 6.1 READMEs, Swagger, screenshots, demo walkthrough
+- 6.1 READMEs, Swagger, screenshots
 - 6.2 Security checklist pass
 - 6.3 Final check on phone and tablet
 
@@ -205,4 +203,3 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 - Admin panel bundler (Vite recommended) and token storage (checkpoint 4.1)
 - Secure storage library and navigation library for mobile (checkpoint 5.1)
 - Mail library for the API (checkpoint 2.1)
-- Whether to use Docker for PostgreSQL and Mailpit or install them directly
