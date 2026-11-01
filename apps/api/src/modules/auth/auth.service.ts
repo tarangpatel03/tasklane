@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '@task-app/shared';
 import * as argon2 from 'argon2';
@@ -65,6 +65,39 @@ export class AuthService {
       }
       return this.issueTokens(stored.user, manager);
     });
+  }
+
+  /**
+   * Changes the password of a signed-in user, signs them out everywhere and hands back a fresh token
+   * pair for this device. A wrong current password is a 400, not a 401: the mobile client treats a 401
+   * as an expired session and would log the user out.
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<AuthResponseDto> {
+    const user = await this.usersService.findById(userId);
+    if (!user || user.status !== UserStatus.ACTIVE || !user.passwordHash) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS);
+    }
+    if (!(await argon2.verify(user.passwordHash, currentPassword))) {
+      throw this.invalidPassword('currentPassword', 'Current password is incorrect');
+    }
+    if (currentPassword === newPassword) {
+      throw this.invalidPassword('newPassword', 'Choose a password you have not used just now');
+    }
+    const passwordHash = await argon2.hash(newPassword);
+
+    return this.dataSource.transaction(async (manager) => {
+      await this.usersService.setPassword(user.id, passwordHash, UserStatus.ACTIVE, manager);
+      await this.refreshTokens.revokeAllForUser(user.id, manager);
+      return this.issueTokens(user, manager);
+    });
+  }
+
+  private invalidPassword(field: string, message: string): BadRequestException {
+    return new BadRequestException({ message, details: [{ field, messages: [message] }] });
   }
 
   async logout(userId: string, token: string): Promise<void> {

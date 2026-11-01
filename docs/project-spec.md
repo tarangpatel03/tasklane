@@ -104,7 +104,7 @@ Prefix `/api/v1`. Response envelope and error shape follow the `nest-backend` sk
 - Auth: `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/change-password`; `GET /auth/me`.
 - Account pages (HTML, public): `GET` and `POST /account/setup?token=...` and `/account/reset?token=...`. They replace the earlier `/auth/setup-account` and `/auth/reset-password` JSON routes.
 - Users: `GET /users` (filter by role), `POST /users`, `GET /users/:id`, `PATCH /users/:id`, `DELETE /users/:id` (deactivate), `POST /users/:id/resend-invite`.
-- Tasks: `GET /tasks` (role-scoped; filters for status, assignee, priority, due date; pagination), `POST /tasks` (title, description, priority, dueDate, requiresReview, assigneeIds, managerId for Admin only), `GET /tasks/:id`, `PATCH /tasks/:id` (including assigneeIds), `DELETE /tasks/:id`, `POST /tasks/:id/transition` (action: START, SUBMIT, COMPLETE, APPROVE, REJECT; comment required for REJECT).
+- Tasks: `GET /tasks/summary` (role-scoped counts per status; tasks In Review also carry `submittedBy` and `submittedAt`), `GET /tasks` (role-scoped; filters for status, assignee, priority, due date; pagination), `POST /tasks` (title, description, priority, dueDate, requiresReview, assigneeIds, managerId for Admin only), `GET /tasks/:id`, `PATCH /tasks/:id` (including assigneeIds), `DELETE /tasks/:id`, `POST /tasks/:id/transition` (action: START, SUBMIT, COMPLETE, APPROVE, REJECT; comment required for REJECT).
 - Comments: `GET /tasks/:id/comments`, `POST /tasks/:id/comments`.
 - Dashboard (Admin): `GET /dashboard/summary`.
 

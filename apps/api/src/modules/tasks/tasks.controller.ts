@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -20,6 +21,7 @@ import { PaginatedResult } from '../../common/types/paginated-result';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { TaskSummaryDto } from './dto/task-summary.dto';
 import { TransitionTaskDto } from './dto/transition-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
@@ -35,6 +37,8 @@ function toResponse(task: Task): TaskResponseDto {
   );
 }
 
+@ApiTags('Tasks')
+@ApiBearerAuth()
 @Controller('tasks')
 export class TasksController {
   constructor(
@@ -42,6 +46,7 @@ export class TasksController {
     private readonly workflowService: TaskWorkflowService,
   ) {}
 
+  @ApiOperation({ summary: "List tasks in the caller's scope" })
   @Get()
   async list(
     @CurrentUser() actor: AuthUser,
@@ -56,6 +61,14 @@ export class TasksController {
     );
   }
 
+  /** Declared before `:id`, otherwise "summary" would be parsed as a task id. */
+  @ApiOperation({ summary: "Task count per status in the caller's scope" })
+  @Get('summary')
+  summary(@CurrentUser() actor: AuthUser): Promise<TaskSummaryDto> {
+    return this.tasksService.summary(actor);
+  }
+
+  @ApiOperation({ summary: 'Get one task' })
   @Get(':id')
   async findOne(
     @CurrentUser() actor: AuthUser,
@@ -65,6 +78,7 @@ export class TasksController {
   }
 
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Create a task (Admin, Manager)' })
   @Post()
   async create(
     @CurrentUser() actor: AuthUser,
@@ -74,6 +88,7 @@ export class TasksController {
   }
 
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Update a task (Admin, Manager)' })
   @Patch(':id')
   async update(
     @CurrentUser() actor: AuthUser,
@@ -84,6 +99,7 @@ export class TasksController {
   }
 
   /** Open to every role: who may do which action is decided by the workflow service. */
+  @ApiOperation({ summary: 'Move a task through the workflow' })
   @Post(':id/transition')
   @HttpCode(HttpStatus.OK)
   async transition(
@@ -95,6 +111,7 @@ export class TasksController {
   }
 
   @Roles(Role.ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Soft-delete a task (Admin, Manager)' })
   @Delete(':id')
   async remove(
     @CurrentUser() actor: AuthUser,

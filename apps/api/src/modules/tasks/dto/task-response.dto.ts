@@ -47,6 +47,14 @@ export class TaskResponseDto {
   @Type(() => UserSummaryDto)
   assignees!: UserSummaryDto[];
 
+  /** Who last sent the task to review. Null unless the task is In Review. */
+  @Expose()
+  @Type(() => UserSummaryDto)
+  submittedBy!: UserSummaryDto | null;
+
+  @Expose()
+  submittedAt!: Date | null;
+
   @Expose()
   completedAt!: Date | null;
 

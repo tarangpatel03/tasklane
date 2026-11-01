@@ -89,4 +89,9 @@ export class Task {
 
   @OneToMany(() => TaskStatusHistory, (entry) => entry.task)
   history!: TaskStatusHistory[];
+
+  /** Not columns: `TasksService` fills them for tasks that are In Review. */
+  submittedBy?: User | null;
+
+  submittedAt?: Date | null;
 }

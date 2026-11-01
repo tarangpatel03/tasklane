@@ -9,6 +9,10 @@ NestJS + TypeORM + PostgreSQL backend. Routes are served under `/api/v1`.
 3. Copy `.env.example` (repo root) to `.env` and set `DB_PASSWORD` and the other `DB_*` values. The API reads the root `.env`.
 4. `yarn dev:api` from the repo root. Check `http://localhost:3000/api/v1/health`.
 
+## API docs (Swagger)
+
+With `NODE_ENV` other than `production`, Swagger UI is at `http://localhost:3000/api/docs` (raw JSON at `/api/docs-json`) and lists every route under `/api/v1`. Log in with `POST /auth/login`, copy `accessToken`, press Authorize and paste it. The `@nestjs/swagger` CLI plugin (`nest-cli.json`) builds the schemas from the DTOs, so a new DTO property shows up without extra decorators; new controllers need `@ApiTags`, `@ApiBearerAuth` (private routes) and `@ApiOperation`. Every success response is wrapped as `{ success, data, meta? }` (see Response shape); the schemas describe `data` only. The HTML account pages (`/account/*`) are left out. Production serves no docs.
+
 ## Environment variables
 
 Validated at startup (the app refuses to start if one is missing or invalid).
@@ -53,6 +57,7 @@ Every route needs `Authorization: Bearer <accessToken>` unless marked `@Public()
 - `POST /auth/login` (public, 5 per minute): `{ email, password }` returns `accessToken`, `refreshToken`, `user`.
 - `POST /auth/refresh` (public, 10 per minute): `{ refreshToken }` returns a new pair. The old refresh token stops working. Reusing a revoked one revokes all of that user's sessions.
 - `POST /auth/logout`: `{ refreshToken }` revokes that token.
+- `POST /auth/change-password` (5 per minute): `{ currentPassword, newPassword }` (8 to 128 characters). Revokes every session and returns a fresh `accessToken`/`refreshToken` pair for the calling device. A wrong current password is a 400 with a `currentPassword` detail, not a 401.
 - `GET /auth/me`: the current user.
 - `POST /auth/forgot-password` (public, 3 per minute): `{ email }` always answers 200. An active user gets a reset email; nobody else does, and at most one per minute.
 
@@ -72,7 +77,7 @@ Lists are paginated (`page`, `limit` up to 100). Emails are stored lowercase and
 Rules, all answered with 409:
 
 - An Admin cannot deactivate themselves or the last active Admin, and cannot change their own role. An Admin account's role cannot be changed, and Admin accounts cannot be created through the API (the seed script creates the first one).
-- Deactivating revokes the user's refresh tokens, and the access token stops working immediately. A user who is on open tasks cannot be deactivated; the error lists the tasks. This check is a stub until tasks exist (checkpoint 3.2).
+- Deactivating revokes the user's refresh tokens, and the access token stops working immediately. A user who is on open tasks cannot be deactivated; the error lists the tasks.
 - Activating works only from `deactivated`. Someone who never set a password goes back to `invited` instead of `active`. An `invited` user becomes active by setting up their account.
 
 ## Account links
@@ -88,7 +93,7 @@ The invite and password reset emails carry a one-time link to a small web page s
 
 Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_assignees` (primary key on task and user), `task_comments` and `task_status_history`. Deleting a task row cascades to its assignees, comments and history; users referenced by any of them cannot be hard-deleted. `tasks.manager_id` is nullable so an Admin can own a task without a Manager.
 
-- `GET /api/v1/tasks` (filters: `status`, `priority`, `assigneeId`, `managerId`, `dueFrom`, `dueTo`, `search`; paginated, newest first) and `GET /api/v1/tasks/:id`. Admin sees every task, a Manager the tasks they manage, an Employee the tasks they are assigned to. Anything else is a 404.
+- `GET /api/v1/tasks` (filters: `status`, `priority`, `assigneeId`, `managerId`, `dueFrom`, `dueTo`, `search`; paginated, newest first) and `GET /api/v1/tasks/:id`. `GET /api/v1/tasks/summary` returns the count per status within the caller's scope. Tasks that are In Review also carry `submittedBy` and `submittedAt` (the latest submission). Admin sees every task, a Manager the tasks they manage, an Employee the tasks they are assigned to. Anything else is a 404.
 - `POST /api/v1/tasks`, `PATCH /api/v1/tasks/:id`, `DELETE /api/v1/tasks/:id` (soft delete) for Admin and Manager. A Manager can only create tasks they manage and edit those; only an Admin sets, changes or clears the Manager. A task needs at least one assignee. `assigneeIds` on `PATCH` replaces the whole set.
 - Assignees must be Employees and the Manager a Manager, neither deactivated. A new task starts as `TODO` with a first `task_status_history` row. `status` cannot be set here (transitions come in 3.3).
 - `POST /api/v1/tasks/:id/transition` with `action` and an optional `comment` (max 2000, stored in `task_status_history`). Every transition is checked on the server and recorded with who did it:

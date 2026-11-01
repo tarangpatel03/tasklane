@@ -13,6 +13,7 @@ import { escapeLike } from '../../common/utils/escape-like';
 import { UsersService } from '../users/users.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
+import { TaskSummaryDto } from './dto/task-summary.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskAssignee } from './entities/task-assignee.entity';
 import { TaskStatusHistory } from './entities/task-status-history.entity';
@@ -115,7 +116,27 @@ export class TasksService {
     });
     const byId = new Map(loaded.map((task) => [task.id, task]));
     const items = ids.flatMap((id) => byId.get(id) ?? []);
+    await this.attachSubmissions(items);
     return new PaginatedResult(items, total, query.page, query.limit);
+  }
+
+  /** Counts per status within the caller's scope. */
+  async summary(actor: AuthUser): Promise<TaskSummaryDto> {
+    const rows = await this.scopedQuery(actor)
+      .select('task.status', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('task.status')
+      .getRawMany<{ status: TaskStatus; count: string }>();
+    const summary: TaskSummaryDto = {
+      [TaskStatus.TODO]: 0,
+      [TaskStatus.WORKING]: 0,
+      [TaskStatus.IN_REVIEW]: 0,
+      [TaskStatus.COMPLETED]: 0,
+    };
+    for (const row of rows) {
+      summary[row.status] = Number(row.count);
+    }
+    return summary;
   }
 
   /** Tasks the caller may not see are reported as missing, so ids cannot be probed. */
@@ -200,7 +221,34 @@ export class TasksService {
     if (!task) {
       throw new NotFoundException(TASK_NOT_FOUND);
     }
+    await this.attachSubmissions([task]);
     return task;
+  }
+
+  /** Sets who sent each In Review task to review, and when, from its latest history row. */
+  private async attachSubmissions(tasks: Task[]): Promise<void> {
+    for (const task of tasks) {
+      task.submittedBy = null;
+      task.submittedAt = null;
+    }
+    const inReview = tasks.filter((task) => task.status === TaskStatus.IN_REVIEW);
+    if (inReview.length === 0) {
+      return;
+    }
+    const rows = await this.dataSource
+      .getRepository(TaskStatusHistory)
+      .createQueryBuilder('entry')
+      .innerJoinAndSelect('entry.actor', 'actor')
+      .where('entry.taskId IN (:...ids)', { ids: inReview.map((task) => task.id) })
+      .andWhere('entry.toStatus = :status', { status: TaskStatus.IN_REVIEW })
+      .orderBy('entry.createdAt', 'DESC')
+      .getMany();
+    for (const task of inReview) {
+      // Rows are newest first, so the first match is the latest submission.
+      const latest = rows.find((row) => row.taskId === task.id);
+      task.submittedBy = latest?.actor ?? null;
+      task.submittedAt = latest?.createdAt ?? null;
+    }
   }
 
   /** Only the difference is written, so assignees who stay keep their original `added_at`. */

@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -8,10 +9,12 @@ import { UserResponseDto } from '../users/dto/user-response.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -21,6 +24,7 @@ export class AuthController {
 
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Log in with email and password' })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
@@ -29,6 +33,7 @@ export class AuthController {
 
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Exchange a refresh token for a new token pair' })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   refresh(@Body() dto: RefreshTokenDto): Promise<AuthResponseDto> {
@@ -38,6 +43,7 @@ export class AuthController {
   /** Always answers 200, whether or not the email belongs to an account. */
   @Public()
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Email a password reset link' })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<null> {
@@ -45,6 +51,21 @@ export class AuthController {
     return null;
   }
 
+  /** Revokes every session and returns a fresh token pair for the calling device. */
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change the password and revoke all sessions' })
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.changePassword(user.id, dto.currentPassword, dto.newPassword);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke a refresh token' })
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user: AuthUser, @Body() dto: RefreshTokenDto): Promise<null> {
@@ -52,6 +73,8 @@ export class AuthController {
     return null;
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Current user' })
   @Get('me')
   async me(@CurrentUser() user: AuthUser): Promise<UserResponseDto> {
     const found = await this.usersService.findById(user.id);
