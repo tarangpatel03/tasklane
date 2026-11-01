@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -28,10 +29,13 @@ function toResponse(user: User): UserResponseDto {
   return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
 }
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOperation({ summary: 'List visible users' })
   @Get()
   async list(
     @CurrentUser() actor: AuthUser,
@@ -46,6 +50,7 @@ export class UsersController {
     );
   }
 
+  @ApiOperation({ summary: 'Get one user' })
   @Get(':id')
   async findOne(
     @CurrentUser() actor: AuthUser,
@@ -55,12 +60,14 @@ export class UsersController {
   }
 
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create and invite a user (Admin)' })
   @Post()
   async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     return toResponse(await this.usersService.create(dto));
   }
 
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update a user (Admin)' })
   @Patch(':id')
   async update(
     @CurrentUser() actor: AuthUser,
@@ -71,6 +78,7 @@ export class UsersController {
   }
 
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Send a new setup link (Admin)' })
   @Post(':id/resend-invite')
   @HttpCode(HttpStatus.OK)
   async resendInvite(@Param('id', ParseUUIDPipe) id: string): Promise<null> {
@@ -80,6 +88,7 @@ export class UsersController {
 
   /** Deactivates the user (spec 8). `PATCH` with `status` does the same and can also activate. */
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Deactivate a user (Admin)' })
   @Delete(':id')
   async deactivate(
     @CurrentUser() actor: AuthUser,

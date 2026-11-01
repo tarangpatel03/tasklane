@@ -1,4 +1,5 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -12,10 +13,13 @@ function toResponse(row: TaskStatusHistory): TaskHistoryResponseDto {
   return plainToInstance(TaskHistoryResponseDto, row, { excludeExtraneousValues: true });
 }
 
+@ApiTags('Task history')
+@ApiBearerAuth()
 @Controller('tasks/:taskId/history')
 export class TaskHistoryController {
   constructor(private readonly historyService: TaskHistoryService) {}
 
+  @ApiOperation({ summary: "List a task's status changes, oldest first" })
   @Get()
   async list(
     @CurrentUser() actor: AuthUser,

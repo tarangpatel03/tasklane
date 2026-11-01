@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Post, Query, Res } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
@@ -35,6 +36,7 @@ function asText(value: unknown): string {
  * The browser pages behind the invite and reset email links. They answer with HTML instead of the
  * JSON envelope, so they handle every outcome themselves and never throw.
  */
+@ApiExcludeController()
 @Controller('account')
 export class AccountPagesController {
   constructor(private readonly authService: AuthService) {}

@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -13,10 +14,13 @@ function toResponse(comment: TaskComment): CommentResponseDto {
   return plainToInstance(CommentResponseDto, comment, { excludeExtraneousValues: true });
 }
 
+@ApiTags('Task comments')
+@ApiBearerAuth()
 @Controller('tasks/:taskId/comments')
 export class TaskCommentsController {
   constructor(private readonly commentsService: TaskCommentsService) {}
 
+  @ApiOperation({ summary: "List a task's comments, oldest first" })
   @Get()
   async list(
     @CurrentUser() actor: AuthUser,
@@ -32,6 +36,7 @@ export class TaskCommentsController {
     );
   }
 
+  @ApiOperation({ summary: 'Add a comment' })
   @Post()
   async create(
     @CurrentUser() actor: AuthUser,
