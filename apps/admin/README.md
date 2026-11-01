@@ -2,6 +2,10 @@
 
 React 19 + TypeScript + Vite. Admin accounts only; Managers and Employees use the mobile app.
 
+![Dashboard](../../docs/screenshots/admin/dashboard.png)
+
+More: [users](../../docs/screenshots/admin/users.png), [tasks](../../docs/screenshots/admin/tasks.png), [task detail](../../docs/screenshots/admin/task-detail.png).
+
 ## Run
 
 1. From the repo root: `yarn install`, then `yarn build:shared`.

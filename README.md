@@ -1,57 +1,72 @@
-# Claude Code starter pack
+# Tasklane
 
-Project-local setup. Nothing here touches `~/.claude`.
+A full-stack task management app for assigning work and tracking it through review. Admins run the system from a web panel, Managers and Employees work in a mobile app (phone and tablet). Built as a portfolio project; everything runs locally.
 
-## Install
+![Admin dashboard](docs/screenshots/admin/dashboard.png)
 
-1. Copy everything in this folder into your project root (merge `.claude/` and `docs/` if they exist).
-2. Edit the `Stack:` line in `CLAUDE.md`.
-3. Add to `.gitignore`:
-   ```
-   .claude/settings.local.json
-   .claude/tmp/
-   ```
-4. Make sure the project has ESLint and Prettier configured and installed locally (`yarn add -D eslint prettier eslint-config-prettier`).
-5. One-time baseline: run `yarn prettier --write .` and commit it alone, so Claude's edits never trigger whole-file reformatting noise in diffs.
-6. Start `claude` in the project root, run `/hooks` and confirm the PostToolUse hook is listed.
-7. Run `/config`, open Output style, and pick **Terse**. If CLAUDE.md alone already keeps replies short, you can delete `.claude/output-styles/terse.md`.
-8. Fill in `docs/design-brief.md` before the first UI task.
+|                                           Tasks                                           |                                          Task detail                                           |                                           Review                                           |                                        Profile                                         |
+| :---------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------: |
+| <img src="docs/screenshots/mobile/tasks.jpg" width="200" alt="Tasks screen on a phone" /> | <img src="docs/screenshots/mobile/task-detail.jpg" width="200" alt="Task detail on a phone" /> | <img src="docs/screenshots/mobile/review.jpg" width="200" alt="Review queue on a phone" /> | <img src="docs/screenshots/mobile/profile.jpg" width="200" alt="Profile on a phone" /> |
 
-## What each file does
+![Tablet split pane](docs/screenshots/mobile/tablet-split.jpg)
 
-| File                                    | Purpose                                                                                                                                   |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `CLAUDE.md`                             | Always-loaded rules: one-line reports, checkpoints, minimal diffs, TypeScript rules, "formatting is not your job". Kept short on purpose. |
-| `.claude/settings.json`                 | Blocks edits to ESLint/Prettier configs and reading `.env`; runs the format/lint hook after every edit.                                   |
-| `.claude/hooks/format-lint.js`          | Runs `eslint --fix` then `prettier --write` on the edited file. Remaining lint errors go back to Claude.                                  |
-| `.claude/output-styles/terse.md`        | Reinforces one-line status replies at system-prompt level.                                                                                |
-| `.claude/skills/ui-design-quality/`     | Brief-first design process, tokens, color/type rules, anti-"AI look" checklist. Loaded only for UI work.                                  |
-| `.claude/skills/rn-responsive-ui/`      | React Native: insets, window size classes, list-detail split, foldables, device screenshots.                                              |
-| `.claude/skills/web-responsive-motion/` | Web: fluid layout, animation rules, accessibility, verification.                                                                          |
-| `.claude/skills/nest-backend/`          | NestJS + PostgreSQL + TypeORM: feature-module structure, guards/pipes, DTOs, response envelope, migrations. Loaded only for backend work. |
-| `docs/design-brief.md`                  | Per-project design direction you fill in.                                                                                                 |
+More screenshots: [admin](docs/screenshots/admin/) and [mobile](docs/screenshots/mobile/).
 
-## Monorepo setup
+## Roles
 
-Yarn classic workspaces: `apps/*` and `packages/*`.
+| Role     | Client      | What they do                                                                 |
+| -------- | ----------- | ---------------------------------------------------------------------------- |
+| Admin    | Admin panel | Manages users, sees every task, reviews tasks, reads the dashboard           |
+| Manager  | Mobile app  | Creates tasks, picks Employees, approves or rejects work in the review queue |
+| Employee | Mobile app  | Starts tasks, submits them for review or completes them, comments            |
+
+A task has one Manager and one or more Employees. Status flow: `TODO` to `WORKING` to `IN_REVIEW` (when review is required) to `COMPLETED`; a rejection sends it back to `WORKING` with a reason. Every change is kept in the task history. Full rules: [docs/project-spec.md](docs/project-spec.md).
+
+## Stack
+
+- API: NestJS, TypeORM, PostgreSQL, JWT access and rotating refresh tokens, Swagger
+- Admin panel: React, TypeScript, Vite, TanStack Query
+- Mobile app: React Native CLI (Android first), TypeScript, React Navigation, Reanimated
+- Shared types: `packages/shared`
+- Yarn classic workspaces monorepo
+
+## Repository layout
+
+```
+apps/api         NestJS API (see apps/api/README.md)
+apps/admin       Admin panel (see apps/admin/README.md)
+apps/mobile      Mobile app (see apps/mobile/README.md)
+packages/shared  Shared enums and response types (see packages/shared/README.md)
+docs/            Spec, design brief, build progress, demo walkthrough, screenshots
+```
+
+## Quick start
+
+Needs Node.js, Yarn 1, PostgreSQL, and for the mobile app the Android SDK with a phone or emulator.
 
 1. `yarn install`
-2. Copy `.env.example` to `.env` and fill in the values.
-3. `yarn build:shared` builds `packages/shared` (`@task-app/shared`).
-4. API setup (database, env variables, scripts): see `apps/api/README.md`.
-5. Admin panel: see `apps/admin/README.md`.
-6. Mobile app: see `apps/mobile/README.md`.
+2. Copy `.env.example` to `.env` and fill it in (database password, `JWT_ACCESS_SECRET` of at least 32 characters, the seed values).
+3. `yarn build:shared`
+4. Create the database: `psql -U postgres -c "CREATE DATABASE task_management;"`
+5. `yarn workspace @task-app/api migration:run`
+6. `yarn workspace @task-app/api seed:admin`, then `yarn workspace @task-app/api seed:demo` for sample users and tasks
+7. `yarn dev:api` (http://localhost:3000), `yarn dev:admin` (http://localhost:5173), and for the phone `yarn dev:mobile` plus `yarn workspace @task-app/mobile android`
 
-Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile` (the `dev:*` scripts work once those apps exist).
+Setup details, environment variables and troubleshooting are in each app's README.
 
-## Modes and models
+## API documentation
 
-- Plan mode (Shift+Tab) for planning and decisions, Manual mode to execute one checkpoint at a time.
-- Default model Sonnet 5.5 (`/model`). Use Opus 5.5 only for hard architecture or bugs Sonnet failed twice.
-- Safe commands (lint, tsc, git diff/status/log, adb) are pre-approved in `.claude/settings.json`.
+With the API running outside production, Swagger UI is at http://localhost:3000/api/docs (use Authorize with an access token from `POST /auth/login`). Routes live under `/api/v1`.
 
-## Troubleshooting
+## Demo
 
-- Hook not running: `claude --debug`, check `/hooks`, and confirm `node` is on PATH.
-- Hook silent on a file: it skips unsupported types and projects where ESLint/Prettier or an ESLint config cannot be found.
-- Skills not appearing: restart `claude`; run `/context` to see what is loaded.
+[docs/demo-walkthrough.md](docs/demo-walkthrough.md) is a scripted tour with the demo accounts: create a task, work it, reject it, approve it, and watch it on the dashboard.
+
+## More docs
+
+- [docs/project-spec.md](docs/project-spec.md): scope, permissions, workflow, API and data model
+- [docs/design-brief.md](docs/design-brief.md): visual design direction
+- [docs/progress.md](docs/progress.md): build checkpoints and decisions
+- [docs/claude-setup.md](docs/claude-setup.md): the Claude Code setup used to build this repo
+
+Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile`.
