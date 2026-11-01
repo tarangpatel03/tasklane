@@ -43,6 +43,18 @@ export const colors = {
     IN_REVIEW: { background: '#FFE8D1', foreground: '#8F4A00' },
     COMPLETED: { background: '#D5F5E3', foreground: '#17653F' },
   },
+  /** Soft avatar pairs from the brief; a user always maps to the same pair. */
+  avatarPairs: [
+    { background: '#C9C1FF', foreground: '#2F2791' },
+    { background: '#BFE0FF', foreground: '#12407F' },
+    { background: '#FFD9B8', foreground: '#6E3900' },
+    { background: '#C8F0DA', foreground: '#17653F' },
+    { background: '#FFD0E0', foreground: '#7A1E45' },
+  ],
+  avatarOverflow: { background: '#ECEAF3', foreground: '#3A3752' },
+  ownAvatar: { background: '#2F2791', foreground: '#FFFFFF' },
+  snackbar: '#1C1B2E',
+  snackbarCheck: '#9BE7BE',
   priority: {
     LOW: { background: '#E3EAF2', foreground: '#3D4F63' },
     MEDIUM: { background: '#FFEFC2', foreground: '#6B4B00' },

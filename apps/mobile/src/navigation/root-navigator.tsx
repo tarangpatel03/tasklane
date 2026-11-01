@@ -2,8 +2,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { ReactNode } from 'react';
 import { useAuth } from '../auth/auth-context';
 import { ForgotPasswordScreen } from '../screens/forgot-password-screen';
-import { HomeScreen } from '../screens/home-screen';
 import { LoginScreen } from '../screens/login-screen';
+import { ReviewScreen } from '../screens/review-screen';
+import { TaskDetailScreen } from '../screens/task-detail-screen';
+import { TaskFormScreen } from '../screens/task-form-screen';
+import { TasksScreen } from '../screens/tasks-screen';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,7 +18,12 @@ export function RootNavigator(): ReactNode {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {status === 'signedIn' ? (
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <>
+          <Stack.Screen name="Tasks" component={TasksScreen} options={{ animation: 'fade' }} />
+          <Stack.Screen name="Review" component={ReviewScreen} options={{ animation: 'fade' }} />
+          <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+          <Stack.Screen name="TaskForm" component={TaskFormScreen} />
+        </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />

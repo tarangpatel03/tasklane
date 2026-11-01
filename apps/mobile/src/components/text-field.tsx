@@ -44,7 +44,7 @@ export function TextField({
           selectionColor={colors.primary}
           // Tight rows stop growing past this; the field itself keeps its 56px height.
           maxFontSizeMultiplier={1.3}
-          style={styles.input}
+          style={[styles.input, rest.multiline && styles.multiline]}
           onFocus={(event) => {
             setFocused(true);
             onFocus?.(event);
@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: fontFamily.medium,
   },
+  // Multiline fields start at the top and keep room above and below the text.
+  multiline: { minHeight: 96, paddingVertical: spacing.md, textAlignVertical: 'top' },
   error: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   errorText: { flex: 1 },
 });

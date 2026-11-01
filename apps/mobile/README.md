@@ -1,6 +1,6 @@
 # Mobile app (`@task-app/mobile`)
 
-React Native CLI (0.88, new architecture), TypeScript, Android first. For Managers and Employees; Admins use the admin panel. This checkpoint is the scaffold only: a placeholder Home screen that shows the window class, insets and an API check. Login and the task screens come next.
+React Native CLI (0.88, new architecture), TypeScript, Android first. For Managers and Employees; Admins use the admin panel. Login, the task list and the task detail work on a phone; the Manager flows work too; the tablet layout and Profile come next.
 
 ## Run
 
@@ -22,9 +22,9 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 - `src/api/client.ts`: fetch wrapper for `/api/v1` (port of the admin client). It unwraps the envelope, throws `ApiRequestError`, adds the Bearer token, and on a 401 refreshes once (one request at a time) and retries.
 - `src/auth/token-store.ts`: access token in memory, refresh token in the Android Keystore through `react-native-keychain`. `loadTokens()` runs once at startup (see `App.tsx`).
 - `src/auth/auth-provider.tsx` and `useAuth()` (`auth-context.ts`): `loading`, `signedOut` or `signedIn`. On start a stored refresh token is checked through `GET /auth/me`. Admin accounts are rejected on the phone ("Admin accounts sign in on the admin panel."). A network failure keeps the stored token.
-- `src/navigation/`: React Navigation native stack and its route types. Signed-out users get `Login` and `ForgotPassword`; signed-in users get `Home`, a placeholder with a temporary Log out button until the task screens and Profile exist.
+- `src/navigation/`: React Navigation native stack and its route types. Signed-out users get `Login` and `ForgotPassword`; signed-in users get `Tasks` (status tiles, filter chips, task list; a temporary Log out sits at the bottom until Profile exists) `TaskDetail` (people, comments, status history, and the Start, Submit, Complete, Approve and Reject actions allowed for the role; the task's Manager also gets Edit and Delete), and for Managers `Review` (the review queue with inline Approve and Reject) and `TaskForm` (create or edit a task, pick Employees). Managers get a floating nav (Tasks, Review) and a New task button; Employees have no nav until Profile exists.
 - Login and Forgot password only ask for the email; the new password is set on the web page from the emailed link (the link needs `PUBLIC_BASE_URL` to be an address the phone can open, see the API README).
-- `src/components/`: `Logo`, `Wash` (lavender header gradient), `AppText`, `AppButton`, `TextButton`, `TextField`, `Banner`, `BackButton`, `Entrance` (staggered entrance), `AuthLayout` (frame of the signed-out screens: centred card from 600 wide, keyboard and safe-area handling).
+- `src/components/`: `Logo`, `Wash` (lavender header gradient), `AppText`, `AppButton`, `TextButton`, `TextField`, `Banner`, `BackButton`, `Entrance` (staggered entrance), task UI (`TaskCard`, `StatusBadge`, `PriorityTag`, `Avatar`, `SummaryTile`, `FilterChip`, `Skeleton`, `Snackbar`, `BottomSheet`, `ActionButton`, `CommentComposer`, `HistoryTimeline`, `ManagerNav`, `NewTaskButton`, `RejectSheet`, `ReviewCard`, `PriorityPicker`, `SwitchRow`, `EmployeeRow`), `AuthLayout` (frame of the signed-out screens: centred card from 600 wide, keyboard and safe-area handling).
 - Animation uses `react-native-reanimated` (Babel plugin `react-native-worklets/plugin` in `babel.config.js`). Reduced motion is honoured with `useReducedMotion`.
 - `metro.config.js` watches the repo root so the hoisted `node_modules` and `@task-app/shared` resolve.
 
@@ -32,3 +32,7 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 
 - Plus Jakarta Sans (500, 600, 700, 800) lives in `android/app/src/main/assets/fonts/`; the family names are in `src/theme/typography.ts`.
 - The launcher icon is an adaptive icon drawn as vectors from `docs/design/logo/tasklane-icon-*.svg` (`res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26`). Android 7.0 and 7.1 still show the React Native default PNGs; replace them from `docs/design/logo/tasklane-icon-full-1024.png` if those versions matter.
+
+## Native modules
+
+`@react-native-community/datetimepicker` (due date on the task form) is a native module: after `yarn install`, rebuild and reinstall the app with `yarn android`; a Metro reload is not enough.

@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from './src/auth/auth-context';
 import { AuthProvider } from './src/auth/auth-provider';
 import { loadTokens } from './src/auth/token-store';
+import { SnackbarProvider } from './src/components/snackbar';
 import { RootNavigator } from './src/navigation/root-navigator';
 import { colors } from './src/theme';
 
@@ -44,7 +45,9 @@ function App(): ReactNode {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Navigation />
+          <SnackbarProvider>
+            <Navigation />
+          </SnackbarProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
