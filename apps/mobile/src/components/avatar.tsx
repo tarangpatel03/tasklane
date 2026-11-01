@@ -10,12 +10,21 @@ interface AvatarProps {
   size?: number;
   /** The signed-in user's own avatar uses the deep violet pair. */
   own?: boolean;
-  /** Draws the 2px white ring used when avatars overlap. */
+  /** Draws the white ring used when avatars overlap. */
   ring?: boolean;
+  /** Ring width; 2 when avatars overlap, 4 on the Profile. */
+  ringWidth?: number;
 }
 
 /** Initials on a soft colour pair; the pair is derived from the id so it never changes. */
-export function Avatar({ id, name, size = 32, own = false, ring = false }: AvatarProps): ReactNode {
+export function Avatar({
+  id,
+  name,
+  size = 32,
+  own = false,
+  ring = false,
+  ringWidth = 2,
+}: AvatarProps): ReactNode {
   const pair = own
     ? colors.ownAvatar
     : colors.avatarPairs[hashIndex(id, colors.avatarPairs.length)];
@@ -25,7 +34,7 @@ export function Avatar({ id, name, size = 32, own = false, ring = false }: Avata
       style={[
         styles.avatar,
         { width: size, height: size, borderRadius: size / 2, backgroundColor: pair.background },
-        ring && styles.ring,
+        ring && [styles.ring, { borderWidth: ringWidth }],
       ]}
     >
       <AppText

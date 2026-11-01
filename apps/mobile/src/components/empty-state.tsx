@@ -10,14 +10,22 @@ interface EmptyStateProps {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** Size of the mark tile: 80 on lists, 96 for the review queue. */
+  tileSize?: number;
 }
 
 /** Geometric mark, one sentence and an optional action. Also used for load errors. */
-export function EmptyState({ title, message, actionLabel, onAction }: EmptyStateProps): ReactNode {
+export function EmptyState({
+  title,
+  message,
+  actionLabel,
+  onAction,
+  tileSize = 80,
+}: EmptyStateProps): ReactNode {
   return (
     <View style={styles.wrap}>
-      <View style={styles.tile}>
-        <Logo size={40} />
+      <View style={[styles.tile, { width: tileSize, height: tileSize }]}>
+        <Logo size={tileSize / 2} />
       </View>
       <AppText variant="titleM" style={styles.center}>
         {title}
@@ -38,8 +46,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   tile: {
-    width: 80,
-    height: 80,
     borderRadius: radii.l,
     backgroundColor: colors.primaryContainer,
     alignItems: 'center',

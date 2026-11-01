@@ -16,7 +16,16 @@ const SHIMMER_MS = 1400;
 const SHIMMER_FROM = colors.surfaceVariant;
 const SHIMMER_TO = '#F8F6FD';
 
-function Block({ width, height }: { width: number | `${number}%`; height: number }): ReactNode {
+/** One shimmering rectangle; skeleton screens are built from these. */
+export function SkeletonBlock({
+  width,
+  height,
+  radius = radii.xs,
+}: {
+  width: number | `${number}%`;
+  height: number;
+  radius?: number;
+}): ReactNode {
   const progress = useSharedValue(0);
   const reduceMotion = useReducedMotion();
 
@@ -33,7 +42,7 @@ function Block({ width, height }: { width: number | `${number}%`; height: number
     backgroundColor: interpolateColor(progress.value, [0, 1], [SHIMMER_FROM, SHIMMER_TO]),
   }));
 
-  return <Animated.View style={[{ width, height, borderRadius: radii.xs }, animatedStyle]} />;
+  return <Animated.View style={[{ width, height, borderRadius: radius }, animatedStyle]} />;
 }
 
 /** A task card drawn in shimmer, shown while the list loads. */
@@ -45,13 +54,13 @@ export function SkeletonCard(): ReactNode {
       importantForAccessibility="no-hide-descendants"
     >
       <View style={styles.row}>
-        <Block width={72} height={28} />
-        <Block width={96} height={32} />
+        <SkeletonBlock width={72} height={28} />
+        <SkeletonBlock width={96} height={32} />
       </View>
-      <Block width="80%" height={24} />
+      <SkeletonBlock width="80%" height={24} />
       <View style={styles.row}>
-        <Block width={120} height={20} />
-        <Block width={72} height={32} />
+        <SkeletonBlock width={120} height={20} />
+        <SkeletonBlock width={72} height={32} />
       </View>
     </View>
   );

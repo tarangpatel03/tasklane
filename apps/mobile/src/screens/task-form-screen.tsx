@@ -21,6 +21,7 @@ import { fetchEmployees } from '../api/users';
 import { AppButton } from '../components/app-button';
 import { AppText } from '../components/app-text';
 import { Banner } from '../components/banner';
+import { CloseButton } from '../components/close-button';
 import { EmployeeRow } from '../components/employee-row';
 import { Entrance } from '../components/entrance';
 import { PriorityPicker } from '../components/priority-picker';
@@ -28,8 +29,9 @@ import { useSnackbar } from '../components/snackbar';
 import { SwitchRow } from '../components/switch-row';
 import { TextButton } from '../components/text-button';
 import { TextField } from '../components/text-field';
+import { useWindowClass } from '../hooks/use-window-class';
 import type { RootStackParamList } from '../navigation/types';
-import { colors, elevation, radii, screenMargin, sizes, spacing } from '../theme';
+import { colors, elevation, radii, sizes, spacing, tablet } from '../theme';
 import { formatDate } from '../utils/task-format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskForm'>;
@@ -106,7 +108,7 @@ export function TaskFormScreen({ navigation, route }: Props): ReactNode {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const snackbar = useSnackbar();
-  const margin = screenMargin.compact;
+  const { windowClass, margin, height } = useWindowClass();
 
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [initial, setInitial] = useState<FormValues>(EMPTY_FORM);
@@ -292,103 +294,110 @@ export function TaskFormScreen({ navigation, route }: Props): ReactNode {
     );
   }
 
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView behavior="padding" style={styles.flex}>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingTop: insets.top + spacing.lg,
-            paddingBottom: spacing.xxl,
-            paddingLeft: insets.left + margin,
-            paddingRight: insets.right + margin,
-          }}
-        >
-          <View style={styles.column}>
-            <View style={styles.headerRow}>
-              <Pressable
-                accessibilityLabel="Close"
-                accessibilityRole="button"
-                onPress={() => navigation.goBack()}
-                style={styles.close}
-              >
-                <Svg width={22} height={22} viewBox="0 0 24 24">
-                  <Path
-                    d="M6 6l12 12M18 6L6 18"
-                    fill="none"
-                    stroke={colors.textPrimary}
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                  />
-                </Svg>
-              </Pressable>
-              <View style={styles.rolePill}>
-                <AppText variant="labelS" color={colors.primaryPressed}>
-                  Manager
-                </AppText>
-              </View>
-            </View>
-            <AppText variant="headline" style={styles.title}>
-              {editing ? 'Edit task' : 'Create task'}
-            </AppText>
-            <View style={styles.fields}>{body}</View>
-          </View>
-        </ScrollView>
+  // Phones show the form full screen; wider windows show it as a centred card over a scrim.
+  const modal = windowClass !== 'compact';
+  const pagePadding = modal ? spacing.xl + spacing.xs : margin;
+  const sideInsets = modal ? { left: 0, right: 0 } : { left: insets.left, right: insets.right };
 
+  return (
+    <View style={modal ? styles.scrim : styles.root}>
+      <StatusBar barStyle="dark-content" />
+      {modal ? (
+        <Pressable
+          accessibilityLabel="Close"
+          accessibilityRole="button"
+          style={StyleSheet.absoluteFill}
+          onPress={() => navigation.goBack()}
+        />
+      ) : null}
+      <KeyboardAvoidingView
+        behavior="padding"
+        pointerEvents="box-none"
+        style={modal ? styles.modalHost : styles.flex}
+      >
         <View
-          style={[
-            styles.footer,
-            {
-              paddingBottom: insets.bottom + spacing.md,
-              paddingLeft: insets.left + margin,
-              paddingRight: insets.right + margin,
-            },
-          ]}
+          style={modal ? [styles.card, { maxHeight: height - tablet.modalMargin }] : styles.flex}
         >
-          <View style={styles.column}>
-            {save.isError ? <Banner message={toMessage(save.error)} /> : null}
-            <AppButton
-              label={buttonLabel}
-              disabled={!canSubmit}
-              loading={save.isPending}
-              onPress={() => save.mutate()}
-            />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            style={styles.scroll}
+            contentContainerStyle={{
+              paddingTop: modal ? spacing.xl : insets.top + spacing.lg,
+              paddingBottom: spacing.xxl,
+              paddingLeft: sideInsets.left + pagePadding,
+              paddingRight: sideInsets.right + pagePadding,
+            }}
+          >
+            <View style={styles.column}>
+              <View style={styles.headerRow}>
+                <CloseButton onPress={() => navigation.goBack()} />
+                <View style={styles.rolePill}>
+                  <AppText variant="labelS" color={colors.primaryPressed}>
+                    Manager
+                  </AppText>
+                </View>
+              </View>
+              <AppText variant="headline" style={styles.title}>
+                {editing ? 'Edit task' : 'Create task'}
+              </AppText>
+              <View style={styles.fields}>{body}</View>
+            </View>
+          </ScrollView>
+
+          <View
+            style={[
+              styles.footer,
+              {
+                paddingBottom: modal ? spacing.lg : insets.bottom + spacing.md,
+                paddingLeft: sideInsets.left + pagePadding,
+                paddingRight: sideInsets.right + pagePadding,
+              },
+            ]}
+          >
+            <View style={styles.column}>
+              {save.isError ? <Banner message={toMessage(save.error)} /> : null}
+              <AppButton
+                label={buttonLabel}
+                disabled={!canSubmit}
+                loading={save.isPending}
+                onPress={() => save.mutate()}
+              />
+            </View>
           </View>
+
+          {created ? (
+            <View style={styles.overlay}>
+              <Entrance style={styles.overlayContent}>
+                <View style={styles.doneTile}>
+                  <Svg width={48} height={48} viewBox="0 0 24 24">
+                    <Path
+                      d="M5 12.5l4.5 4.5L19 7.5"
+                      fill="none"
+                      stroke={colors.onPrimary}
+                      strokeWidth={2.6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                </View>
+                <AppText variant="headline" style={styles.center}>
+                  Task created
+                </AppText>
+                <AppText variant="bodyL" color={colors.textSecondary} style={styles.center}>
+                  The selected Employees have been assigned and will see it in their list.
+                </AppText>
+                <AppButton
+                  label="Back to review queue"
+                  onPress={() => {
+                    navigation.popTo('Main', { screen: 'Review' });
+                  }}
+                />
+              </Entrance>
+            </View>
+          ) : null}
         </View>
       </KeyboardAvoidingView>
-
-      {created ? (
-        <View style={styles.overlay}>
-          <Entrance style={styles.overlayContent}>
-            <View style={styles.doneTile}>
-              <Svg width={48} height={48} viewBox="0 0 24 24">
-                <Path
-                  d="M5 12.5l4.5 4.5L19 7.5"
-                  fill="none"
-                  stroke={colors.onPrimary}
-                  strokeWidth={2.6}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </View>
-            <AppText variant="headline" style={styles.center}>
-              Task created
-            </AppText>
-            <AppText variant="bodyL" color={colors.textSecondary} style={styles.center}>
-              The selected Employees have been assigned and will see it in their list.
-            </AppText>
-            <AppButton
-              label="Back to review queue"
-              onPress={() => {
-                navigation.popToTop();
-                navigation.replace('Review');
-              }}
-            />
-          </Entrance>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -398,15 +407,17 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   column: { width: '100%', maxWidth: COLUMN_MAX_WIDTH, alignSelf: 'center', gap: spacing.lg },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  close: {
-    width: sizes.touchTarget,
-    height: sizes.touchTarget,
-    borderRadius: sizes.touchTarget / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    ...elevation.l1,
+  scrim: { flex: 1, backgroundColor: colors.scrim },
+  modalHost: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  card: {
+    width: '100%',
+    maxWidth: tablet.column,
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    backgroundColor: colors.background,
+    ...elevation.l3,
   },
+  scroll: { flexGrow: 0, flexShrink: 1 },
   rolePill: {
     minHeight: 24,
     justifyContent: 'center',
@@ -444,7 +455,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: screenMargin.compact,
+    padding: spacing.xl,
   },
   overlayContent: { width: '100%', maxWidth: 420, alignItems: 'stretch', gap: spacing.lg },
   doneTile: {

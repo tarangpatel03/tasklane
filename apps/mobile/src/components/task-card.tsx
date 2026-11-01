@@ -18,10 +18,12 @@ import { StatusBadge } from './status-badge';
 interface TaskCardProps {
   task: Task;
   onPress: () => void;
+  /** The task shown in the detail pane on wide windows. */
+  selected?: boolean;
 }
 
 /** Task summary card: priority and status, title, due text and the assignees. Scales to .98 when pressed. */
-export function TaskCard({ task, onPress }: TaskCardProps): ReactNode {
+export function TaskCard({ task, onPress, selected = false }: TaskCardProps): ReactNode {
   const scale = useSharedValue(1);
   const reduceMotion = useReducedMotion();
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -37,11 +39,13 @@ export function TaskCard({ task, onPress }: TaskCardProps): ReactNode {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ selected }}
       onPress={onPress}
       onPressIn={() => animateTo(pressScale.card)}
       onPressOut={() => animateTo(1)}
     >
-      <Animated.View style={[styles.card, animatedStyle]}>
+      <Animated.View style={[styles.card, selected && styles.cardSelected, animatedStyle]}>
+        {selected ? <View pointerEvents="none" style={styles.ring} /> : null}
         <View style={styles.tags}>
           <PriorityTag priority={task.priority} />
           <StatusBadge status={task.status} />
@@ -80,6 +84,14 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.md,
     ...elevation.l2,
+  },
+  cardSelected: { backgroundColor: colors.surfaceTint },
+  // Inset ring: drawn over the card so the layout does not shift when the selection moves.
+  ring: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: radii.l,
+    borderWidth: 2.5,
+    borderColor: colors.primary,
   },
   tags: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm },
   footer: {

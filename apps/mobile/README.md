@@ -1,6 +1,6 @@
 # Mobile app (`@task-app/mobile`)
 
-React Native CLI (0.88, new architecture), TypeScript, Android first. For Managers and Employees; Admins use the admin panel. Login, the task list and the task detail work on a phone; the Manager flows work too; the tablet layout and Profile come next.
+React Native CLI (0.88, new architecture), TypeScript, Android first. For Managers and Employees; Admins use the admin panel. Login, the task list and the task detail work on a phone; the Manager flows, the tablet layouts and the Profile (with change password and Log out) work too.
 
 ## Run
 
@@ -22,7 +22,7 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 - `src/api/client.ts`: fetch wrapper for `/api/v1` (port of the admin client). It unwraps the envelope, throws `ApiRequestError`, adds the Bearer token, and on a 401 refreshes once (one request at a time) and retries.
 - `src/auth/token-store.ts`: access token in memory, refresh token in the Android Keystore through `react-native-keychain`. `loadTokens()` runs once at startup (see `App.tsx`).
 - `src/auth/auth-provider.tsx` and `useAuth()` (`auth-context.ts`): `loading`, `signedOut` or `signedIn`. On start a stored refresh token is checked through `GET /auth/me`. Admin accounts are rejected on the phone ("Admin accounts sign in on the admin panel."). A network failure keeps the stored token.
-- `src/navigation/`: React Navigation native stack and its route types. Signed-out users get `Login` and `ForgotPassword`; signed-in users get `Tasks` (status tiles, filter chips, task list; a temporary Log out sits at the bottom until Profile exists) `TaskDetail` (people, comments, status history, and the Start, Submit, Complete, Approve and Reject actions allowed for the role; the task's Manager also gets Edit and Delete), and for Managers `Review` (the review queue with inline Approve and Reject) and `TaskForm` (create or edit a task, pick Employees). Managers get a floating nav (Tasks, Review) and a New task button; Employees have no nav until Profile exists.
+- `src/navigation/`: React Navigation native stack and its route types. Signed-out users get `Login` and `ForgotPassword`; signed-in users get `Main` (bottom tabs) and the screens above it. The tabs are `Tasks` (status tiles, filter chips, task list), `Profile` (name, email, role, Change password, Log out), `TaskDetail` (people, comments, status history, and the Start, Submit, Complete, Approve and Reject actions allowed for the role; the task's Manager also gets Edit and Delete), and for Managers `Review` (the review queue with inline Approve and Reject) and `TaskForm` (create or edit a task, pick Employees). The tabs (`@react-navigation/bottom-tabs`, `src/navigation/main-tabs.tsx`) stay mounted once opened, and the floating nav is the tab bar (`src/components/bottom-nav.tsx`): its pill slides between tabs and, on wide windows, the nav glides between the list pane and the window centre. Everyone gets Tasks and Profile, Managers also Review (count badge) and a New task button. Overlays inside a tab (the side sheet) hide the nav through `nav-visibility.ts`.
 - Login and Forgot password only ask for the email; the new password is set on the web page from the emailed link (the link needs `PUBLIC_BASE_URL` to be an address the phone can open, see the API README).
 - `src/components/`: `Logo`, `Wash` (lavender header gradient), `AppText`, `AppButton`, `TextButton`, `TextField`, `Banner`, `BackButton`, `Entrance` (staggered entrance), task UI (`TaskCard`, `StatusBadge`, `PriorityTag`, `Avatar`, `SummaryTile`, `FilterChip`, `Skeleton`, `Snackbar`, `BottomSheet`, `ActionButton`, `CommentComposer`, `HistoryTimeline`, `ManagerNav`, `NewTaskButton`, `RejectSheet`, `ReviewCard`, `PriorityPicker`, `SwitchRow`, `EmployeeRow`), `AuthLayout` (frame of the signed-out screens: centred card from 600 wide, keyboard and safe-area handling).
 - Animation uses `react-native-reanimated` (Babel plugin `react-native-worklets/plugin` in `babel.config.js`). Reduced motion is honoured with `useReducedMotion`.
@@ -36,3 +36,20 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 ## Native modules
 
 `@react-native-community/datetimepicker` (due date on the task form) is a native module: after `yarn install`, rebuild and reinstall the app with `yarn android`; a Metro reload is not enough.
+
+## Layouts by window size
+
+`useWindowClass()` (`src/hooks/use-window-class.ts`) is the only place the breakpoints and screen margins live: compact below 600, medium 600 to 899, expanded 900 and up.
+
+- **Compact:** one column. A task opens as a pushed `TaskDetail` screen; Create/Edit task is full screen.
+- **Medium:** tiles in one row, cards in two columns, margin 40. A task opens in a 560px side sheet (`SideSheet`, scrim, Android back closes it). Create/Edit task is a centred modal.
+- **Expanded:** `ListDetail`: a 420px list pane (the nav and New task button float inside it) and the selected task's detail in the right pane. The first task is selected on load.
+
+The selected task (`selectedId`) is state of the Tasks and Review screens, which stay mounted through rotation, fold and split-screen, so the selection and the filter survive a resize. If a pushed `TaskDetail` screen finds itself in an expanded window it goes back to the list with that task selected. The detail itself is one component, `TaskDetailView`, with `screen`, `sheet` and `pane` variants.
+
+## Loading and error states
+
+- `Splash` (mark on the wash) shows while the stored session is read and checked.
+- Lists and the task detail show skeletons while loading; failed loads show an empty-state card with Retry, and comments or history that fail to load say so inline instead of looking empty.
+- `ErrorBoundary` wraps the navigator as a safety net for rendering crashes ("Something went wrong", Try again).
+- Change password (`POST /auth/change-password`) signs the user out of every other device and keeps this one signed in with the fresh tokens the API returns.

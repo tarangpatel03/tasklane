@@ -16,6 +16,8 @@ interface ReviewCardProps {
   onOpen: () => void;
   onApprove: () => void;
   onReject: () => void;
+  /** The task shown in the detail pane on wide windows. */
+  selected?: boolean;
 }
 
 /** A task waiting for the Manager: who submitted it and when, with Reject and Approve inline. */
@@ -25,13 +27,20 @@ export function ReviewCard({
   onOpen,
   onApprove,
   onReject,
+  selected = false,
 }: ReviewCardProps): ReactNode {
   const overdue = isOverdue(task.dueDate, task.status);
   const submittedBy = task.submittedBy;
   const when = task.submittedAt ? relativeTime(task.submittedAt) : null;
 
   return (
-    <Pressable accessibilityRole="button" onPress={onOpen} style={styles.card}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onOpen}
+      style={[styles.card, selected && styles.cardSelected]}
+    >
+      {selected ? <View pointerEvents="none" style={styles.ring} /> : null}
       <View style={styles.tags}>
         <PriorityTag priority={task.priority} />
         <StatusBadge status={task.status} />
@@ -73,6 +82,13 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.md,
     ...elevation.l2,
+  },
+  cardSelected: { backgroundColor: colors.surfaceTint },
+  ring: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: radii.l,
+    borderWidth: 2.5,
+    borderColor: colors.primary,
   },
   tags: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm },
   submitter: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },

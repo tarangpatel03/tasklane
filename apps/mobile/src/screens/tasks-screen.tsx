@@ -1,8 +1,10 @@
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Role, type TaskStatus } from '@task-app/shared';
 import type { ReactElement, ReactNode } from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -18,36 +20,42 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchTasks, fetchTaskSummary, type Task } from '../api/tasks';
 import { useAuth } from '../auth/auth-context';
 import { AppText } from '../components/app-text';
-import { ManagerNav, NAV_CLEARANCE } from '../components/bottom-nav';
+import { NAV_CLEARANCE } from '../components/bottom-nav';
 import { EmptyState } from '../components/empty-state';
 import { Entrance } from '../components/entrance';
 import { FilterChip } from '../components/filter-chip';
+import { EmptyPane, ListDetail, PaneSwap } from '../components/list-detail';
+import { SideSheet } from '../components/side-sheet';
 import { SkeletonCard } from '../components/skeleton';
 import { SummaryTile } from '../components/summary-tile';
 import { TaskCard } from '../components/task-card';
-import { TextButton } from '../components/text-button';
 import { Wash } from '../components/wash';
-import type { RootStackParamList } from '../navigation/types';
-import { colors, elevation, radii, screenMargin, sizes, spacing } from '../theme';
+import { useWindowClass } from '../hooks/use-window-class';
+import type { RootStackParamList, TabParamList } from '../navigation/types';
+import { colors, elevation, radii, sizes, spacing, tablet } from '../theme';
 import { ROLE_LABEL, STATUS_LABEL, STATUS_ORDER } from '../utils/task-format';
+import { TaskDetailView } from './task-detail-view';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Tasks'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, 'Tasks'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
-const SKELETON_COUNT = 3;
-/** Widest the content gets before the split pane arrives in 5.5. */
-const COLUMN_MAX_WIDTH = 560;
-
-/** Centres content and caps its width so wide windows do not stretch cards edge to edge. */
-function Column({ children }: { children: ReactNode }): ReactNode {
-  return <View style={styles.column}>{children}</View>;
-}
+/** Gap between cards, and between the two card columns on medium windows. */
+const CARD_GAP = spacing.lg;
 
 /** Tasks the signed-in Manager or Employee may see, filtered by status tiles or chips. */
-export function TasksScreen({ navigation }: Props): ReactNode {
+export function TasksScreen({ navigation, route }: Props): ReactNode {
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const { windowClass, margin, width } = useWindowClass();
+  const expanded = windowClass === 'expanded';
+  const medium = windowClass === 'medium';
   const [filter, setFilter] = useState<TaskStatus | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  // The open task. It lives here (not in the detail) so it survives rotation and window changes.
+  const [selectedId, setSelectedId] = useState<string | null>(route.params?.selectedId ?? null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const summary = useQuery({ queryKey: ['tasks', 'summary'], queryFn: fetchTaskSummary });
   const list = useInfiniteQuery({
@@ -61,8 +69,24 @@ export function TasksScreen({ navigation }: Props): ReactNode {
   const counts = summary.data;
   const total = counts ? STATUS_ORDER.reduce((sum, status) => sum + counts[status], 0) : 0;
   const shownCount = counts ? (filter ? counts[filter] : total) : 0;
-  const margin = screenMargin.compact;
   const isManager = user?.role === Role.MANAGER;
+  const firstTaskId = tasks[0]?.id ?? null;
+
+  // A task handed over by the detail screen when the window grew to the split layout.
+  const paramId = route.params?.selectedId;
+  useEffect(() => {
+    if (paramId) setSelectedId(paramId);
+  }, [paramId]);
+
+  // The split layout starts with the first task open, but never overrides a choice.
+  useEffect(() => {
+    if (expanded && selectedId === null && firstTaskId !== null) setSelectedId(firstTaskId);
+  }, [expanded, selectedId, firstTaskId]);
+
+  // The side sheet only exists on medium windows.
+  useEffect(() => {
+    if (!medium) setSheetOpen(false);
+  }, [medium]);
 
   const refresh = useCallback(async (): Promise<void> => {
     setRefreshing(true);
@@ -73,18 +97,36 @@ export function TasksScreen({ navigation }: Props): ReactNode {
   const toggle = (status: TaskStatus): void =>
     setFilter((current) => (current === status ? null : status));
 
+  const openTask = (taskId: string): void => {
+    if (expanded) {
+      setSelectedId(taskId);
+    } else if (medium) {
+      setSelectedId(taskId);
+      setSheetOpen(true);
+    } else {
+      navigation.navigate('TaskDetail', { taskId, from: 'Tasks' });
+    }
+  };
+
+  const handleDeleted = (): void => {
+    setSheetOpen(false);
+    setSelectedId(tasks.find((task) => task.id !== selectedId)?.id ?? null);
+  };
+
+  const columns = medium ? 2 : 1;
+  const itemWidth =
+    columns === 2
+      ? (width - insets.left - insets.right - margin * 2 - CARD_GAP) / columns
+      : undefined;
+  const contentStyle = { maxWidth: windowClass === 'compact' ? tablet.column : undefined };
+  const statusRows = medium ? [STATUS_ORDER] : [STATUS_ORDER.slice(0, 2), STATUS_ORDER.slice(2)];
+
   const header = (
     <View>
       <View style={styles.washWrap}>
         <Wash />
-        <View
-          style={{
-            paddingTop: insets.top + spacing.lg,
-            paddingLeft: insets.left,
-            paddingRight: insets.right,
-          }}
-        >
-          <Column>
+        <View style={{ paddingTop: insets.top + spacing.lg }}>
+          <View style={[styles.column, contentStyle]}>
             <View style={[styles.padded, { paddingHorizontal: margin }]}>
               <View style={styles.greetingRow}>
                 <View style={styles.greeting}>
@@ -127,7 +169,7 @@ export function TasksScreen({ navigation }: Props): ReactNode {
               </View>
 
               <View style={styles.tiles}>
-                {[STATUS_ORDER.slice(0, 2), STATUS_ORDER.slice(2)].map((row) => (
+                {statusRows.map((row) => (
                   <View key={row[0]} style={styles.tileRow}>
                     {row.map((status) => (
                       <SummaryTile
@@ -142,11 +184,11 @@ export function TasksScreen({ navigation }: Props): ReactNode {
                 ))}
               </View>
             </View>
-          </Column>
+          </View>
         </View>
       </View>
 
-      <Column>
+      <View style={[styles.column, contentStyle]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -172,7 +214,7 @@ export function TasksScreen({ navigation }: Props): ReactNode {
             {`${shownCount} ${shownCount === 1 ? 'task' : 'tasks'}`}
           </AppText>
         </View>
-      </Column>
+      </View>
     </View>
   );
 
@@ -191,74 +233,137 @@ export function TasksScreen({ navigation }: Props): ReactNode {
     body = <EmptyState title="No tasks here" message="Nothing matches this status right now." />;
   }
 
-  const renderItem = ({ item, index }: { item: Task; index: number }): ReactNode => (
-    <Column>
-      <Entrance index={index} style={[styles.item, { paddingHorizontal: margin }]}>
-        <TaskCard
-          task={item}
-          onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+  const renderItem = ({ item, index }: { item: Task; index: number }): ReactNode => {
+    const card = (
+      <TaskCard
+        task={item}
+        selected={expanded && selectedId === item.id}
+        onPress={() => openTask(item.id)}
+      />
+    );
+    if (itemWidth !== undefined) {
+      return (
+        <Entrance index={index} style={{ width: itemWidth, marginBottom: CARD_GAP }}>
+          {card}
+        </Entrance>
+      );
+    }
+    return (
+      <View style={[styles.column, contentStyle]}>
+        <Entrance index={index} style={[styles.item, { paddingHorizontal: margin }]}>
+          {card}
+        </Entrance>
+      </View>
+    );
+  };
+
+  const skeletonCount = medium ? 4 : 3;
+  const listPane = (
+    <View style={styles.flex}>
+      <View
+        style={[
+          styles.flex,
+          {
+            paddingLeft: expanded ? 0 : insets.left,
+            paddingRight: expanded ? 0 : insets.right,
+          },
+        ]}
+      >
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          // numColumns cannot change on a mounted list, so a new column count remounts it.
+          key={columns}
+          numColumns={columns}
+          columnWrapperStyle={
+            columns > 1 ? { gap: CARD_GAP, paddingHorizontal: margin } : undefined
+          }
+          data={showSkeleton ? [] : tasks}
+          // The filter is part of the key so changing it remounts the rows and restaggers them.
+          keyExtractor={(task) => `${filter ?? 'all'}-${task.id}`}
+          renderItem={renderItem}
+          ListHeaderComponent={header}
+          ListEmptyComponent={
+            showSkeleton ? (
+              <View style={[styles.column, contentStyle]}>
+                <View
+                  style={[
+                    styles.skeletons,
+                    medium && styles.skeletonGrid,
+                    { paddingHorizontal: margin },
+                  ]}
+                >
+                  {Array.from({ length: skeletonCount }, (_unused, index) => (
+                    <View key={index} style={itemWidth ? { width: itemWidth } : styles.flex}>
+                      <SkeletonCard />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : (
+              body
+            )
+          }
+          ListFooterComponent={
+            <View style={[styles.column, contentStyle]}>
+              {list.isFetchingNextPage ? (
+                <ActivityIndicator color={colors.primary} style={styles.more} />
+              ) : null}
+            </View>
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void refresh()}
+              colors={[colors.primary]}
+              progressViewOffset={insets.top}
+            />
+          }
+          onEndReached={() => {
+            if (list.hasNextPage && !list.isFetchingNextPage) void list.fetchNextPage();
+          }}
+          onEndReachedThreshold={0.4}
+          contentContainerStyle={{
+            paddingBottom:
+              insets.bottom + (isManager ? NAV_CLEARANCE.withButton : NAV_CLEARANCE.navOnly),
+          }}
         />
-      </Entrance>
-    </Column>
+      </View>
+    </View>
+  );
+
+  const detail = selectedId ? (
+    <PaneSwap key={selectedId}>
+      <TaskDetailView taskId={selectedId} variant="pane" onDeleted={handleDeleted} />
+    </PaneSwap>
+  ) : (
+    <EmptyPane title="No task selected" message="Choose a task from the list to see it here." />
   );
 
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" />
-      <FlatList
-        data={showSkeleton ? [] : tasks}
-        // The filter is part of the key so changing it remounts the rows and restaggers them.
-        keyExtractor={(task) => `${filter ?? 'all'}-${task.id}`}
-        renderItem={renderItem}
-        ListHeaderComponent={header}
-        ListEmptyComponent={
-          showSkeleton ? (
-            <Column>
-              <View style={[styles.skeletons, { paddingHorizontal: margin }]}>
-                {Array.from({ length: SKELETON_COUNT }, (_unused, index) => (
-                  <SkeletonCard key={index} />
-                ))}
-              </View>
-            </Column>
-          ) : (
-            body
-          )
-        }
-        ListFooterComponent={
-          <Column>
-            {list.isFetchingNextPage ? (
-              <ActivityIndicator color={colors.primary} style={styles.more} />
-            ) : null}
-            {/* Temporary until Profile (5.6) has the real Log out. */}
-            <View style={styles.logout}>
-              <TextButton label="Log out" onPress={() => void logout()} />
-            </View>
-          </Column>
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => void refresh()}
-            colors={[colors.primary]}
-            progressViewOffset={insets.top}
-          />
-        }
-        onEndReached={() => {
-          if (list.hasNextPage && !list.isFetchingNextPage) void list.fetchNextPage();
-        }}
-        onEndReachedThreshold={0.4}
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + (isManager ? NAV_CLEARANCE : spacing.xxxl),
-        }}
-      />
-      <ManagerNav active="Tasks" />
+      {expanded ? <ListDetail list={listPane} detail={detail} leftInset={insets.left} /> : listPane}
+      {medium ? (
+        <SideSheet visible={sheetOpen} onClose={() => setSheetOpen(false)}>
+          {selectedId ? (
+            <TaskDetailView
+              key={selectedId}
+              taskId={selectedId}
+              variant="sheet"
+              onDismiss={() => setSheetOpen(false)}
+              onDeleted={handleDeleted}
+            />
+          ) : null}
+        </SideSheet>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  column: { width: '100%', maxWidth: COLUMN_MAX_WIDTH, alignSelf: 'center' },
+  flex: { flex: 1 },
+  column: { width: '100%', alignSelf: 'center' },
   washWrap: {
     borderBottomLeftRadius: radii.xl,
     borderBottomRightRadius: radii.xl,
@@ -299,8 +404,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: spacing.md,
   },
-  item: { paddingBottom: spacing.lg },
-  skeletons: { gap: spacing.lg },
+  item: { paddingBottom: CARD_GAP },
+  skeletons: { gap: CARD_GAP },
+  skeletonGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   more: { paddingVertical: spacing.lg },
-  logout: { alignItems: 'center', paddingTop: spacing.lg },
 });

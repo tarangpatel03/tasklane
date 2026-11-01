@@ -6,6 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from './src/auth/auth-context';
 import { AuthProvider } from './src/auth/auth-provider';
 import { loadTokens } from './src/auth/token-store';
+import { ErrorBoundary } from './src/components/error-boundary';
+import { Splash } from './src/components/splash';
 import { SnackbarProvider } from './src/components/snackbar';
 import { RootNavigator } from './src/navigation/root-navigator';
 import { colors } from './src/theme';
@@ -22,7 +24,7 @@ const navigationTheme: Theme = {
 /** Waits for the stored session check, so a signed-in user never sees the login screen flash. */
 function Navigation(): ReactNode {
   const { status } = useAuth();
-  if (status === 'loading') return null;
+  if (status === 'loading') return <Splash />;
 
   return (
     <NavigationContainer theme={navigationTheme}>
@@ -39,14 +41,16 @@ function App(): ReactNode {
     void loadTokens().then(() => setReady(true));
   }, []);
 
-  if (!ready) return null;
+  if (!ready) return <Splash />;
 
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <SnackbarProvider>
-            <Navigation />
+            <ErrorBoundary>
+              <Navigation />
+            </ErrorBoundary>
           </SnackbarProvider>
         </AuthProvider>
       </QueryClientProvider>

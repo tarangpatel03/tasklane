@@ -32,5 +32,18 @@ export const borders = { input: 1.5, inputError: 2, focusRing: 4 } as const;
 /** Widest a form or card gets on large windows. */
 export const maxWidths = { form: 480 } as const;
 
+/** Tablet layout widths from the brief: list pane, nav inside it, side sheet, detail action bar. */
+export const tablet = {
+  listPane: 420,
+  navInPane: 388,
+  navCentred: 480,
+  sideSheet: 560,
+  actionBar: 104,
+  /** Content column on medium windows and in detail bodies. */
+  column: 560,
+  /** Space kept above and below the centred Create/Edit task card (card max height = window - this). */
+  modalMargin: 96,
+} as const;
+
 /** Screen margin; phones at 320 wide use the smaller one. */
 export const screenMargin = { compact: 20, narrow: 16, medium: 40, expanded: 24 } as const;

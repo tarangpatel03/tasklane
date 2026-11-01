@@ -1,8 +1,10 @@
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { TaskAction, TaskStatus } from '@task-app/shared';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -15,21 +17,27 @@ import Animated, { Keyframe, LinearTransition, useReducedMotion } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchTasks, fetchTaskSummary, type Task } from '../api/tasks';
 import { AppText } from '../components/app-text';
-import { NAV_CLEARANCE, ManagerNav } from '../components/bottom-nav';
+import { NAV_CLEARANCE } from '../components/bottom-nav';
 import { EmptyState } from '../components/empty-state';
 import { Entrance } from '../components/entrance';
+import { EmptyPane, ListDetail, PaneSwap } from '../components/list-detail';
 import { RejectSheet } from '../components/reject-sheet';
 import { ReviewCard } from '../components/review-card';
+import { SideSheet } from '../components/side-sheet';
 import { SkeletonCard } from '../components/skeleton';
 import { TextButton } from '../components/text-button';
 import { Wash } from '../components/wash';
 import { useTransitionTask } from '../hooks/use-transition-task';
-import type { RootStackParamList } from '../navigation/types';
-import { colors, duration, easing, fontFamily, radii, screenMargin, spacing } from '../theme';
+import { useWindowClass } from '../hooks/use-window-class';
+import type { RootStackParamList, TabParamList } from '../navigation/types';
+import { colors, duration, easing, fontFamily, radii, spacing, tablet } from '../theme';
+import { TaskDetailView } from './task-detail-view';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Review'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, 'Review'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
-const COLUMN_MAX_WIDTH = 560;
 const SKELETON_COUNT = 3;
 
 /** A handled card slides 60px right and fades over 200ms; the cards below then close the gap over 300ms. */
@@ -39,14 +47,19 @@ const handledExit = new Keyframe({
 }).duration(duration.exit);
 
 /** Tasks In Review for the signed-in Manager, with Approve and Reject on each card. */
-export function ReviewScreen({ navigation }: Props): ReactNode {
+export function ReviewScreen({ navigation, route }: Props): ReactNode {
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const transition = useTransitionTask();
+  const { windowClass, margin } = useWindowClass();
+  const expanded = windowClass === 'expanded';
+  const medium = windowClass === 'medium';
   const [refreshing, setRefreshing] = useState(false);
   const [rejectTask, setRejectTask] = useState<Task | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
-  const margin = screenMargin.compact;
+  // The open task. It lives here so it survives rotation and window changes.
+  const [selectedId, setSelectedId] = useState<string | null>(route.params?.selectedId ?? null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const summary = useQuery({ queryKey: ['tasks', 'summary'], queryFn: fetchTaskSummary });
   const list = useInfiniteQuery({
@@ -60,11 +73,47 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
   const waiting = summary.data?.[TaskStatus.IN_REVIEW] ?? tasks.length;
   const showSkeleton = list.isPending || refreshing;
   const busyTaskId = transition.isPending ? transition.variables.taskId : null;
+  const firstTaskId = tasks[0]?.id ?? null;
+  const selectedInQueue = selectedId !== null && tasks.some((task) => task.id === selectedId);
+
+  // A task handed over by the detail screen when the window grew to the split layout.
+  const paramId = route.params?.selectedId;
+  useEffect(() => {
+    if (paramId) setSelectedId(paramId);
+  }, [paramId]);
+
+  // The split layout shows the queue's tasks only: start with the first, and move on when the
+  // open one leaves the queue (approved or rejected). Waits for the refetch so it never flickers.
+  useEffect(() => {
+    if (!expanded || list.isFetching) return;
+    if (!selectedInQueue) setSelectedId(firstTaskId);
+  }, [expanded, list.isFetching, selectedInQueue, firstTaskId]);
+
+  // The side sheet only exists on medium windows.
+  useEffect(() => {
+    if (!medium) setSheetOpen(false);
+  }, [medium]);
 
   const refresh = async (): Promise<void> => {
     setRefreshing(true);
     await Promise.all([summary.refetch(), list.refetch()]);
     setRefreshing(false);
+  };
+
+  const openTask = (taskId: string): void => {
+    if (expanded) {
+      setSelectedId(taskId);
+    } else if (medium) {
+      setSelectedId(taskId);
+      setSheetOpen(true);
+    } else {
+      navigation.navigate('TaskDetail', { taskId, from: 'Review' });
+    }
+  };
+
+  const handleDeleted = (): void => {
+    setSheetOpen(false);
+    setSelectedId(null);
   };
 
   let body: ReactNode;
@@ -84,6 +133,7 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
       <EmptyState
         title="Nothing in review"
         message="Tasks your team submits for review will appear here."
+        tileSize={96}
       />
     );
   } else {
@@ -98,8 +148,9 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
             <Entrance index={index}>
               <ReviewCard
                 task={task}
+                selected={expanded && selectedId === task.id}
                 busy={busyTaskId === task.id}
-                onOpen={() => navigation.navigate('TaskDetail', { taskId: task.id })}
+                onOpen={() => openTask(task.id)}
                 onApprove={() => transition.mutate({ taskId: task.id, action: TaskAction.APPROVE })}
                 onReject={() => {
                   setRejectTask(task);
@@ -120,10 +171,14 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
     );
   }
 
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="dark-content" />
+  const queuePane = (
+    <View style={styles.flex}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{
+          paddingLeft: expanded ? 0 : insets.left,
+          paddingRight: expanded ? 0 : insets.right,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -132,17 +187,11 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
             progressViewOffset={insets.top}
           />
         }
-        contentContainerStyle={{ paddingBottom: insets.bottom + NAV_CLEARANCE }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + NAV_CLEARANCE.withButton }}
       >
         <View style={styles.washWrap}>
           <Wash />
-          <View
-            style={{
-              paddingTop: insets.top + spacing.xl,
-              paddingLeft: insets.left + margin,
-              paddingRight: insets.right + margin,
-            }}
-          >
+          <View style={{ paddingTop: insets.top + spacing.xl, paddingHorizontal: margin }}>
             <View style={[styles.column, styles.header]}>
               <AppText variant="headline" style={styles.title}>
                 Review queue
@@ -156,17 +205,40 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
             </View>
           </View>
         </View>
-        <View
-          style={[
-            styles.column,
-            styles.cards,
-            { paddingLeft: insets.left + margin, paddingRight: insets.right + margin },
-          ]}
-        >
-          {body}
-        </View>
+        <View style={[styles.column, styles.cards, { paddingHorizontal: margin }]}>{body}</View>
       </ScrollView>
-      <ManagerNav active="Review" />
+    </View>
+  );
+
+  const detail = selectedId ? (
+    <PaneSwap key={selectedId}>
+      <TaskDetailView taskId={selectedId} variant="pane" onDeleted={handleDeleted} />
+    </PaneSwap>
+  ) : (
+    <EmptyPane title="Nothing in review" message="Select a task from the queue when one arrives." />
+  );
+
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="dark-content" />
+      {expanded ? (
+        <ListDetail list={queuePane} detail={detail} leftInset={insets.left} />
+      ) : (
+        queuePane
+      )}
+      {medium ? (
+        <SideSheet visible={sheetOpen} onClose={() => setSheetOpen(false)}>
+          {selectedId ? (
+            <TaskDetailView
+              key={selectedId}
+              taskId={selectedId}
+              variant="sheet"
+              onDismiss={() => setSheetOpen(false)}
+              onDeleted={handleDeleted}
+            />
+          ) : null}
+        </SideSheet>
+      ) : null}
       <RejectSheet
         visible={rejectOpen}
         taskTitle={rejectTask?.title ?? ''}
@@ -186,7 +258,9 @@ export function ReviewScreen({ navigation }: Props): ReactNode {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  column: { width: '100%', maxWidth: COLUMN_MAX_WIDTH, alignSelf: 'center' },
+  flex: { flex: 1 },
+  // Single-column content is centred and capped; on wide windows the pane width does that.
+  column: { width: '100%', maxWidth: tablet.column, alignSelf: 'center' },
   washWrap: {
     borderBottomLeftRadius: radii.xl,
     borderBottomRightRadius: radii.xl,

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
+  interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -24,30 +25,37 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, large = false }: StatusBadgeProps): ReactNode {
   const tone = colors.status[status];
   const scale = useSharedValue(1);
+  // The tint cross-fades from the previous status colour to the new one.
+  const tint = useSharedValue(1);
+  const tintFrom = useSharedValue<string>(tone.background);
+  const tintTo = useSharedValue<string>(tone.background);
   const reduceMotion = useReducedMotion();
   const previous = useRef(status);
 
   useEffect(() => {
     if (previous.current === status) return;
+    tintFrom.value = colors.status[previous.current].background;
+    tintTo.value = colors.status[status].background;
     previous.current = status;
+    tint.value = 0;
+    tint.value = withTiming(1, {
+      duration: reduceMotion ? duration.reduced : duration.sheet,
+      easing: easing.standard,
+    });
     if (reduceMotion) return;
     scale.value = withSequence(
       withTiming(1.1, { duration: duration.sheet / 2, easing: easing.emphasized }),
       withTiming(1, { duration: duration.sheet / 2, easing: easing.emphasized }),
     );
-  }, [status, reduceMotion, scale]);
+  }, [status, reduceMotion, scale, tint, tintFrom, tintTo]);
 
-  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    backgroundColor: interpolateColor(tint.value, [0, 1], [tintFrom.value, tintTo.value]),
+  }));
 
   return (
-    <Animated.View
-      style={[
-        styles.badge,
-        large && styles.large,
-        { backgroundColor: tone.background },
-        animatedStyle,
-      ]}
-    >
+    <Animated.View style={[styles.badge, large && styles.large, animatedStyle]}>
       <StatusIcon
         status={status}
         color={tone.foreground}

@@ -1,4 +1,5 @@
 import type { AuthTokens, AuthUser } from '../auth/types';
+import { setTokens } from '../auth/token-store';
 import { apiRequest } from './client';
 
 export function login(email: string, password: string): Promise<AuthTokens> {
@@ -24,4 +25,16 @@ export function forgotPassword(email: string): Promise<null> {
     body: { email },
     public: true,
   });
+}
+
+/**
+ * Changes the password. The API revokes every session and returns a fresh token pair for this
+ * device, which replaces the stored one so the user stays signed in here.
+ */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const tokens = await apiRequest<AuthTokens>('/auth/change-password', {
+    method: 'POST',
+    body: { currentPassword, newPassword },
+  });
+  await setTokens(tokens.accessToken, tokens.refreshToken);
 }

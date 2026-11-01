@@ -5,22 +5,16 @@ import { useWindowClass } from '../hooks/use-window-class';
 import { colors, elevation, maxWidths, radii, screenMargin, spacing } from '../theme';
 import { Wash } from './wash';
 
-/** Below this width the smaller 16 margin is used (brief: 16 at 320 wide). */
-const NARROW_WIDTH = 360;
-
 /**
  * Shared frame of the signed-out screens: lavender wash, safe-area insets, a scrolling form that the
  * keyboard never covers. Medium and wider windows put the content in a centred white card.
  */
 export function AuthLayout({ children }: { children: ReactNode }): ReactNode {
   const insets = useSafeAreaInsets();
-  const { windowClass, width } = useWindowClass();
+  const { windowClass, margin } = useWindowClass();
   const isCard = windowClass !== 'compact';
-  const margin = isCard
-    ? screenMargin.medium
-    : width < NARROW_WIDTH
-      ? screenMargin.narrow
-      : screenMargin.compact;
+  // The expanded list-pane margin (24) does not apply to a centred card.
+  const pageMargin = isCard ? screenMargin.medium : margin;
 
   return (
     <View style={styles.root}>
@@ -28,14 +22,15 @@ export function AuthLayout({ children }: { children: ReactNode }): ReactNode {
       <Wash />
       <KeyboardAvoidingView behavior="padding" style={styles.flex}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             styles.content,
             {
               paddingTop: insets.top + spacing.xl,
               paddingBottom: insets.bottom + spacing.xl,
-              paddingLeft: insets.left + margin,
-              paddingRight: insets.right + margin,
+              paddingLeft: insets.left + pageMargin,
+              paddingRight: insets.right + pageMargin,
             },
           ]}
         >

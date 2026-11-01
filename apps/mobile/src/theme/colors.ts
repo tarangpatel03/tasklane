@@ -31,6 +31,8 @@ export const colors = {
   rejectBackground: '#FFDAD8',
   rejectText: '#8A1E22',
 
+  logoutBorder: '#E7B9B8',
+
   disabledBackground: '#ECEAF3',
   disabledText: '#8B889E',
 

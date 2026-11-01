@@ -4,12 +4,14 @@ import { StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { colors, duration, easing, fontFamily, radii, spacing } from '../theme';
+import { useWindowClass } from '../hooks/use-window-class';
+import { colors, duration, easing, fontFamily, radii, spacing, tablet } from '../theme';
 import { AppText } from './app-text';
 
 const VISIBLE_MS = 2200;
 /** Distance of the snackbar above the bottom edge, from the brief. */
 const BOTTOM_OFFSET = 108;
+const CORNER_MAX_WIDTH = 360;
 
 interface SnackbarMessage {
   id: number;
@@ -29,6 +31,9 @@ function SnackbarView({
 }): ReactNode {
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
+  const { windowClass, margin } = useWindowClass();
+  // On wide windows the message sits in the bottom right corner, above the detail pane action bar.
+  const corner = windowClass === 'expanded';
 
   useEffect(() => {
     const timer = setTimeout(onHide, VISIBLE_MS);
@@ -45,7 +50,17 @@ function SnackbarView({
       }
       exiting={FadeOut.duration(duration.exit)}
       pointerEvents="none"
-      style={[styles.bar, { bottom: insets.bottom + BOTTOM_OFFSET }]}
+      style={[
+        styles.bar,
+        corner
+          ? {
+              left: undefined,
+              right: margin + insets.right,
+              bottom: insets.bottom + tablet.actionBar + spacing.lg,
+              maxWidth: CORNER_MAX_WIDTH,
+            }
+          : { bottom: insets.bottom + BOTTOM_OFFSET },
+      ]}
     >
       <Svg width={20} height={20} viewBox="0 0 24 24">
         <Path

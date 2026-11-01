@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { usePressScale } from '../hooks/use-press-scale';
 import { colors, radii, sizes, spacing } from '../theme';
 import { AppText } from './app-text';
 
@@ -12,28 +14,31 @@ interface FilterChipProps {
 
 /** 48px pill. Selected is filled violet with a check; unselected is outlined on white. */
 export function FilterChip({ label, selected, onPress }: FilterChipProps): ReactNode {
+  const press = usePressScale();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={[styles.chip, selected && styles.selected]}
+      {...press.handlers}
     >
-      {selected && (
-        <Svg width={16} height={16} viewBox="0 0 24 24">
-          <Path
-            d="M5 12.5l4.5 4.5L19 7.5"
-            fill="none"
-            stroke={colors.onPrimary}
-            strokeWidth={3}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      )}
-      <AppText variant="labelL" color={selected ? colors.onPrimary : colors.textStrong}>
-        {label}
-      </AppText>
+      <Animated.View style={[styles.chip, selected && styles.selected, press.style]}>
+        {selected && (
+          <Svg width={16} height={16} viewBox="0 0 24 24">
+            <Path
+              d="M5 12.5l4.5 4.5L19 7.5"
+              fill="none"
+              stroke={colors.onPrimary}
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        )}
+        <AppText variant="labelL" color={selected ? colors.onPrimary : colors.textStrong}>
+          {label}
+        </AppText>
+      </Animated.View>
     </Pressable>
   );
 }
