@@ -2,6 +2,8 @@
 
 React Native CLI (0.88, new architecture), TypeScript, Android first. For Managers and Employees; Admins use the admin panel. Login, the task list and the task detail work on a phone; the Manager flows, the tablet layouts and the Profile (with change password and Log out) work too.
 
+Screenshots (in `docs/screenshots/mobile/`): [Tasks](../../docs/screenshots/mobile/tasks.jpg), [Task detail](../../docs/screenshots/mobile/task-detail.jpg), [Review](../../docs/screenshots/mobile/review.jpg), [Profile](../../docs/screenshots/mobile/profile.jpg), [tablet split pane](../../docs/screenshots/mobile/tablet-split.jpg).
+
 ## Run
 
 1. From the repo root: `yarn install`, then `yarn build:shared`.
