@@ -16,7 +16,7 @@ Other scripts: `yarn workspace @task-app/admin typecheck` and `build`.
 
 ## Configuration
 
-The dev server proxies `/api` to the API, so the browser sees one origin and no CORS setup is needed in development. To point at another API, copy `.env.example` to `.env` in this folder and set `VITE_API_PROXY_TARGET`. CORS for a deployed panel is still to be added to the API.
+The dev server proxies `/api` to the API, so the browser sees one origin and no CORS setup is needed in development. To point at another API, copy `.env.example` to `.env` in this folder and set `VITE_API_PROXY_TARGET`. For a deployed panel, set `ADMIN_CORS_ORIGIN` on the API to the panel's origin; the API allows only that origin.
 
 ## How it works
 

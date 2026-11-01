@@ -3,6 +3,7 @@ import { VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AppConfig } from './config/configuration';
 
@@ -13,8 +14,33 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
+  const isProduction = config.get('nodeEnv', { infer: true }) === 'production';
+
+  // Swagger UI needs inline scripts and styles, so helmet's default CSP is relaxed outside production only.
+  // The account pages set their own stricter CSP header per response.
+  app.use(
+    isProduction
+      ? helmet()
+      : helmet({
+          contentSecurityPolicy: {
+            directives: {
+              ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+              'script-src': ["'self'", "'unsafe-inline'"],
+              // Dev runs over plain HTTP (including the LAN IP), which this directive would break.
+              'upgrade-insecure-requests': null,
+            },
+          },
+        }),
+  );
+
+  // The mobile app is not a browser, so only the admin panel origin needs CORS.
+  app.enableCors({
+    origin: config.get('adminCorsOrigin', { infer: true }),
+    allowedHeaders: ['Authorization', 'Content-Type'],
+  });
+
   // Docs list every route and the DTO shapes; they stay off in production.
-  if (config.get('nodeEnv', { infer: true }) !== 'production') {
+  if (!isProduction) {
     const document = SwaggerModule.createDocument(
       app,
       new DocumentBuilder()

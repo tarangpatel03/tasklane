@@ -13,6 +13,10 @@ NestJS + TypeORM + PostgreSQL backend. Routes are served under `/api/v1`.
 
 With `NODE_ENV` other than `production`, Swagger UI is at `http://localhost:3000/api/docs` (raw JSON at `/api/docs-json`) and lists every route under `/api/v1`. Log in with `POST /auth/login`, copy `accessToken`, press Authorize and paste it. The `@nestjs/swagger` CLI plugin (`nest-cli.json`) builds the schemas from the DTOs, so a new DTO property shows up without extra decorators; new controllers need `@ApiTags`, `@ApiBearerAuth` (private routes) and `@ApiOperation`. Every success response is wrapped as `{ success, data, meta? }` (see Response shape); the schemas describe `data` only. The HTML account pages (`/account/*`) are left out. Production serves no docs.
 
+## HTTP security
+
+`helmet` sets the standard security headers on every response (outside production its CSP also allows the inline scripts Swagger UI needs; the `/account/*` pages send their own stricter CSP). CORS allows only the `ADMIN_CORS_ORIGIN` origin with the `Authorization` and `Content-Type` headers; the mobile app is not a browser and is unaffected. Access tokens are signed and verified as HS256 only.
+
 ## Environment variables
 
 Validated at startup (the app refuses to start if one is missing or invalid).
@@ -21,7 +25,7 @@ Validated at startup (the app refuses to start if one is missing or invalid).
 | ------------------- | ----------------------------- | ------------------------------------------- |
 | `NODE_ENV`          | `development`                 | `development`, `production`, `test`         |
 | `API_PORT`          | `3000`                        |                                             |
-| `ADMIN_CORS_ORIGIN` | required                      | Admin panel origin                          |
+| `ADMIN_CORS_ORIGIN` | required                      | Only origin allowed by CORS (admin panel)   |
 | `DB_HOST`           | required                      |                                             |
 | `DB_PORT`           | `5432`                        |                                             |
 | `DB_USER`           | required                      |                                             |

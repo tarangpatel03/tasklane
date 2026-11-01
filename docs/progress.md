@@ -3,7 +3,7 @@
 Tracks the build plan in `docs/project-spec.md` section 13. Claude updates this file as checkpoints are planned and finished.
 
 **Last updated:** 2026-11-01
-**Current checkpoint:** 6.2 - Security checklist pass (next)
+**Current checkpoint:** 6.3 - Final check on phone and tablet (next)
 
 Status values: `Done`, `Next`, `Pending`.
 
@@ -58,11 +58,11 @@ Status values: `Done`, `Next`, `Pending`.
 
 ### Phase 6: Polish
 
-| #   | Checkpoint                                      | Status  |
-| --- | ----------------------------------------------- | ------- |
-| 6.1 | READMEs, Swagger, screenshots, demo walkthrough | Done    |
-| 6.2 | Security checklist pass                         | Next    |
-| 6.3 | Final check on phone and tablet                 | Pending |
+| #   | Checkpoint                                      | Status |
+| --- | ----------------------------------------------- | ------ |
+| 6.1 | READMEs, Swagger, screenshots, demo walkthrough | Done   |
+| 6.2 | Security checklist pass                         | Done   |
+| 6.3 | Final check on phone and tablet                 | Next   |
 
 ## Open items for me
 
@@ -286,7 +286,7 @@ Four status tiles (count-up, link to Tasks), overdue list (5 of the 10), tasks p
 
 **Risks:** Swagger support for Nest 12; plugin vs pinned TypeScript 5.9.3 (report, do not change tsconfig); mobile screenshots depend on me.
 
-### 6.2 Security checklist pass - Next
+### 6.2 Security checklist pass - Done
 
 **Goal:** check spec section 11 against the code and fix small gaps (about 10 lines each); larger ones are listed as risks. Survey found no CORS (`ADMIN_CORS_ORIGIN` is validated but unused) and no helmet.
 
@@ -301,11 +301,52 @@ Four status tiles (count-up, link to Tasks), overdue list (5 of the 10), tasks p
 5. Screenshot cleanup: delete `docs/screenshots/admin/login.png`; drop `create-task.png` and the login link from the READMEs and the walkthrough. Final set: admin `dashboard`, `users`, `tasks`, `task-detail`; mobile `tasks`, `task-detail`, `review`, `profile`; tablet `tablet-split`.
 6. Docs: API README, this file (6.3 becomes Next).
 
+**Done:** `helmet` 8.3.0 and CORS (`ADMIN_CORS_ORIGIN` only; Authorization and Content-Type) in `main.ts`; in dev the CSP allows inline scripts for Swagger and drops `upgrade-insecure-requests` (plain HTTP, LAN IP); JWT pinned to HS256 for sign and verify; Admin README, API README (new "HTTP security" section) and `.env.example` updated. Checked on port 3001: allowed origin gets the CORS header, `/api/docs` returns 200, account page keeps its own CSP and `Referrer-Policy: no-referrer` (already set, no change needed), 401 envelope, login 429 on the 6th try, an HS512 token is rejected. API typecheck and build pass; `yarn audit` (dependencies) reports 0 vulnerabilities. Screenshot cleanup was already done (no `login.png` or `create-task` files or links).
+
+**Audit (one line each):**
+
+- Roles and ownership: every route is private through the global JWT guard; only `/auth/login`, `/auth/refresh`, `/auth/forgot-password`, `/account/*` and `/health` are `@Public()`. Role scoping lives in the services (checked in 2.2 to 3.4); not re-tested route by route.
+- Validation: global pipe has `whitelist` and `forbidNonWhitelisted`; all 11 `@Param` ids use `ParseUUIDPipe`.
+- Errors: stack traces are only logged server side; clients get the envelope.
+- Rate limits: global throttler; login is 5 per minute and returns 429.
+- Secrets and SQL: no `console.*` outside seeds; raw `query()` only in migrations and the health check (`SELECT 1`). I could not read `.env`, so I did not check it for real secrets; `.gitignore` coverage of `.env` was not re-verified.
+- Schema: `synchronize: false`; all schema changes are migrations.
+- Demo seed vs the spec: not re-compared.
+
+**Report-only risks:** access tokens stay valid up to 15 minutes after a password change or reset; release builds use the debug keystore and have no release API URL; the admin refresh token is in `sessionStorage`; no HTTPS or `trust proxy` setup (helmet sends HSTS, which browsers ignore over plain HTTP).
+
 **Manual steps for me:** stop Gradle if `yarn add helmet` hits the locked file, then `yarn install` at the root; restart the API on 3000 and keep `ADMIN_CORS_ORIGIN` equal to the admin origin; take the mobile and tablet screenshots and retake the admin ones on demo data; no commit unless I ask.
 
 **Verification:** API typecheck, build and Prettier pass; on port 3001 the allowed origin gets the CORS header and `http://evil.test` does not, helmet headers are present, `/api/docs` renders, the account page keeps its CSP and gains Referrer-Policy, 401, 403, 404 and 429 behave; admin login and mobile login still work.
 
 **Risks:** helmet CSP can break Swagger UI; installing a dependency can relink `tsc` to TS 6 or hit the Gradle lock.
+
+### 6.3 Final check on phone and tablet - Next
+
+**Goal:** last checkpoint. Claude runs the automated checks; I test the phone and tablet by hand from one checklist. No feature, database, dependency or tsconfig change. Fixes only for problems found.
+
+**Steps:**
+
+1. Automated gate: typecheck for API, mobile, admin and shared; `yarn format:check`; build API and admin; confirm `tsc` is 5.9.3. Known 5.2 typecheck errors in `text-field.tsx` and `login-screen.tsx` are reported, not fixed, unless I say so.
+2. Smoke test on port 3001 (never 3000): `/health`, login 401 and 429, `/api/docs` 200; stop it afterwards.
+3. Write the manual checklist below under 6.3, merging the unchecked device items from 5.2 to 5.6 and 6.1.
+4. Re-read `docs/demo-walkthrough.md` against the checklist; fix wrong commands only.
+5. After my results: fix confirmed bugs in small steps, set 6.3 to Done, mark the project complete, keep a short known-risks list. No commit.
+
+**Manual checklist for me:**
+
+- Setup: `yarn seed:demo` on a clean database; API on 3000 restarted (helmet and CORS); `ADMIN_CORS_ORIGIN` equals the admin origin; phone and tablet on the PC's Wi-Fi (LAN IP in `app-config.ts`, port 3000 open); Metro reload or `yarn android`.
+- Phone, Manager and Employee: login errors, Admin rejected, session after reopen, Log out, forgot password (success, 429); tile and chip counts, filters, pull to refresh, empty and error states with Retry; Start, Submit, Reject with reason, resubmit, Approve, Complete on a no-review task, comments, history order, overdue text; Manager create (validation, priority, due date set and cleared, review switch, Employees), edit, delete, Review queue with badge, Approve and Reject from the card; Profile and change password (mismatch, wrong current, success, old rejected, new works), nav per role; 130% font, 320 and 430 wide, keyboard, rotation keeps the open task, nothing under system bars, reduced motion.
+- Tablet portrait: four tiles, two-column cards, side sheet with scrim and back button, Create/Edit modal, Review single pane.
+- Tablet landscape: list plus detail panes, first task preselected, highlight, two-column detail with action bar, nav and New task in the list pane, Review queue and empty texts, smooth tab switching; rotating keeps selection and filter; multi-window resize.
+- Admin and email on the PC: login, Dashboard, Users, Tasks still work with CORS; real Gmail invite check (Open items).
+- Screenshots: retake the four admin ones on demo data; check mobile and tablet images for personal data.
+
+**Automated results (steps 1, 2 and 4 done):** typecheck passes for API, admin and mobile (the 5.2 errors in `text-field.tsx` and `login-screen.tsx` no longer appear); shared, API and admin build; `tsc` is 5.9.3. `format:check` flags 15 files: `apps/admin/src/features/tasks/task-drawer.module.css`, `CLAUDE.md`, `docs/project-spec.md`, `package.json`, `packages/shared/tsconfig.json` and the `docs/design/mobile/*.html` mockups; none were touched in 6.x and nothing was reformatted. Port 3001 smoke test: `/health` ok with database up, `/api/docs` 200, login 401 five times then 429; instance stopped. `docs/demo-walkthrough.md` re-read: commands and scripts match `package.json`; no change needed.
+
+**Waiting on me:** the manual checklist above. Status moves to Done after I report the results.
+
+**Risks:** report-only items stay open (15-minute access tokens after a password change, debug keystore for release, admin refresh token in `sessionStorage`, no HTTPS setup); a Gradle lock or `tsc` relink can break installs; device results depend on my checks.
 
 ## Update rules for Claude
 

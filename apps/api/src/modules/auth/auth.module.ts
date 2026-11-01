@@ -25,7 +25,8 @@ import { AuthService } from './auth.service';
         // The library types the TTL as a template-literal string (such as "15m"); env gives a plain string.
         return {
           secret: accessSecret,
-          signOptions: { expiresIn: accessTtl as JwtSignOptions['expiresIn'] },
+          signOptions: { algorithm: 'HS256', expiresIn: accessTtl as JwtSignOptions['expiresIn'] },
+          verifyOptions: { algorithms: ['HS256'] },
         };
       },
     }),
