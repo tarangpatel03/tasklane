@@ -40,6 +40,7 @@ Yarn classic workspaces: `apps/*` and `packages/*`.
 3. `yarn build:shared` builds `packages/shared` (`@task-app/shared`).
 4. API setup (database, env variables, scripts): see `apps/api/README.md`.
 5. Admin panel: see `apps/admin/README.md`.
+6. Mobile app: see `apps/mobile/README.md`.
 
 Root scripts: `format`, `format:check`, `build:shared`, `dev:api`, `dev:admin`, `dev:mobile` (the `dev:*` scripts work once those apps exist).
 

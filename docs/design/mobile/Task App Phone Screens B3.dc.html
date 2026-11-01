@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F0EDFA;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1C1B2E}a{color:#5B4FD6}a:hover{color:#4338B8}.hs::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:48px;justify-content:center;align-items:flex-start;padding:48px 32px 80px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1C1B2E">
+
+<div style="width:340px;display:flex;flex-direction:column;gap:20px">
+<div><div style="font:700 12px/16px 'Plus Jakarta Sans';letter-spacing:.08em;text-transform:uppercase;color:#5B4FD6">Batch 3 · Phone</div>
+<h1 style="margin:6px 0 0;font:800 32px/38px 'Plus Jakarta Sans';letter-spacing:-.02em">Account, create, review, profile</h1></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#5F5C74">Screen</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:24px;background:#fff;box-shadow:0 1px 2px rgba(60,40,140,.08)">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="5"><button onClick="{{ s.on }}" style="all:unset;box-sizing:border-box;min-height:48px;border-radius:999px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;background:{{ s.bg }};color:{{ s.fg }};transition:background 200ms,color 200ms">{{ s.label }}<span style="font:600 12px/16px 'Plus Jakarta Sans';opacity:.85">{{ s.tag }}</span></button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#5F5C74">Screen width</div>
+<div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(60,40,140,.08)">
+<sc-for list="{{ widths }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.on }}" style="all:unset;box-sizing:border-box;flex:1;min-height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;background:{{ r.bg }};color:{{ r.fg }};transition:background 200ms,color 200ms">{{ r.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:24px;background:#fff;font:500 13px/20px 'Plus Jakarta Sans';color:#3A3752">
+<div style="font:800 15px/20px 'Plus Jakarta Sans'">Try it</div>
+<div><b>Login:</b> press Sign in with empty fields to see errors; any email and password signs in as the Manager.</div>
+<div><b>Review queue:</b> Approve removes a task; Reject opens a sheet that requires a comment.</div>
+<div><b>Create task:</b> needs a title, a due date and at least one Employee. Reachable from the New task button in Review.</div>
+</div>
+</div>
+
+<div style="position:relative;flex:none;width:{{ w }}px;height:800px;border-radius:44px;background:#F6F4FD;overflow:hidden;box-shadow:0 0 0 10px #1C1B2E,0 30px 60px rgba(40,30,110,.35);transition:width 300ms cubic-bezier(.05,.7,.1,1)">
+<div style="position:absolute;inset:0;opacity:{{ entO }};transform:translateY({{ entY }}px);transition:{{ entTr }}">
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:84px {{ pad }}px 36px;display:flex;flex-direction:column;gap:16px;border-radius:0 0 40px 40px">
+<div style="width:64px;height:64px;border-radius:22px;background:#5B4FD6;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(91,79,214,.36)"><svg width="30" height="30" viewBox="0 0 30 30"><rect x="5" y="5" width="20" height="20" rx="6" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M10.5 15.5l3 3 6-6.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div style="font:700 13px/18px 'Plus Jakarta Sans';color:#4338B8">Task Management App</div>
+<h2 style="margin:0;font:800 34px/40px 'Plus Jakarta Sans';letter-spacing:-.02em">Welcome back</h2>
+<div style="font:500 15px/22px 'Plus Jakarta Sans';color:#5F5C74">Sign in with your work email.</div>
+</div>
+<div style="padding:28px {{ pad }}px 40px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Email</label>
+<input value="{{ f.lEmail }}" onInput="{{ on.lEmail }}" type="email" autocomplete="email" placeholder="name@company.com" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:{{ lEmailBd }};background:#FBFAFF;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<sc-if value="{{ lEmailErr }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:6px;font:600 13px/18px 'Plus Jakarta Sans';color:#A3262A"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#A3262A"/><path d="M7 3.8v3.6M7 9.4v.1" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Enter a valid email address</div></sc-if></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Password</label>
+<div style="position:relative"><input value="{{ f.lPw }}" onInput="{{ on.lPw }}" type="{{ pwType }}" autocomplete="current-password" placeholder="Your password" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:{{ lPwBd }};background:#FBFAFF;padding:0 76px 0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<button onClick="{{ togglePw }}" style="all:unset;box-sizing:border-box;position:absolute;right:4px;top:4px;height:48px;min-width:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:700 13px/16px 'Plus Jakarta Sans';color:#4338B8;cursor:pointer" style-active="background:#EEEAFB">{{ pwLabel }}</button></div>
+<sc-if value="{{ lPwErr }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:6px;font:600 13px/18px 'Plus Jakarta Sans';color:#A3262A"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#A3262A"/><path d="M7 3.8v3.6M7 9.4v.1" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Enter your password</div></sc-if></div>
+<div style="display:flex;justify-content:flex-end"><button style="all:unset;box-sizing:border-box;min-height:48px;padding:0 12px;border-radius:999px;color:#4338B8;font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;display:inline-flex;align-items:center" style-active="background:#EEEAFB">Forgot password?</button></div>
+<button onClick="{{ doLogin }}" style="all:unset;box-sizing:border-box;min-height:56px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(91,79,214,.36)" style-active="transform:scale(.97)">Sign in</button>
+
+</div></div>
+</sc-if>
+
+<sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+<div class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:130px">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:56px {{ pad }}px 24px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 32px 32px">
+<div style="display:flex;align-items:center;gap:12px"><button onClick="{{ goReview }}" aria-label="Close" style="all:unset;box-sizing:border-box;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(60,40,140,.14);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.94)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="#1C1B2E" stroke-width="2.2" stroke-linecap="round"/></svg></button><div style="font:700 15px/20px 'Plus Jakarta Sans';color:#5F5C74">Manager</div></div>
+<h2 style="margin:4px 0 0;font:800 30px/36px 'Plus Jakarta Sans';letter-spacing:-.02em">Create task</h2>
+</div>
+<div style="padding:20px {{ pad }}px 0;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Title</label>
+<input value="{{ f.cTitle }}" onInput="{{ on.cTitle }}" placeholder="e.g. Prepare Q4 vendor contract summary" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#fff;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18)"/></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Description</label>
+<textarea rows="3" value="{{ f.cDesc }}" onInput="{{ on.cDesc }}" placeholder="What needs to be done and what counts as finished" style="box-sizing:border-box;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#fff;padding:14px 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none;resize:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18)"></textarea></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Priority</div>
+<div style="display:flex;gap:8px"><sc-for list="{{ prios }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.on }}" aria-pressed="{{ p.sel }}" style="all:unset;box-sizing:border-box;flex:1;min-height:52px;border-radius:18px;border:2px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};display:flex;align-items:center;justify-content:center;gap:6px;font:700 13px/16px 'Plus Jakarta Sans';cursor:pointer;transition:background 200ms,border-color 200ms" style-active="transform:scale(.96)">{{ p.icon }}{{ p.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Due date</label>
+<input type="date" value="{{ f.cDue }}" onInput="{{ on.cDue }}" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#fff;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18)"/></div>
+<button onClick="{{ toggleRr }}" role="switch" aria-checked="{{ rr }}" style="all:unset;box-sizing:border-box;min-height:72px;border-radius:24px;background:#fff;box-shadow:0 2px 8px rgba(60,40,140,.08);padding:12px 16px 12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer" style-active="transform:scale(.98)"><div><div style="font:700 15px/20px 'Plus Jakarta Sans'">Requires review</div><div style="font:500 13px/18px 'Plus Jakarta Sans';color:#5F5C74">{{ rrText }}</div></div>
+<div style="flex:none;display:flex;align-items:center;gap:8px"><span style="font:700 12px/16px 'Plus Jakarta Sans';color:{{ rrFg }}">{{ rrState }}</span><span style="width:52px;height:32px;border-radius:16px;background:{{ rrBg }};position:relative;transition:background 200ms"><span style="position:absolute;top:4px;left:{{ rrX }}px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left 200ms cubic-bezier(.2,0,0,1)"></span></span></div></button>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#3A3752">Employees</div><div style="font:700 12px/18px 'Plus Jakarta Sans';color:#5F5C74">{{ selCount }} selected</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ emps }}" as="e" hint-placeholder-count="5"><button onClick="{{ e.on }}" role="checkbox" aria-checked="{{ e.sel }}" style="all:unset;box-sizing:border-box;min-height:64px;border-radius:20px;border:2px solid {{ e.bd }};background:{{ e.bg }};padding:8px 16px 8px 12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 200ms,border-color 200ms" style-active="transform:scale(.98)">{{ e.av }}<div style="flex:1;min-width:0"><div style="font:700 15px/20px 'Plus Jakarta Sans'">{{ e.name }}</div><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">{{ e.open }}</div></div>{{ e.box }}</button></sc-for></div></div>
+</div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:32px {{ pad }}px 30px;background:linear-gradient(180deg,rgba(246,244,253,0) 0%,#F6F4FD 38%)"><button onClick="{{ doCreate }}" style="all:unset;box-sizing:border-box;width:100%;min-height:56px;border-radius:999px;background:{{ createBg }};color:{{ createFg }};font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 200ms" style-active="transform:scale(.97)">{{ createLabel }}</button></div>
+</sc-if>
+
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+<div class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:140px">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:60px {{ pad }}px 24px;display:flex;flex-direction:column;gap:6px;border-radius:0 0 32px 32px">
+<div style="font:600 14px/20px 'Plus Jakarta Sans';color:#5F5C74">Manager</div>
+<h2 style="margin:0;font:800 30px/36px 'Plus Jakarta Sans';letter-spacing:-.02em">Review queue</h2>
+<div style="display:flex;align-items:center;gap:8px;font:600 14px/20px 'Plus Jakarta Sans';color:#8F4A00"><span style="font:800 22px/26px 'Plus Jakarta Sans';font-variant-numeric:tabular-nums;color:#8F4A00">{{ waiting }}</span>waiting for your review</div>
+</div>
+<div style="padding:16px {{ pad }}px 0;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ queue }}" as="q" hint-placeholder-count="3">
+<div style="overflow:hidden;max-height:{{ q.mh }}px;opacity:{{ q.o }};transform:translateX({{ q.x }}px);transition:max-height 300ms cubic-bezier(.05,.7,.1,1) 120ms,opacity 200ms,transform 300ms cubic-bezier(.3,0,.8,.15);margin-bottom:{{ q.mb }}px">
+<div style="border-radius:24px;padding:20px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.10);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">{{ q.prio }}{{ q.badge }}</div>
+<div style="font:700 18px/24px 'Plus Jakarta Sans';letter-spacing:-.005em;text-wrap:pretty">{{ q.title }}</div>
+<div style="display:flex;align-items:center;gap:10px">{{ q.av }}<div style="font:600 13px/18px 'Plus Jakarta Sans';color:#5F5C74;min-width:0">Submitted by <b style="color:#1C1B2E">{{ q.by }}</b><br/>{{ q.when }} · {{ q.due }}</div></div>
+<div style="display:flex;gap:10px">
+<button onClick="{{ q.reject }}" style="all:unset;box-sizing:border-box;flex:1;min-height:48px;border-radius:999px;background:#FFDAD8;color:#8A1E22;font:700 14px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-active="transform:scale(.96)"><svg width="16" height="16" viewBox="0 0 18 18"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="#8A1E22" stroke-width="2.2" stroke-linecap="round"/></svg>Reject</button>
+<button onClick="{{ q.approve }}" style="all:unset;box-sizing:border-box;flex:1;min-height:48px;border-radius:999px;background:#17653F;color:#fff;font:700 14px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-active="transform:scale(.96)"><svg width="16" height="16" viewBox="0 0 18 18"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button></div>
+</div></div>
+</sc-for>
+<sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="border-radius:28px;background:#fff;padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 6px 20px rgba(60,40,140,.08)"><div style="width:96px;height:96px;border-radius:32px;background:linear-gradient(160deg,#E6E1FF,#F6F4FD);display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;border-radius:14px;border:3px solid #5B4FD6;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" stroke="#5B4FD6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div style="font:800 22px/28px 'Plus Jakarta Sans'">Nothing in review</div><div style="font:500 15px/22px 'Plus Jakarta Sans';color:#5F5C74;text-wrap:pretty">Tasks your team submits for review will appear here.</div></div>
+</sc-if>
+</div></div>
+<button onClick="{{ goCreate }}" style="all:unset;box-sizing:border-box;position:absolute;right:{{ pad }}px;bottom:112px;min-height:56px;padding:0 24px 0 18px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(91,79,214,.4);z-index:5" style-active="transform:scale(.96)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>New task</button>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:140px">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:72px {{ pad }}px 32px;display:flex;flex-direction:column;align-items:center;gap:10px;border-radius:0 0 40px 40px;text-align:center">
+<div style="width:96px;height:96px;border-radius:50%;background:#2F2791;color:#fff;border:4px solid #fff;box-shadow:0 8px 20px rgba(47,39,145,.28);display:flex;align-items:center;justify-content:center;font:800 32px/36px 'Plus Jakarta Sans'">DO</div>
+<h2 style="margin:6px 0 0;font:800 26px/32px 'Plus Jakarta Sans';letter-spacing:-.01em">Daniel Okafor</h2>
+<div style="display:inline-flex;height:28px;align-items:center;padding:0 14px;border-radius:999px;background:#fff;font:700 13px/16px 'Plus Jakarta Sans';color:#4338B8">Manager</div>
+</div>
+<div style="padding:20px {{ pad }}px 0;display:flex;flex-direction:column;gap:16px">
+<div style="border-radius:24px;background:#fff;padding:8px 20px;box-shadow:0 6px 20px rgba(60,40,140,.08)">
+<div style="min-height:56px;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid #EEEAF8"><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">Name</div><div style="font:700 15px/22px 'Plus Jakarta Sans'">Daniel Okafor</div></div>
+<div style="min-height:56px;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid #EEEAF8"><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">Email</div><div style="font:700 15px/22px 'Plus Jakarta Sans';overflow-wrap:anywhere">daniel.okafor@northwind.co</div></div>
+<div style="min-height:56px;display:flex;flex-direction:column;justify-content:center"><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">Role</div><div style="font:700 15px/22px 'Plus Jakarta Sans'">Manager</div></div>
+</div>
+<button onClick="{{ openPw }}" style="all:unset;box-sizing:border-box;min-height:64px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.08);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font:700 15px/20px 'Plus Jakarta Sans'" style-active="transform:scale(.98)">Change password<svg width="20" height="20" viewBox="0 0 20 20"><path d="M7.5 4.5l5.5 5.5-5.5 5.5" stroke="#5F5C74" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button onClick="{{ logout }}" style="all:unset;box-sizing:border-box;min-height:56px;border-radius:999px;border:1.5px solid #E7B9B8;color:#8A1E22;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-active="background:#FFEDEC"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M7 3H4.5A1.5 1.5 0 003 4.5v9A1.5 1.5 0 004.5 15H7M11 5.5L14.5 9 11 12.5M14.5 9H7" stroke="#8A1E22" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</button>
+</div></div>
+</sc-if>
+</div>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:12px;right:12px;bottom:26px;height:72px;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 10px 30px rgba(60,40,140,.22);display:flex;align-items:center;justify-content:space-around;padding:0 8px;gap:4px;z-index:6">
+<div style="min-width:48px;height:56px;padding:0 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5C74;font:700 11px/14px 'Plus Jakarta Sans'"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="4" width="16" height="3.4" rx="1.7" fill="#5F5C74"/><rect x="3" y="9.3" width="16" height="3.4" rx="1.7" fill="#5F5C74"/><rect x="3" y="14.6" width="10" height="3.4" rx="1.7" fill="#5F5C74"/></svg>Tasks</div>
+<button onClick="{{ goReview }}" style="all:unset;box-sizing:border-box;min-width:48px;height:56px;padding:{{ nav.rp }};border-radius:999px;background:{{ nav.rbg }};display:flex;align-items:center;flex-direction:{{ nav.rdir }};justify-content:center;gap:{{ nav.rgap }};color:{{ nav.rfg }};font:700 {{ nav.rfs }}px/14px 'Plus Jakarta Sans';cursor:pointer;position:relative"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M4 12h4l1.5 3h3L14 12h4M4 12l2-7h10l2 7v6H4z" stroke="{{ nav.rfg }}" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>Review<span style="position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:9px;background:#C2282D;color:#fff;font:700 11px/18px 'Plus Jakarta Sans';text-align:center;padding:0 4px;box-sizing:border-box">{{ waiting }}</span></button>
+<button onClick="{{ goProfile }}" style="all:unset;box-sizing:border-box;min-width:48px;height:56px;padding:{{ nav.pp }};border-radius:999px;background:{{ nav.pbg }};display:flex;align-items:center;flex-direction:{{ nav.pdir }};justify-content:center;gap:{{ nav.pgap }};color:{{ nav.pfg }};font:700 {{ nav.pfs }}px/14px 'Plus Jakarta Sans';cursor:pointer"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="8" r="3.6" stroke="{{ nav.pfg }}" stroke-width="1.8" fill="none"/><path d="M4 18.5c1-3.6 3.8-5 7-5s6 1.4 7 5" stroke="{{ nav.pfg }}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Profile</button>
+</div>
+</sc-if>
+
+<div style="position:absolute;left:{{ pad }}px;right:{{ pad }}px;bottom:108px;z-index:30;min-height:48px;border-radius:20px;background:#1C1B2E;color:#fff;font:600 14px/20px 'Plus Jakarta Sans';display:flex;align-items:center;gap:10px;padding:10px 16px;opacity:{{ snackO }};transform:translateY({{ snackY }}px);transition:opacity 200ms,transform 300ms cubic-bezier(.05,.7,.1,1);pointer-events:none"><svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><circle cx="9" cy="9" r="8" fill="#D5F5E3"/><path d="M5.5 9.2l2.4 2.4 4.6-5" stroke="#17653F" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ snack }}</div>
+
+<sc-if value="{{ overlay }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:50;background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 32px;text-align:center">
+<div style="width:96px;height:96px;border-radius:32px;background:#17653F;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(23,101,63,.3)"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div style="font:800 28px/34px 'Plus Jakarta Sans';letter-spacing:-.01em">{{ overlayTitle }}</div>
+<div style="font:500 15px/22px 'Plus Jakarta Sans';color:#5F5C74;text-wrap:pretty">{{ overlayText }}</div>
+<button onClick="{{ overlayGo }}" style="all:unset;box-sizing:border-box;min-height:56px;padding:0 32px;margin-top:8px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.97)">{{ overlayBtn }}</button>
+</div>
+</sc-if>
+
+<div style="position:absolute;inset:0;z-index:40;background:rgba(28,27,46,.42);opacity:{{ sheetScrim }};pointer-events:{{ sheetPE }};transition:opacity 200ms cubic-bezier(.2,0,0,1)" onClick="{{ closeSheet }}"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:41;border-radius:32px 32px 0 0;background:#fff;padding:12px {{ pad }}px 34px;display:flex;flex-direction:column;gap:12px;box-shadow:0 -10px 40px rgba(60,40,140,.24);transform:translateY({{ sheetY }});transition:transform 300ms cubic-bezier(.05,.7,.1,1)">
+<div style="align-self:center;width:40px;height:5px;border-radius:3px;background:#D5D0EA"></div>
+<sc-if value="{{ sheetReject }}" hint-placeholder-val="{{ false }}">
+<div style="font:800 20px/26px 'Plus Jakarta Sans';margin-top:4px">Reject task</div>
+<div style="font:500 14px/20px 'Plus Jakarta Sans';color:#5F5C74">{{ targetTitle }}</div>
+<textarea rows="3" value="{{ rejectText }}" onInput="{{ onReject }}" placeholder="Reason for rejecting (required)" style="box-sizing:border-box;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:14px 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none;resize:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"></textarea>
+<div style="display:flex;gap:10px"><button onClick="{{ closeSheet }}" style="all:unset;box-sizing:border-box;flex:1;min-height:52px;border-radius:999px;border:1.5px solid #B9B2E6;color:#4338B8;font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.97)">Cancel</button><button onClick="{{ doReject }}" style="all:unset;box-sizing:border-box;flex:1.3;min-height:52px;border-radius:999px;background:{{ rejectBg }};color:{{ rejectFg }};font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 200ms" style-active="transform:scale(.97)">Reject task</button></div>
+</sc-if>
+<sc-if value="{{ sheetPw }}" hint-placeholder-val="{{ false }}">
+<div style="font:800 20px/26px 'Plus Jakarta Sans';margin-top:4px">Change password</div>
+<input value="{{ f.pOld }}" onInput="{{ on.pOld }}" type="password" placeholder="Current password" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<input value="{{ f.pNew }}" onInput="{{ on.pNew }}" type="password" placeholder="New password (8+ characters, with a number)" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<input value="{{ f.pNew2 }}" onInput="{{ on.pNew2 }}" type="password" placeholder="Confirm new password" style="box-sizing:border-box;height:56px;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:0 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<div style="display:flex;gap:10px"><button onClick="{{ closeSheet }}" style="all:unset;box-sizing:border-box;flex:1;min-height:52px;border-radius:999px;border:1.5px solid #B9B2E6;color:#4338B8;font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.97)">Cancel</button><button onClick="{{ doPw }}" style="all:unset;box-sizing:border-box;flex:1.3;min-height:52px;border-radius:999px;background:{{ pwBg }};color:{{ pwFg }};font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 200ms" style-active="transform:scale(.97)">Update password</button></div>
+</sc-if>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:0;height:44px;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:700 14px/16px 'Plus Jakarta Sans';pointer-events:none"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><span style="width:16px;height:10px;border-radius:2px;background:#1C1B2E;opacity:.8"></span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid #1C1B2E;box-sizing:border-box;padding:1px"><span style="display:block;width:70%;height:100%;border-radius:2px;background:#1C1B2E"></span></span></span></div>
+<div style="position:absolute;left:50%;bottom:8px;width:120px;margin-left:-60px;height:5px;border-radius:3px;background:#1C1B2E;opacity:.55;z-index:60;pointer-events:none"></div>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'login', width: 390, ent: true, f: { lEmail: '', lPw: '', sEmail: '', sCode: '', sPw: '', sPw2: '', cTitle: '', cDesc: '', cDue: '', pOld: '', pNew: '', pNew2: '' }, showPw: false, tried: false, prio: 'Medium', rr: true, sel: [], overlay: null, sheet: null, target: null, rejectText: '', snack: '', leaving: {}, gone: {} };
+  P = { PN: ['Priya Nair', '#C9C1FF', '#2F2791'], MR: ['Marcus Reyes', '#BFE0FF', '#12407F'], AT: ['Aiko Tanaka', '#FFD9B8', '#6E3900'], TF: ['Tomás Ferreira', '#C8F0DA', '#17653F'], LH: ['Lena Hoffmann', '#FFD0E0', '#7A1E45'] };
+  OPEN = { PN: '4 open tasks', MR: '2 open tasks', AT: '3 open tasks', TF: '2 open tasks', LH: '1 open task' };
+  PR = { Low: ['#E3EAF2', '#3D4F63', 1], Medium: ['#FFEFC2', '#6B4B00', 2], High: ['#FFDAD8', '#8A1E22', 3] };
+  Q = [
+    { id: 1, title: 'Reconcile October expense reports', by: 'PN', when: 'Today, 8:52', due: 'Due today', prio: 'High' },
+    { id: 2, title: 'Draft customer feedback summary', by: 'LH', when: 'Yesterday, 16:40', due: 'Due Nov 8', prio: 'Medium' },
+    { id: 3, title: 'Update vendor onboarding packet', by: 'MR', when: 'Yesterday, 11:05', due: 'Due Nov 5', prio: 'Low' }
+  ];
+  go = (screen) => { this.setState({ screen, ent: false, sheet: null, overlay: null }); setTimeout(() => this.setState({ ent: true }), 30); };
+  setF = (k) => (e) => { const v = k === 'sCode' ? e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) : e.target.value; this.setState({ f: { ...this.state.f, [k]: v } }); };
+  say = (m) => { this.setState({ snack: m }); clearTimeout(this._s); this._s = setTimeout(() => this.setState({ snack: '' }), 2200); };
+  pwOk = (v) => v.length >= 8 && /\d/.test(v);
+  svg(kids, w) { return React.createElement('svg', { width: w || 14, height: w || 14, viewBox: '0 0 14 14', style: { flex: 'none' } }, kids); }
+  bars(fg, n) { const h = React.createElement, b = (i, x, y, ht) => h('rect', { key: i, x: x * 1, y, width: 2.6, height: ht, rx: 1, fill: fg, opacity: n > i ? 1 : 0.25 }); return h('svg', { width: 12, height: 12, viewBox: '0 0 12 12' }, [b(0, 1, 7, 4), b(1, 4.7, 4.5, 6.5), b(2, 8.4, 1, 10)]); }
+  prioTag(p) { const [bg, fg, n] = this.PR[p]; return React.createElement('span', { style: { height: 28, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 12px', borderRadius: 10, background: bg, color: fg, font: "700 12px/16px 'Plus Jakarta Sans'" } }, this.bars(fg, n), p); }
+  badge() {
+    const h = React.createElement;
+    return h('span', { style: { height: 32, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 14px 0 11px', borderRadius: 999, background: '#FFE8D1', color: '#8F4A00', font: "700 13px/16px 'Plus Jakarta Sans'" } }, this.svg([h('circle', { key: 'a', cx: 7, cy: 7, r: 5.5, fill: 'none', stroke: '#8F4A00', strokeWidth: 2 }), h('path', { key: 'b', d: 'M7 4v3.2l2 1.2', stroke: '#8F4A00', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' })]), 'In Review');
+  }
+  av(k, size, ring) { const [name, bg, fg] = this.P[k]; return React.createElement('div', { title: name, style: { width: size, height: size, borderRadius: '50%', background: bg, color: fg, border: ring ? '3px solid #5B4FD6' : '2px solid #fff', boxSizing: 'border-box', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "700 " + (size > 40 ? 15 : 12) + "px/16px 'Plus Jakarta Sans'" } }, name.split(' ').map(x => x[0]).join('')); }
+  doLogin = () => { const f = this.state.f; this.setState({ tried: true }); if (/.+@.+\..+/.test(f.lEmail) && f.lPw) this.go('review'); };
+  doCreate = () => { const s = this.state; if (s.f.cTitle.trim() && s.f.cDue && s.sel.length) this.setState({ overlay: 'create' }); };
+  removeQ = (id, msg) => {
+    this.setState({ leaving: { ...this.state.leaving, [id]: true } });
+    setTimeout(() => this.setState({ gone: { ...this.state.gone, [id]: true } }), 480);
+    this.say(msg);
+  };
+  doReject = () => { const s = this.state; if (!s.rejectText.trim()) return; const id = s.target; this.setState({ sheet: null, rejectText: '' }); this.removeQ(id, 'Rejected and sent back to the employee'); };
+  doPw = () => { const f = this.state.f; if (f.pOld && this.pwOk(f.pNew) && f.pNew === f.pNew2) { this.setState({ sheet: null, f: { ...f, pOld: '', pNew: '', pNew2: '' } }); this.say('Password updated'); } };
+  renderVals() {
+    const s = this.state, f = s.f, h = React.createElement, pad = s.width === 320 ? 16 : 20, sc = s.screen;
+    const errIc = (c) => null;
+    const emailOk = /.+@.+\..+/.test(f.lEmail), sMail = /.+@.+\..+/.test(f.sEmail);
+    const rule = (ok, label) => ({ label, fg: ok ? '#17653F' : '#5F5C74', dot: ok ? '#17653F' : '#ECEAF3', icon: ok ? h('svg', { width: 10, height: 10, viewBox: '0 0 10 10' }, h('path', { d: 'M2 5.2l2 2 4-4.4', stroke: '#fff', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' })) : null });
+    const setupOk = sMail && f.sCode.length === 8 && this.pwOk(f.sPw) && f.sPw === f.sPw2;
+    const createOk = f.cTitle.trim() && f.cDue && s.sel.length > 0;
+    const on = {}; Object.keys(f).forEach(k => on[k] = this.setF(k));
+    const screens = [['login', 'Login', 'All'], ['create', 'Create task', 'Manager'], ['review', 'Review queue', 'Manager'], ['profile', 'Profile', 'All']].map(([v, l, t]) => ({ label: l, tag: t, on: () => this.go(v), bg: sc === v ? '#5B4FD6' : 'transparent', fg: sc === v ? '#fff' : '#3A3752' }));
+    const widths = [320, 390, 430].map(w => ({ label: String(w), on: () => this.setState({ width: w }), bg: s.width === w ? '#5B4FD6' : 'transparent', fg: s.width === w ? '#fff' : '#3A3752' }));
+    const prios = ['Low', 'Medium', 'High'].map(p => { const [bg, fg, n] = this.PR[p], on = s.prio === p; return { label: p, sel: on, bg: on ? bg : '#fff', fg: on ? fg : '#3A3752', bd: on ? fg : '#D5D0EA', icon: this.bars(on ? fg : '#5F5C74', n), on: () => this.setState({ prio: p }) }; });
+    const emps = Object.keys(this.P).map(k => { const on = s.sel.includes(k); return { name: this.P[k][0], open: this.OPEN[k], sel: on, bg: on ? '#F1EEFF' : '#fff', bd: on ? '#5B4FD6' : '#E6E2F3', av: this.av(k, 40), box: on ? h('span', { style: { width: 28, height: 28, borderRadius: '50%', background: '#5B4FD6', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' } }, h('svg', { width: 16, height: 16, viewBox: '0 0 16 16' }, h('path', { d: 'M3 8.5l3.2 3.2L13 4.5', stroke: '#fff', strokeWidth: 2.2, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }))) : h('span', { style: { width: 28, height: 28, borderRadius: '50%', border: '2px solid #B9B2E6', boxSizing: 'border-box', flex: 'none' } }), on: () => this.setState({ sel: on ? s.sel.filter(x => x !== k) : [...s.sel, k] }) }; });
+    const visibleQ = this.Q.filter(q => !s.gone[q.id]);
+    const queue = visibleQ.map(q => { const lv = !!s.leaving[q.id]; return { title: q.title, by: this.P[q.by][0], when: q.when, due: q.due, prio: this.prioTag(q.prio), badge: this.badge(), av: this.av(q.by, 40), mh: lv ? 0 : 400, o: lv ? 0 : 1, x: lv ? 60 : 0, mb: lv ? -12 : 0, approve: () => this.removeQ(q.id, 'Approved. Task moved to Completed'), reject: () => this.setState({ sheet: 'reject', target: q.id, rejectText: '' }) }; });
+    const waiting = visibleQ.filter(q => !s.leaving[q.id]).length;
+    const nav = { rbg: sc === 'review' ? '#E6E1FF' : 'transparent', rfg: sc === 'review' ? '#2F2791' : '#5F5C74', rdir: sc === 'review' ? 'row' : 'column', rgap: sc === 'review' ? '8px' : '2px', rp: sc === 'review' ? '0 14px' : '0 10px', rfs: sc === 'review' ? 13 : 11, pbg: sc === 'profile' ? '#E6E1FF' : 'transparent', pfg: sc === 'profile' ? '#2F2791' : '#5F5C74', pdir: sc === 'profile' ? 'row' : 'column', pgap: sc === 'profile' ? '8px' : '2px', pp: sc === 'profile' ? '0 14px' : '0 10px', pfs: sc === 'profile' ? 13 : 11 };
+    const rejOk = s.rejectText.trim().length > 0, pwOk = f.pOld && this.pwOk(f.pNew) && f.pNew === f.pNew2;
+    const tgt = this.Q.find(q => q.id === s.target);
+    const ov = ['Task created', 'The selected Employees have been assigned and will see it in their list.', 'Back to review queue', () => { this.setState({ f: { ...f, cTitle: '', cDesc: '', cDue: '' }, sel: [], prio: 'Medium', rr: true }); this.go('review'); }];
+    return {
+      screens, widths, w: s.width, pad, f, on,
+      entO: s.ent ? 1 : 0, entY: s.ent ? 0 : 14, entTr: s.ent ? 'opacity 300ms cubic-bezier(.05,.7,.1,1), transform 300ms cubic-bezier(.05,.7,.1,1)' : 'none',
+      isLogin: sc === 'login', isCreate: sc === 'create', isReview: sc === 'review', isProfile: sc === 'profile', showNav: sc === 'review' || sc === 'profile', nav,
+      lEmailErr: s.tried && !emailOk, lPwErr: s.tried && !f.lPw, lEmailBd: s.tried && !emailOk ? '2px solid #C2282D' : '1.5px solid #D5D0EA', lPwBd: s.tried && !f.lPw ? '2px solid #C2282D' : '1.5px solid #D5D0EA',
+      pwType: s.showPw ? 'text' : 'password', pwLabel: s.showPw ? 'Hide' : 'Show', togglePw: () => this.setState({ showPw: !s.showPw }),
+      doLogin: this.doLogin, goLogin: () => this.go('login'), goReview: () => this.go('review'), goCreate: () => this.go('create'), goProfile: () => this.go('profile'),
+      prios, emps, selCount: s.sel.length, rr: s.rr, toggleRr: () => this.setState({ rr: !s.rr }), rrBg: s.rr ? '#5B4FD6' : '#8B889E', rrX: s.rr ? 24 : 4, rrState: s.rr ? 'On' : 'Off', rrFg: s.rr ? '#4338B8' : '#5F5C74', rrText: s.rr ? 'Manager approves before it is completed' : 'Employee can complete it directly',
+      createBg: createOk ? '#5B4FD6' : '#ECEAF3', createFg: createOk ? '#fff' : '#8B889E', createLabel: createOk ? 'Create task' : 'Add title, due date and an Employee', doCreate: this.doCreate,
+      queue, waiting, queueEmpty: visibleQ.length === 0,
+      snack: s.snack || ' ', snackO: s.snack ? 1 : 0, snackY: s.snack ? 0 : 16,
+      overlay: !!s.overlay, overlayTitle: ov[0], overlayText: ov[1], overlayBtn: ov[2], overlayGo: ov[3],
+      sheetScrim: s.sheet ? 1 : 0, sheetPE: s.sheet ? 'auto' : 'none', sheetY: s.sheet ? '0%' : '110%', closeSheet: () => this.setState({ sheet: null }),
+      sheetReject: s.sheet === 'reject', sheetPw: s.sheet === 'pw', targetTitle: tgt ? tgt.title : '', rejectText: s.rejectText, onReject: e => this.setState({ rejectText: e.target.value }), rejectBg: rejOk ? '#A3262A' : '#ECEAF3', rejectFg: rejOk ? '#fff' : '#8B889E', doReject: this.doReject,
+      openPw: () => this.setState({ sheet: 'pw' }), pwBg: pwOk ? '#5B4FD6' : '#ECEAF3', pwFg: pwOk ? '#fff' : '#8B889E', doPw: this.doPw,
+      logout: () => this.go('login')
+    };
+  }
+}
+</script>
+</body>
+</html>

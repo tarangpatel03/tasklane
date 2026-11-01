@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F0EDFA;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1C1B2E}a{color:#5B4FD6}a:hover{color:#4338B8}@keyframes dcshimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}@keyframes dcspin{to{transform:rotate(360deg)}}.hs::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:48px;justify-content:center;align-items:flex-start;padding:48px 32px 80px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1C1B2E">
+
+<div style="width:340px;display:flex;flex-direction:column;gap:20px">
+<div><div style="font:700 12px/16px 'Plus Jakarta Sans';letter-spacing:.08em;text-transform:uppercase;color:#5B4FD6">Batch 2 · Phone</div>
+<h1 style="margin:6px 0 0;font:800 32px/38px 'Plus Jakarta Sans';letter-spacing:-.02em">Tasks and Task detail</h1></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#5F5C74">Role</div>
+<div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(60,40,140,.08)">
+<sc-for list="{{ roles }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.on }}" style="all:unset;box-sizing:border-box;flex:1;min-height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;background:{{ r.bg }};color:{{ r.fg }};transition:background 200ms,color 200ms">{{ r.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:700 13px/18px 'Plus Jakarta Sans';color:#5F5C74">Screen width</div>
+<div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(60,40,140,.08)">
+<sc-for list="{{ widths }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.on }}" style="all:unset;box-sizing:border-box;flex:1;min-height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;background:{{ r.bg }};color:{{ r.fg }};transition:background 200ms,color 200ms">{{ r.label }}</button></sc-for></div></div>
+<button onClick="{{ replay }}" style="all:unset;box-sizing:border-box;min-height:48px;border-radius:999px;border:1.5px solid #B9B2E6;color:#4338B8;font:700 14px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.97)">Replay loading and entrance</button>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:24px;background:#fff;font:500 13px/20px 'Plus Jakarta Sans';color:#3A3752">
+<div style="font:800 15px/20px 'Plus Jakarta Sans'">Try it</div>
+<div>Tap a summary tile or chip to filter. Tap a card to open it. Scroll to the top and keep pulling up on the list, or tap the refresh button, to see the skeleton loader.</div>
+<div><b>Employee</b> (Priya): open Prepare Q4 vendor contract summary, then Submit for review.</div>
+<div><b>Manager</b> (Daniel): open Reconcile October expense reports, then Approve or Reject. Reject needs a comment.</div>
+<div>Motion: cards stagger in 40ms apart, detail slides in over 450ms, status badge pulses on change, counts tick up, reject uses a bottom sheet. Review and Profile tabs arrive in Batch 3.</div>
+</div>
+</div>
+
+<div style="position:relative;flex:none;width:{{ w }}px;height:800px;border-radius:44px;background:#F6F4FD;overflow:hidden;box-shadow:0 0 0 10px #1C1B2E,0 30px 60px rgba(40,30,110,.35);transition:width 300ms cubic-bezier(.05,.7,.1,1)">
+
+<div ref="{{ homeRef }}" onWheel="{{ onWheel }}" class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:140px">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:60px {{ pad }}px 20px;display:flex;flex-direction:column;gap:20px;border-radius:0 0 32px 32px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+<div style="min-width:0"><div style="font:600 14px/20px 'Plus Jakarta Sans';color:#5F5C74">Good morning,</div>
+<div style="font:800 28px/34px 'Plus Jakarta Sans';letter-spacing:-.01em;overflow-wrap:anywhere">{{ firstName }}</div>
+<div style="margin-top:4px;display:inline-flex;height:24px;align-items:center;padding:0 10px;border-radius:999px;background:#fff;font:700 12px/16px 'Plus Jakarta Sans';color:#4338B8">{{ role }}</div></div>
+<button onClick="{{ refresh }}" aria-label="Refresh" style="all:unset;box-sizing:border-box;flex:none;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(60,40,140,.14);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.94)"><svg width="22" height="22" viewBox="0 0 22 22" style="{{ spinStyle }}"><path d="M17.5 11a6.5 6.5 0 11-2-4.7M17.5 4v3.6h-3.6" stroke="#4338B8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+<button onClick="{{ t.on }}" style="all:unset;box-sizing:border-box;min-height:88px;border-radius:24px;padding:14px 16px;background:{{ t.bg }};color:{{ t.fg }};display:flex;flex-direction:column;gap:2px;cursor:pointer;box-shadow:{{ t.ring }};transition:transform 100ms cubic-bezier(.2,0,0,1),box-shadow 200ms" style-active="transform:scale(.96)">
+<div style="display:flex;align-items:center;gap:6px;font:700 13px/18px 'Plus Jakarta Sans'">{{ t.icon }}{{ t.label }}</div>
+<div style="font:800 34px/40px 'Plus Jakarta Sans';font-variant-numeric:tabular-nums">{{ t.count }}</div></button>
+</sc-for>
+</div>
+</div>
+
+<div class="hs" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:20px {{ pad }}px 4px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+<button onClick="{{ c.on }}" style="all:unset;box-sizing:border-box;flex:none;min-height:48px;display:inline-flex;align-items:center;gap:8px;padding:0 18px;white-space:nowrap;border-radius:999px;border:1.5px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font:700 14px/20px 'Plus Jakarta Sans';cursor:pointer;transition:background 200ms,color 200ms,border-color 200ms" style-active="transform:scale(.96)">{{ c.check }}{{ c.label }} · {{ c.n }}</button>
+</sc-for>
+</div>
+
+<div style="padding:16px {{ pad }}px 0;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:800 20px/26px 'Plus Jakarta Sans'">{{ listTitle }}</div><div style="font:600 13px/18px 'Plus Jakarta Sans';color:#5F5C74">{{ shownCount }} tasks</div></div>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="3">
+<div style="border-radius:24px;padding:20px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.10);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between"><div style="width:64px;height:28px;border-radius:10px;background:linear-gradient(90deg,#EEEAF8 25%,#F8F6FD 50%,#EEEAF8 75%);background-size:600px 100%;animation:dcshimmer 1.4s linear infinite"></div><div style="width:92px;height:32px;border-radius:999px;background:linear-gradient(90deg,#EEEAF8 25%,#F8F6FD 50%,#EEEAF8 75%);background-size:600px 100%;animation:dcshimmer 1.4s linear infinite"></div></div>
+<div style="width:85%;height:20px;border-radius:8px;background:linear-gradient(90deg,#EEEAF8 25%,#F8F6FD 50%,#EEEAF8 75%);background-size:600px 100%;animation:dcshimmer 1.4s linear infinite"></div>
+<div style="display:flex;justify-content:space-between"><div style="width:90px;height:16px;border-radius:8px;background:linear-gradient(90deg,#EEEAF8 25%,#F8F6FD 50%,#EEEAF8 75%);background-size:600px 100%;animation:dcshimmer 1.4s linear infinite"></div><div style="width:64px;height:32px;border-radius:16px;background:linear-gradient(90deg,#EEEAF8 25%,#F8F6FD 50%,#EEEAF8 75%);background-size:600px 100%;animation:dcshimmer 1.4s linear infinite"></div></div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ cards }}" as="k" hint-placeholder-count="4">
+<div role="button" tabindex="0" onClick="{{ k.open }}" style="border-radius:24px;padding:20px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.10);display:flex;flex-direction:column;gap:14px;cursor:pointer;opacity:{{ k.o }};transform:translateY({{ k.y }}px);transition:{{ k.tr }}" style-active="transform:scale(.98)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">{{ k.prio }}{{ k.badge }}</div>
+<div style="font:700 18px/24px 'Plus Jakarta Sans';letter-spacing:-.005em;text-wrap:pretty">{{ k.title }}</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<div style="display:flex;align-items:center;gap:6px;font:600 13px/18px 'Plus Jakarta Sans';color:{{ k.dueFg }}"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="{{ k.dueFg }}" stroke-width="1.6"/><path d="M8 4.5V8l2.2 1.4" stroke="{{ k.dueFg }}" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>{{ k.due }}</div>
+{{ k.stack }}</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="border-radius:28px;background:#fff;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center"><div style="width:80px;height:80px;border-radius:28px;background:#E6E1FF;display:flex;align-items:center;justify-content:center"><div style="width:36px;height:36px;border-radius:12px;border:3px solid #5B4FD6"></div></div><div style="font:800 20px/26px 'Plus Jakarta Sans'">No tasks here</div><div style="font:500 14px/20px 'Plus Jakarta Sans';color:#5F5C74">Nothing matches this status right now.</div></div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ isManager }}" hint-placeholder-val="{{ false }}">
+<button style="all:unset;box-sizing:border-box;position:absolute;right:{{ pad }}px;bottom:112px;min-height:56px;padding:0 24px 0 18px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(91,79,214,.4);z-index:5" style-active="transform:scale(.96)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>New task</button>
+</sc-if>
+
+<div style="position:absolute;left:12px;right:12px;bottom:26px;height:72px;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 10px 30px rgba(60,40,140,.22);display:flex;align-items:center;justify-content:space-around;padding:0 8px;gap:4px;z-index:6">
+<div style="min-width:48px;height:56px;padding:0 14px;border-radius:999px;background:#E6E1FF;display:flex;align-items:center;gap:8px;color:#2F2791;font:700 13px/16px 'Plus Jakarta Sans'"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="4" width="16" height="3.4" rx="1.7" fill="#2F2791"/><rect x="3" y="9.3" width="16" height="3.4" rx="1.7" fill="#2F2791"/><rect x="3" y="14.6" width="10" height="3.4" rx="1.7" fill="#2F2791"/></svg>Tasks</div>
+<sc-if value="{{ isManager }}" hint-placeholder-val="{{ false }}"><div style="min-width:48px;height:56px;padding:0 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5C74;font:700 11px/14px 'Plus Jakarta Sans';position:relative"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M4 12h4l1.5 3h3L14 12h4M4 12l2-7h10l2 7v6H4z" stroke="#5F5C74" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>Review<span style="position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:9px;background:#C2282D;color:#fff;font:700 11px/18px 'Plus Jakarta Sans';text-align:center;padding:0 4px;box-sizing:border-box">{{ reviewCount }}</span></div></sc-if>
+<div style="min-width:48px;height:56px;padding:0 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5C74;font:700 11px/14px 'Plus Jakarta Sans'"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="8" r="3.6" stroke="#5F5C74" stroke-width="1.8" fill="none"/><path d="M4 18.5c1-3.6 3.8-5 7-5s6 1.4 7 5" stroke="#5F5C74" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Profile</div>
+</div>
+
+<sc-if value="{{ hasDetail }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:#F6F4FD;z-index:20;opacity:{{ dOpacity }};transform:translateX({{ dX }}px);transition:opacity 300ms cubic-bezier(.05,.7,.1,1),transform 450ms cubic-bezier(.05,.7,.1,1)">
+<div class="hs" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:170px">
+<div style="background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:56px {{ pad }}px 24px;display:flex;flex-direction:column;gap:16px;border-radius:0 0 32px 32px">
+<div style="display:flex;align-items:center;gap:12px"><button onClick="{{ back }}" aria-label="Back" style="all:unset;box-sizing:border-box;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(60,40,140,.14);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.94)"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M13.5 5l-6 6 6 6" stroke="#1C1B2E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div style="font:700 15px/20px 'Plus Jakarta Sans';color:#5F5C74">Task detail</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">{{ d.prio }}{{ d.badge }}</div>
+<h2 style="margin:0;font:800 26px/32px 'Plus Jakarta Sans';letter-spacing:-.01em;text-wrap:pretty">{{ d.title }}</h2>
+</div>
+
+<div style="padding:16px {{ pad }}px 0;display:flex;flex-direction:column;gap:16px">
+<div style="border-radius:24px;background:#fff;padding:20px;box-shadow:0 6px 20px rgba(60,40,140,.08);display:flex;flex-direction:column;gap:12px">
+<div style="font:800 17px/22px 'Plus Jakarta Sans'">Description</div>
+<div style="font:500 15px/23px 'Plus Jakarta Sans';color:#3A3752;text-wrap:pretty">{{ d.desc }}</div>
+<div style="height:1px;background:#EEEAF8"></div>
+<div style="display:flex;justify-content:space-between;gap:12px;font:600 14px/20px 'Plus Jakarta Sans'"><span style="color:#5F5C74">Due date</span><span style="color:{{ d.dueFg }};font-weight:700;text-align:right">{{ d.due }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;font:600 14px/20px 'Plus Jakarta Sans'"><span style="color:#5F5C74">Review</span><span style="font-weight:700;text-align:right">{{ d.review }}</span></div>
+</div>
+
+<div style="border-radius:24px;background:#fff;padding:20px;box-shadow:0 6px 20px rgba(60,40,140,.08);display:flex;flex-direction:column;gap:14px">
+<div style="font:800 17px/22px 'Plus Jakarta Sans'">People</div>
+<div style="display:flex;align-items:center;gap:12px">{{ d.managerAvatar }}<div style="min-width:0"><div style="font:700 15px/20px 'Plus Jakarta Sans'">Daniel Okafor</div><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#4338B8">Manager</div></div></div>
+<sc-for list="{{ d.people }}" as="p" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px">{{ p.av }}<div style="min-width:0"><div style="font:700 15px/20px 'Plus Jakarta Sans'">{{ p.name }}</div><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">Employee</div></div></div>
+</sc-for>
+</div>
+
+<div style="border-radius:24px;background:#fff;padding:20px;box-shadow:0 6px 20px rgba(60,40,140,.08);display:flex;flex-direction:column;gap:14px">
+<div style="font:800 17px/22px 'Plus Jakarta Sans'">Comments · {{ d.commentCount }}</div>
+<sc-for list="{{ d.comments }}" as="c" hint-placeholder-count="2">
+<div style="display:flex;gap:10px">{{ c.av }}<div style="flex:1;min-width:0;border-radius:18px;background:#F6F4FD;padding:10px 14px"><div style="display:flex;justify-content:space-between;gap:8px;font:700 13px/18px 'Plus Jakarta Sans'"><span>{{ c.name }}</span><span style="font-weight:600;color:#5F5C74">{{ c.when }}</span></div><div style="font:500 14px/20px 'Plus Jakarta Sans';color:#3A3752;margin-top:2px;text-wrap:pretty">{{ c.text }}</div></div></div>
+</sc-for>
+<div style="display:flex;gap:8px;align-items:center">
+<input value="{{ commentText }}" onInput="{{ onComment }}" placeholder="Add a comment" style="box-sizing:border-box;flex:1;min-width:0;height:48px;border-radius:999px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:0 18px;font:500 15px/20px 'Plus Jakarta Sans';color:#1C1B2E;outline:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"/>
+<button onClick="{{ sendComment }}" aria-label="Send comment" style="all:unset;box-sizing:border-box;flex:none;width:48px;height:48px;border-radius:50%;background:#5B4FD6;display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.94)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10h11M10.5 5l5 5-5 5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+</div>
+
+<div style="border-radius:24px;background:#fff;padding:20px;box-shadow:0 6px 20px rgba(60,40,140,.08);display:flex;flex-direction:column;gap:0">
+<div style="font:800 17px/22px 'Plus Jakarta Sans';margin-bottom:14px">Status history</div>
+<sc-for list="{{ d.history }}" as="e" hint-placeholder-count="3">
+<div style="display:flex;gap:14px">
+<div style="display:flex;flex-direction:column;align-items:center;width:14px;flex:none"><div style="width:14px;height:14px;border-radius:50%;background:{{ e.fg }};margin-top:6px"></div><div style="width:2px;flex:1;background:{{ e.line }};min-height:16px"></div></div>
+<div style="padding-bottom:18px;display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex">{{ e.badge }}</div><div style="font:600 13px/18px 'Plus Jakarta Sans';color:#5F5C74">{{ e.by }} · {{ e.when }}</div><div style="font:500 13px/18px 'Plus Jakarta Sans';color:#3A3752">{{ e.note }}</div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;padding:32px {{ pad }}px 30px;background:linear-gradient(180deg,rgba(246,244,253,0) 0%,#F6F4FD 38%);display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ a.start }}" hint-placeholder-val="{{ false }}"><button onClick="{{ a.doStart }}" style="all:unset;box-sizing:border-box;min-height:56px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(91,79,214,.36)" style-active="transform:scale(.97)">Start task</button></sc-if>
+<sc-if value="{{ a.submit }}" hint-placeholder-val="{{ false }}"><button onClick="{{ a.doSubmit }}" style="all:unset;box-sizing:border-box;min-height:56px;border-radius:999px;background:#5B4FD6;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(91,79,214,.36)" style-active="transform:scale(.97)">Submit for review</button></sc-if>
+<sc-if value="{{ a.complete }}" hint-placeholder-val="{{ false }}"><button onClick="{{ a.doComplete }}" style="all:unset;box-sizing:border-box;min-height:56px;border-radius:999px;background:#17653F;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(23,101,63,.3)" style-active="transform:scale(.97)">Complete task</button></sc-if>
+<sc-if value="{{ a.review }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px">
+<button onClick="{{ a.openReject }}" style="all:unset;box-sizing:border-box;flex:1;min-height:56px;border-radius:999px;background:#FFDAD8;color:#8A1E22;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-active="transform:scale(.97)"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="#8A1E22" stroke-width="2.2" stroke-linecap="round"/></svg>Reject</button>
+<button onClick="{{ a.doApprove }}" style="all:unset;box-sizing:border-box;flex:1;min-height:56px;border-radius:999px;background:#17653F;color:#fff;font:700 16px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 8px 20px rgba(23,101,63,.3)" style-active="transform:scale(.97)"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button></div></sc-if>
+<sc-if value="{{ a.note }}" hint-placeholder-val="{{ false }}"><div style="min-height:56px;border-radius:999px;background:#ECEAF3;color:#3A3752;font:700 14px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px">{{ a.noteText }}</div></sc-if>
+</div>
+</div>
+</sc-if>
+
+<div style="position:absolute;inset:0;z-index:40;background:rgba(28,27,46,.42);opacity:{{ sheetScrim }};pointer-events:{{ sheetPE }};transition:opacity 200ms cubic-bezier(.2,0,0,1)" onClick="{{ closeSheet }}"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:41;border-radius:32px 32px 0 0;background:#fff;padding:12px {{ pad }}px 34px;display:flex;flex-direction:column;gap:12px;box-shadow:0 -10px 40px rgba(60,40,140,.24);transform:translateY({{ sheetY }});transition:transform 300ms cubic-bezier(.05,.7,.1,1)">
+<div style="align-self:center;width:40px;height:5px;border-radius:3px;background:#D5D0EA"></div>
+<div style="font:800 20px/26px 'Plus Jakarta Sans';margin-top:4px">Reject task</div>
+<div style="font:500 14px/20px 'Plus Jakarta Sans';color:#5F5C74">{{ d.title }}</div>
+<textarea rows="3" value="{{ rejectText }}" onInput="{{ onReject }}" placeholder="Reason for rejecting (required)" style="box-sizing:border-box;width:100%;border-radius:18px;border:1.5px solid #D5D0EA;background:#FBFAFF;padding:14px 18px;font:500 16px/24px 'Plus Jakarta Sans';color:#1C1B2E;outline:none;resize:none" style-focus="border-color:#5B4FD6;box-shadow:0 0 0 4px rgba(91,79,214,.18);background:#fff"></textarea>
+<div style="display:flex;gap:10px"><button onClick="{{ closeSheet }}" style="all:unset;box-sizing:border-box;flex:1;min-height:52px;border-radius:999px;border:1.5px solid #B9B2E6;color:#4338B8;font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.97)">Cancel</button><button onClick="{{ a.doReject }}" style="all:unset;box-sizing:border-box;flex:1.3;min-height:52px;border-radius:999px;background:{{ rejectBg }};color:{{ rejectFg }};font:700 15px/20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 200ms" style-active="transform:scale(.97)">Reject task</button></div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:0;height:44px;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:700 14px/16px 'Plus Jakarta Sans';pointer-events:none"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><span style="width:16px;height:10px;border-radius:2px;background:#1C1B2E;opacity:.8"></span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid #1C1B2E;box-sizing:border-box;padding:1px"><span style="display:block;width:70%;height:100%;border-radius:2px;background:#1C1B2E"></span></span></span></div>
+<div style="position:absolute;left:50%;bottom:8px;width:120px;margin-left:-60px;height:5px;border-radius:3px;background:#1C1B2E;opacity:.55;z-index:60;pointer-events:none"></div>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  homeRef = React.createRef();
+  state = { role: 'Employee', width: 390, filter: 'All', selected: null, detailIn: false, tasks: null, entered: false, loading: true, spin: false, cnt: { 'To Do': 0, Working: 0, 'In Review': 0, Completed: 0 }, pulse: false, sheet: false, rejectText: '', commentText: '' };
+  P = { PN: ['Priya Nair', '#C9C1FF', '#2F2791'], MR: ['Marcus Reyes', '#BFE0FF', '#12407F'], AT: ['Aiko Tanaka', '#FFD9B8', '#6E3900'], TF: ['Tomás Ferreira', '#C8F0DA', '#17653F'], LH: ['Lena Hoffmann', '#FFD0E0', '#7A1E45'], DO: ['Daniel Okafor', '#2F2791', '#FFFFFF'] };
+  S = { 'To Do': ['#ECE8FF', '#4B3FB0'], Working: ['#DDEBFF', '#1E58B8'], 'In Review': ['#FFE8D1', '#8F4A00'], Completed: ['#D5F5E3', '#17653F'] };
+  PR = { Low: ['#E3EAF2', '#3D4F63', 1], Medium: ['#FFEFC2', '#6B4B00', 2], High: ['#FFDAD8', '#8A1E22', 3] };
+  componentDidMount() {
+    this.setState({ tasks: this.seed() });
+    this.boot();
+  }
+  seed() {
+    const hist = (st, ppl) => {
+      const o = ['To Do', 'Working', 'In Review', 'Completed'], i = o.indexOf(st), h = [{ status: 'To Do', by: 'Daniel Okafor', when: 'Oct 27, 10:12', note: 'Task created and assigned' }];
+      if (i > 0) h.push({ status: 'Working', by: this.P[ppl][0], when: 'Oct 28, 9:05', note: 'Started work' });
+      if (i > 1) h.push({ status: 'In Review', by: this.P[ppl][0], when: 'Oct 31, 16:40', note: 'Submitted for review' });
+      if (i > 2) h.push({ status: 'Completed', by: 'Daniel Okafor', when: 'Oct 31, 17:30', note: 'Approved' });
+      return h;
+    };
+    const c = (p, text, when) => ({ p, text, when });
+    const T = (id, title, desc, priority, due, dueState, status, ppl, rr, comments) => ({ id, title, desc, priority, due, dueState, status, ppl, rr, comments: comments || [], history: hist(status, ppl[0]) });
+    return [
+      T(1, 'Prepare Q4 vendor contract summary', 'Summarise the renewal terms for the five active vendor contracts: pricing changes, notice periods and auto-renewal dates. Flag anything that needs a decision before December.', 'High', 'Nov 6', 'ok', 'Working', ['PN', 'MR'], true, [c('DO', 'Start with the logistics vendors, their renewal is first.', 'Oct 28'), c('PN', 'Understood. Two of five are drafted.', 'Oct 31')]),
+      T(2, 'Update onboarding checklist for new hires', 'Add the new badge-access and laptop setup steps to the checklist and remove the retired VPN instructions.', 'Medium', 'Nov 4', 'ok', 'To Do', ['PN'], true),
+      T(3, 'Reconcile October expense reports', 'Match all October expense reports against card statements and list any receipts that are missing or over policy limits.', 'High', 'Today', 'soon', 'In Review', ['PN', 'TF'], true, [c('TF', 'Three receipts are still missing, listed on the last tab.', 'Oct 31')]),
+      T(4, 'Review safety training deck', 'Check the revised forklift safety deck for outdated regulation references and send corrections.', 'Low', 'Nov 12', 'ok', 'To Do', ['AT', 'LH'], false),
+      T(5, 'Schedule warehouse inventory audit', 'Agree an audit date with the warehouse leads and book the external counters.', 'Medium', 'Overdue · Oct 30', 'late', 'Working', ['TF', 'AT'], true),
+      T(6, 'Draft customer feedback summary', 'Group the 120 October survey responses into themes and pick five representative quotes.', 'Medium', 'Nov 8', 'ok', 'In Review', ['PN', 'LH'], true),
+      T(7, 'Archive 2025 supplier invoices', 'Move all closed 2025 supplier invoices to the archive folder and confirm the retention label.', 'Low', 'Oct 28', 'ok', 'Completed', ['PN'], false),
+      T(8, 'Confirm travel budget for regional meeting', 'Get final quotes for flights and rooms and confirm the total with finance.', 'High', 'Nov 3', 'soon', 'To Do', ['MR', 'LH'], true)
+    ];
+  }
+  boot = () => {
+    this.setState({ loading: true, entered: false });
+    clearTimeout(this._b);
+    this._b = setTimeout(() => { this.setState({ loading: false }); this.tween(); setTimeout(() => this.setState({ entered: true }), 40); }, 1000);
+  };
+  visible(role, tasks) { return role === 'Manager' ? tasks : tasks.filter(t => t.ppl.includes('PN')); }
+  counts(list) { const c = { 'To Do': 0, Working: 0, 'In Review': 0, Completed: 0 }; list.forEach(t => c[t.status]++); return c; }
+  tween = () => {
+    cancelAnimationFrame(this._r);
+    const from = { ...this.state.cnt }, to = this.counts(this.visible(this.state.role, this.state.tasks || [])), s = performance.now();
+    const step = (n) => {
+      const p = Math.min(1, (n - s) / 600), e = 1 - Math.pow(1 - p, 3), c = {};
+      Object.keys(to).forEach(k => c[k] = Math.round(from[k] + (to[k] - from[k]) * e));
+      this.setState({ cnt: c });
+      if (p < 1) this._r = requestAnimationFrame(step);
+    };
+    this._r = requestAnimationFrame(step);
+  };
+  setRole = (role) => { this.setState({ role, filter: 'All', selected: null, detailIn: false, sheet: false }, () => { this.tween(); this.restagger(); }); };
+  restagger = () => { this.setState({ entered: false }); setTimeout(() => this.setState({ entered: true }), 40); };
+  setFilter = (f) => { this.setState({ filter: f, entered: false }); setTimeout(() => this.setState({ entered: true }), 40); };
+  refresh = () => { this.setState({ spin: true }); this.boot(); setTimeout(() => this.setState({ spin: false }), 1000); };
+  onWheel = (e) => { const el = e.currentTarget; if (el.scrollTop <= 0 && e.deltaY < -30 && !this.state.loading && !this.state.selected) { this.refresh(); } };
+  open = (id) => { this.setState({ selected: id, detailIn: false, commentText: '' }); setTimeout(() => this.setState({ detailIn: true }), 30); };
+  back = () => { this.setState({ detailIn: false, sheet: false }); setTimeout(() => this.setState({ selected: null }), 320); };
+  actor() { return this.state.role === 'Manager' ? 'Daniel Okafor' : 'Priya Nair'; }
+  change(status, note, extraComment) {
+    const id = this.state.selected, now = 'Nov 1, 9:41', who = this.actor();
+    const tasks = this.state.tasks.map(t => t.id !== id ? t : { ...t, status, history: [...t.history, { status, by: who, when: now, note }], comments: extraComment ? [...t.comments, { p: this.state.role === 'Manager' ? 'DO' : 'PN', text: extraComment, when: 'Nov 1' }] : t.comments });
+    this.setState({ tasks, pulse: true, sheet: false, rejectText: '' }, () => this.tween());
+    setTimeout(() => this.setState({ pulse: false }), 320);
+  }
+  svg(w, kids) { return React.createElement('svg', { width: w, height: w, viewBox: '0 0 14 14', style: { flex: 'none' } }, kids); }
+  sIcon(s, c, bg) {
+    const h = React.createElement, ring = h('circle', { key: 'r', cx: 7, cy: 7, r: 5.5, fill: 'none', stroke: c, strokeWidth: 2 });
+    if (s === 'To Do') return this.svg(14, [ring]);
+    if (s === 'Working') return this.svg(14, [ring, h('path', { key: 'p', d: 'M7 3a4 4 0 010 8z', fill: c })]);
+    if (s === 'In Review') return this.svg(14, [ring, h('path', { key: 'p', d: 'M7 4v3.2l2 1.2', stroke: c, strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' })]);
+    return this.svg(14, [h('circle', { key: 'r', cx: 7, cy: 7, r: 6, fill: c }), h('path', { key: 'p', d: 'M4.2 7.2l2 2 3.6-4', stroke: bg, strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' })]);
+  }
+  badge(s, big, pulse) {
+    const [bg, fg] = this.S[s];
+    return React.createElement('span', { style: { height: big ? 36 : 32, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 14px 0 11px', borderRadius: 999, background: bg, color: fg, font: "700 " + (big ? 14 : 13) + "px/16px 'Plus Jakarta Sans'", transition: 'background 300ms, color 300ms, transform 300ms cubic-bezier(.05,.7,.1,1)', transform: pulse ? 'scale(1.1)' : 'scale(1)', whiteSpace: 'nowrap' } }, this.sIcon(s, fg, bg), s);
+  }
+  prio(p) {
+    const [bg, fg, n] = this.PR[p], h = React.createElement, bar = (i, x, y, ht) => h('rect', { key: i, x, y, width: 2.6, height: ht, rx: 1, fill: fg, opacity: n > i ? 1 : 0.25 });
+    return h('span', { style: { height: 28, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 12px', borderRadius: 10, background: bg, color: fg, font: "700 12px/16px 'Plus Jakarta Sans'" } }, h('svg', { width: 12, height: 12, viewBox: '0 0 12 12' }, [bar(0, 1, 7, 4), bar(1, 4.7, 4.5, 6.5), bar(2, 8.4, 1, 10)]), p);
+  }
+  av(k, size, ring) {
+    const [name, bg, fg] = this.P[k], ini = name.split(' ').map(x => x[0]).join('');
+    return React.createElement('div', { key: k, title: name, style: { width: size, height: size, borderRadius: '50%', background: bg, color: fg, border: ring ? '3px solid #5B4FD6' : '2px solid #fff', boxSizing: 'border-box', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "700 " + (size > 40 ? 15 : 12) + "px/16px 'Plus Jakarta Sans'" } }, ini);
+  }
+  stack(ppl) {
+    return React.createElement('div', { style: { display: 'flex', paddingLeft: 8 }, 'aria-label': ppl.map(k => this.P[k][0]).join(', ') }, ppl.map(k => React.createElement('div', { key: k, style: { marginLeft: -8, display: 'flex' } }, this.av(k, 32))));
+  }
+  renderVals() {
+    const st = this.state, tasks = st.tasks || [], role = st.role, vis = this.visible(role, tasks), cnt = this.counts(vis), isM = role === 'Manager';
+    const pad = st.width === 320 ? 16 : 20, h = React.createElement;
+    const seg = (items, cur, set) => items.map(([v, l]) => ({ label: l, on: () => set(v), bg: cur === v ? '#5B4FD6' : 'transparent', fg: cur === v ? '#fff' : '#3A3752' }));
+    const order = ['To Do', 'Working', 'In Review', 'Completed'];
+    const tiles = order.map(s => ({ label: s, count: st.cnt[s], bg: this.S[s][0], fg: this.S[s][1], icon: this.sIcon(s, this.S[s][1], this.S[s][0]), ring: st.filter === s ? 'inset 0 0 0 2.5px ' + this.S[s][1] : 'none', on: () => this.setFilter(st.filter === s ? 'All' : s) }));
+    const chips = ['All', ...order].map(s => { const on = st.filter === s; return { label: s, n: s === 'All' ? vis.length : cnt[s], bg: on ? '#5B4FD6' : '#fff', fg: on ? '#fff' : '#3A3752', bd: on ? '#5B4FD6' : '#D5D0EA', check: on ? h('svg', { width: 16, height: 16, viewBox: '0 0 16 16' }, h('path', { d: 'M3 8.5l3.2 3.2L13 4.5', stroke: '#fff', strokeWidth: 2.2, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' })) : null, on: () => this.setFilter(s) }; });
+    const list = vis.filter(t => st.filter === 'All' || t.status === st.filter);
+    const ease = 'cubic-bezier(.05,.7,.1,1)';
+    const cards = list.map((t, i) => ({ title: t.title, prio: this.prio(t.priority), badge: this.badge(t.status), stack: this.stack(t.ppl), due: t.due === 'Today' ? 'Due today' : t.dueState === 'late' ? t.due : 'Due ' + t.due, dueFg: t.dueState === 'late' ? '#A3262A' : '#5F5C74', o: st.entered ? 1 : 0, y: st.entered ? 0 : 16, tr: st.entered ? 'opacity 300ms ' + ease + ' ' + Math.min(i, 7) * 40 + 'ms, transform 300ms ' + ease + ' ' + Math.min(i, 7) * 40 + 'ms' : 'none', open: () => this.open(t.id) }));
+    const t = tasks.find(x => x.id === st.selected), d = { title: '' }, a = {};
+    if (t) {
+      const [mb, mf] = [0, 0];
+      d.title = t.title; d.desc = t.desc; d.prio = this.prio(t.priority); d.badge = this.badge(t.status, true, st.pulse);
+      d.due = t.due === 'Today' ? 'Today' : t.dueState === 'late' ? t.due : t.due + ', 2026'; d.dueFg = t.dueState === 'late' ? '#A3262A' : '#1C1B2E';
+      d.review = t.rr ? 'Manager approval required' : 'Not required';
+      d.managerAvatar = this.av('DO', 48, true);
+      d.people = t.ppl.map(k => ({ name: this.P[k][0], av: this.av(k, 48) }));
+      d.commentCount = t.comments.length;
+      d.comments = t.comments.length ? t.comments.map(c => ({ av: this.av(c.p, 36), name: this.P[c.p][0], when: c.when, text: c.text })) : [{ av: null, name: 'No comments yet', when: '', text: 'Add the first one below.' }];
+      d.history = t.history.slice().reverse().map((e, i, arr) => ({ badge: this.badge(e.status), fg: this.S[e.status][1], line: i === arr.length - 1 ? 'transparent' : '#D5D0EA', by: e.by, when: e.when, note: e.note }));
+      const s = t.status;
+      a.start = !isM && s === 'To Do'; a.submit = !isM && s === 'Working' && t.rr; a.complete = !isM && s === 'Working' && !t.rr; a.review = isM && s === 'In Review';
+      a.note = !a.start && !a.submit && !a.complete && !a.review;
+      a.noteText = isM ? (s === 'Completed' ? 'Task completed' : 'Approve or reject when In Review') : (s === 'In Review' ? 'Waiting for manager review' : 'Task completed');
+      a.doStart = () => this.change('Working', 'Started work');
+      a.doSubmit = () => this.change('In Review', 'Submitted for review');
+      a.doComplete = () => this.change('Completed', 'Marked as completed');
+      a.doApprove = () => this.change('Completed', 'Approved');
+      a.openReject = () => this.setState({ sheet: true });
+      const ok = st.rejectText.trim().length > 0;
+      a.doReject = () => { if (ok) this.change('Working', 'Rejected and sent back', 'Rejected: ' + st.rejectText.trim()); };
+    }
+    const ok = st.rejectText.trim().length > 0;
+    return {
+      roles: seg([['Employee', 'Employee'], ['Manager', 'Manager']], role, this.setRole),
+      widths: seg([[320, '320'], [390, '390'], [430, '430']], st.width, w => this.setState({ width: w })),
+      replay: this.refresh, w: st.width, pad, homeRef: this.homeRef, onWheel: this.onWheel, refresh: this.refresh,
+      spinStyle: st.spin ? { animation: 'dcspin 800ms linear infinite' } : {},
+      firstName: isM ? 'Daniel' : 'Priya', role, isManager: isM, reviewCount: cnt['In Review'],
+      tiles, chips, cards, skeletons: [1, 2, 3], loading: st.loading, showList: !st.loading && list.length > 0, isEmpty: !st.loading && list.length === 0,
+      listTitle: isM ? 'All tasks' : 'Your tasks', shownCount: list.length,
+      hasDetail: !!t, dOpacity: st.detailIn ? 1 : 0, dX: st.detailIn ? 0 : 60, back: this.back, d, a,
+      commentText: st.commentText, onComment: e => this.setState({ commentText: e.target.value }),
+      sendComment: () => { const v = st.commentText.trim(); if (!v) return; this.setState({ commentText: '', tasks: tasks.map(x => x.id === st.selected ? { ...x, comments: [...x.comments, { p: isM ? 'DO' : 'PN', text: v, when: 'Nov 1' }] } : x) }); },
+      sheetScrim: st.sheet ? 1 : 0, sheetPE: st.sheet ? 'auto' : 'none', sheetY: st.sheet ? '0%' : '110%', closeSheet: () => this.setState({ sheet: false }),
+      rejectText: st.rejectText, onReject: e => this.setState({ rejectText: e.target.value }), rejectBg: ok ? '#A3262A' : '#ECEAF3', rejectFg: ok ? '#fff' : '#8B889E'
+    };
+  }
+}
+</script>
+</body>
+</html>

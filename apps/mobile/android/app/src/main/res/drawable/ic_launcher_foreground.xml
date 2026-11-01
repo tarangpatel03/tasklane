@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  From docs/design/logo/tasklane-icon-foreground.svg. Android vectors have no masks, so the
+  check that the SVG cuts out of the right lane is drawn in the gradient's mid colour instead.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <group
+        android:scaleX="10.4"
+        android:scaleY="10.4"
+        android:translateX="179.2"
+        android:translateY="179.2">
+        <path
+            android:fillAlpha="0.3"
+            android:fillColor="#FFFFFF"
+            android:pathData="M14,10a7,7 0 0 1 7,7v30a7,7 0 0 1 -14,0v-30a7,7 0 0 1 7,-7z" />
+        <path
+            android:fillAlpha="0.3"
+            android:fillColor="#FFFFFF"
+            android:pathData="M32,10a7,7 0 0 1 7,7v30a7,7 0 0 1 -14,0v-30a7,7 0 0 1 7,-7z" />
+        <path
+            android:fillAlpha="0.7"
+            android:fillColor="#FFFFFF"
+            android:pathData="M32,30a7,7 0 0 1 7,7v10a7,7 0 0 1 -14,0v-10a7,7 0 0 1 7,-7z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M50,10a7,7 0 0 1 7,7v30a7,7 0 0 1 -14,0v-30a7,7 0 0 1 7,-7z" />
+        <path
+            android:pathData="M46,33l3.6,3.6 5.8,-7"
+            android:strokeColor="#564BCF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="3.2" />
+    </group>
+</vector>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#EFECF8;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1C1B2E}a{color:#5B4FD6}a:hover{color:#4338B8}</style>
+</helmet>
+<div style="width:1240px;padding:56px 56px 72px;box-sizing:border-box;display:flex;flex-direction:column;gap:48px;font-family:'Plus Jakarta Sans',system-ui,sans-serif">
+
+<header style="display:flex;align-items:center;gap:28px;padding:36px 40px;border-radius:32px;background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 85%)">
+<img src="logo/tasklane-mark.svg" width="96" height="96" alt="Tasklane mark"/>
+<div><div style="font:700 12px/16px 'Plus Jakarta Sans';letter-spacing:.08em;text-transform:uppercase;color:#4338B8">Brand · Status columns</div>
+<h1 style="margin:4px 0 0;font:800 44px/50px 'Plus Jakarta Sans';letter-spacing:-.02em">Tasklane</h1>
+<div style="font:500 16px/24px 'Plus Jakarta Sans';color:#5F5C74;margin-top:4px;max-width:640px">Three lanes fill from empty to done, matching To Do, Working and Completed. Violet #5B4FD6 on light, white on the #6A5EE6 to #4338B8 icon gradient.</div></div></header>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:800 24px/30px 'Plus Jakarta Sans'">1 · Mark and one-colour mark</h2>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+<div style="display:flex;flex-direction:column;gap:10px"><div style="height:240px;border-radius:28px;background:#fff;background-image:linear-gradient(45deg,#ECE9F6 25%,transparent 25%,transparent 75%,#ECE9F6 75%),linear-gradient(45deg,#ECE9F6 25%,transparent 25%,transparent 75%,#ECE9F6 75%);background-size:24px 24px;background-position:0 0,12px 12px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-mark.svg" width="150" height="150" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Mark, transparent</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">tasklane-mark.svg / .png</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="height:240px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-mark-mono.svg" width="150" height="150" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">One colour, dark</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Outlined lanes, check cut out. Flat fill, no transparency steps.</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="height:240px;border-radius:28px;background:#5B4FD6;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-mark-mono-white.svg" width="150" height="150" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">One colour, white</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">tasklane-mark-mono-white.svg</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="height:240px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;gap:28px;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-mark.svg" width="48" height="48" alt=""/><img src="logo/tasklane-mark.svg" width="32" height="32" alt=""/><img src="logo/tasklane-mark.svg" width="20" height="20" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Small sizes</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">48, 32 and 20px. Keep clear space of one column width around the mark.</div></div>
+</div></section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:800 24px/30px 'Plus Jakarta Sans'">2 · App icon layers, 1024 × 1024</h2>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+<div style="display:flex;flex-direction:column;gap:10px"><div style="aspect-ratio:1;border-radius:28px;overflow:hidden;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-icon-background.svg" style="width:100%;height:100%;display:block" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Background layer</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Soft gradient, full bleed, no rounding. tasklane-icon-background.svg / .png</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="position:relative;aspect-ratio:1;border-radius:28px;overflow:hidden;background:#fff;background-image:linear-gradient(45deg,#ECE9F6 25%,transparent 25%,transparent 75%,#ECE9F6 75%),linear-gradient(45deg,#ECE9F6 25%,transparent 25%,transparent 75%,#ECE9F6 75%);background-size:24px 24px;background-position:0 0,12px 12px;box-shadow:0 6px 20px rgba(60,40,140,.08)"><div style="position:absolute;inset:0;background:#4338B8;opacity:.9"></div><img src="logo/tasklane-icon-foreground.svg" style="position:absolute;inset:0;width:100%;height:100%" alt=""/><div style="position:absolute;left:17%;top:17%;width:66%;height:66%;border:2px dashed rgba(255,255,255,.85);border-radius:50%;box-sizing:border-box"></div></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Foreground layer</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Transparent. Mark is 520 × 458, and its farthest corner sits 316px from the centre, inside the dashed 676px (66%) safe-zone circle. Check is cut out so the background shows through.</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="aspect-ratio:1;border-radius:28px;overflow:hidden;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-icon-full.svg" style="width:100%;height:100%;display:block" alt=""/></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Combined, square</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">For iOS and stores, which apply their own rounding. tasklane-icon-full.svg / .png</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="aspect-ratio:1;border-radius:28px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.08);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;place-items:center;padding:16px;gap:8px">
+<div style="width:96px;height:96px;border-radius:50%;overflow:hidden;position:relative"><img src="logo/tasklane-icon-full.svg" style="width:100%;height:100%" alt=""/></div>
+<div style="width:96px;height:96px;border-radius:34%;overflow:hidden"><img src="logo/tasklane-icon-full.svg" style="width:100%;height:100%" alt=""/></div>
+<div style="width:96px;height:96px;border-radius:22%;overflow:hidden"><img src="logo/tasklane-icon-full.svg" style="width:100%;height:100%" alt=""/></div>
+<div style="width:96px;height:96px;border-radius:12%;overflow:hidden"><img src="logo/tasklane-icon-full.svg" style="width:100%;height:100%" alt=""/></div></div><div style="font:700 13px/18px 'Plus Jakarta Sans'">Launcher masks</div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Circle, squircle, rounded square and tight square all keep the mark clear of the edge.</div></div>
+</div></section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:800 24px/30px 'Plus Jakarta Sans'">3 · Horizontal logo</h2>
+<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="height:150px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;gap:16px;box-shadow:0 6px 20px rgba(60,40,140,.08)"><img src="logo/tasklane-mark.svg" width="72" height="72" alt=""/><span style="font:800 56px/60px 'Plus Jakarta Sans';letter-spacing:-.02em">Tasklane</span></div>
+<div style="height:150px;border-radius:28px;background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);display:flex;align-items:center;justify-content:center;gap:16px"><img src="logo/tasklane-mark.svg" width="72" height="72" alt=""/><span style="font:800 56px/60px 'Plus Jakarta Sans';letter-spacing:-.02em">Tasklane</span></div>
+<div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Mark plus wordmark in Plus Jakarta Sans 800, tracking -2%. The SVG file names the font; install Plus Jakarta Sans or convert the text to outlines before print use. tasklane-logo-horizontal.svg</div></div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="border-radius:28px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.08);padding:20px 14px;display:flex;flex-direction:column;gap:20px;width:264px"><div style="display:flex;align-items:center;gap:12px;padding:0 6px"><img src="logo/tasklane-mark.svg" width="44" height="44" alt=""/><div><div style="font:800 19px/22px 'Plus Jakarta Sans';letter-spacing:-.01em">Tasklane</div><div style="font:600 12px/16px 'Plus Jakarta Sans';color:#5F5C74">Admin panel</div></div></div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74;padding:0 6px">Admin sidebar</div></div>
+<div style="border-radius:28px;background:linear-gradient(160deg,#E4DEFF 0%,#F6F4FD 100%);padding:28px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center;gap:12px"><img src="logo/tasklane-mark.svg" width="52" height="52" alt=""/><span style="font:800 28px/32px 'Plus Jakarta Sans';letter-spacing:-.02em">Tasklane</span></div><div style="font:500 12px/18px 'Plus Jakarta Sans';color:#5F5C74">Login hero</div></div></div>
+</div></section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:800 24px/30px 'Plus Jakarta Sans'">4 · Previews</h2>
+<div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:flex-end;gap:32px;padding:32px 40px;border-radius:28px;background:#fff;box-shadow:0 6px 20px rgba(60,40,140,.08)">
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:96px;height:96px;border-radius:22px;overflow:hidden;box-shadow:0 8px 20px rgba(67,56,184,.35)"><img src="logo/tasklane-icon-full.svg" width="96" height="96" style="display:block" alt=""/></div><div style="font:700 12px/16px 'Plus Jakarta Sans';color:#5F5C74">96px</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:48px;height:48px;border-radius:11px;overflow:hidden"><img src="logo/tasklane-icon-full.svg" width="48" height="48" style="display:block" alt=""/></div><div style="font:700 12px/16px 'Plus Jakarta Sans';color:#5F5C74">48px</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:29px;height:29px;border-radius:7px;overflow:hidden"><img src="logo/tasklane-icon-full.svg" width="29" height="29" style="display:block" alt=""/></div><div style="font:700 12px/16px 'Plus Jakarta Sans';color:#5F5C74">29px</div></div></div>
+<div style="font:500 13px/20px 'Plus Jakarta Sans';color:#5F5C74;max-width:340px">The three columns stay distinct down to 29px; the check is the first detail to drop and the half-filled column carries the mark.</div></div>
+
+<div style="width:320px;height:640px;border-radius:48px;background:linear-gradient(170deg,#CFC7FF 0%,#F1EEFF 45%,#FFD9C2 100%);box-shadow:0 0 0 10px #1C1B2E,0 30px 60px rgba(40,30,110,.35);position:relative;overflow:hidden;flex:none">
+<div style="position:absolute;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:700 14px/16px 'Plus Jakarta Sans'"><span>9:41</span><span style="width:24px;height:11px;border-radius:4px;border:1.5px solid #1C1B2E;box-sizing:border-box;padding:1px"><span style="display:block;width:70%;height:100%;border-radius:2px;background:#1C1B2E"></span></span></div>
+<div style="position:absolute;left:20px;right:20px;top:84px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;overflow:hidden;box-shadow:0 4px 10px rgba(40,30,110,.25)"><img src="logo/tasklane-icon-full.svg" width="62" height="62" style="display:block" alt=""/></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Tasklane</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#fff"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Notes</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#FFD9B8"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Clock</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#C8F0DA"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Maps</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#BFE0FF"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Mail</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#FFD0E0"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Photos</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#fff"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Camera</div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:62px;height:62px;border-radius:15px;background:#E3EAF2"></div><div style="font:600 11px/14px 'Plus Jakarta Sans';color:#1C1B2E">Files</div></div></div>
+<div style="position:absolute;left:14px;right:14px;bottom:26px;height:84px;border-radius:30px;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:space-around;padding:0 10px"><div style="width:62px;height:62px;border-radius:15px;background:#fff"></div><div style="width:62px;height:62px;border-radius:15px;background:#C8F0DA"></div><div style="width:62px;height:62px;border-radius:15px;background:#FFD9B8"></div><div style="width:62px;height:62px;border-radius:15px;background:#BFE0FF"></div></div>
+<div style="position:absolute;left:50%;bottom:8px;width:110px;margin-left:-55px;height:5px;border-radius:3px;background:#1C1B2E;opacity:.55"></div>
+</div>
+</div></section>
+
+<section style="padding:24px 28px;border-radius:24px;background:#fff;display:flex;flex-direction:column;gap:6px;font:500 14px/22px 'Plus Jakarta Sans';color:#3A3752"><div style="font:800 16px/22px 'Plus Jakarta Sans'">Files in /logo</div>
+<div style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:20px;color:#5F5C74">tasklane-mark.svg · tasklane-mark-1024.png · tasklane-mark-mono.svg · tasklane-mark-mono-1024.png · tasklane-mark-mono-white.svg<br/>tasklane-icon-foreground.svg · tasklane-icon-foreground-1024.png · tasklane-icon-background.svg · tasklane-icon-background-1024.png<br/>tasklane-icon-full.svg · tasklane-icon-full-1024.png · tasklane-logo-horizontal.svg</div></section>
+</div>
+
+</x-dc>
+</body>
+</html>
