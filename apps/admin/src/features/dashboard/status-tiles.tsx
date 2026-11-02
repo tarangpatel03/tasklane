@@ -7,6 +7,7 @@ import { Skeleton } from '../../components/skeleton';
 import { STATUS_LABEL } from '../../components/task-badges';
 import { useCountUp } from '../../hooks/use-count-up';
 import styles from './status-tiles.module.css';
+import { PATHS } from '../../app/paths';
 
 const TONE: Record<TaskStatus, string> = {
   [TaskStatus.TODO]: styles.todo,
@@ -29,7 +30,7 @@ function Tile({
   return (
     <li className={styles.item} style={{ '--i': index } as CSSProperties}>
       <Link
-        to={`/tasks?status=${status}`}
+        to={`${PATHS.tasks}?status=${status}`}
         className={`${styles.tile} ${TONE[status]}`}
         aria-label={`${STATUS_LABEL[status]}: ${count} tasks. Show them.`}
       >

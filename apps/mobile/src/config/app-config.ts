@@ -1,3 +1,5 @@
+import { API_BASE_PATH } from '@task-app/shared';
+
 /**
  * API base URL. Debug builds use the PC's LAN IP (same Wi-Fi); for `adb reverse tcp:3000 tcp:3000`
  * set the debug value to `http://localhost:3000` instead.
@@ -15,5 +17,5 @@ function resolveApiUrl(): string {
 }
 
 export const appConfig = {
-  apiBaseUrl: `${resolveApiUrl()}/api/v1`,
+  apiBaseUrl: `${resolveApiUrl()}${API_BASE_PATH}`,
 };

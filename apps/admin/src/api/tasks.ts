@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '@task-app/shared';
 import type { ApiMeta, Role, TaskAction, TaskPriority, TaskStatus } from '@task-app/shared';
 import { apiEnvelope, apiRequest } from './client';
 
@@ -97,40 +98,47 @@ export function listTasks(params: ListTasksParams): Promise<Page<TaskDto>> {
   for (const [key, value] of optional) {
     if (value) query.set(key, value);
   }
-  return listPage<TaskDto>(`/tasks?${query.toString()}`, params.page, params.limit);
+  return listPage<TaskDto>(
+    `${ENDPOINTS.tasks.list}?${query.toString()}`,
+    params.page,
+    params.limit,
+  );
 }
 
 export function getTask(id: string): Promise<TaskDto> {
-  return apiRequest<TaskDto>(`/tasks/${id}`);
+  return apiRequest<TaskDto>(ENDPOINTS.tasks.byId(id));
 }
 
 export function createTask(body: CreateTaskBody): Promise<TaskDto> {
-  return apiRequest<TaskDto>('/tasks', { method: 'POST', body });
+  return apiRequest<TaskDto>(ENDPOINTS.tasks.list, { method: 'POST', body });
 }
 
 export function updateTask(id: string, body: UpdateTaskBody): Promise<TaskDto> {
-  return apiRequest<TaskDto>(`/tasks/${id}`, { method: 'PATCH', body });
+  return apiRequest<TaskDto>(ENDPOINTS.tasks.byId(id), { method: 'PATCH', body });
 }
 
 export function deleteTask(id: string): Promise<null> {
-  return apiRequest<null>(`/tasks/${id}`, { method: 'DELETE' });
+  return apiRequest<null>(ENDPOINTS.tasks.byId(id), { method: 'DELETE' });
 }
 
 export function transitionTask(id: string, action: TaskAction, comment?: string): Promise<TaskDto> {
-  return apiRequest<TaskDto>(`/tasks/${id}/transition`, {
+  return apiRequest<TaskDto>(ENDPOINTS.tasks.transition(id), {
     method: 'POST',
     body: { action, comment },
   });
 }
 
 export function listComments(taskId: string): Promise<Page<CommentDto>> {
-  return listPage<CommentDto>(`/tasks/${taskId}/comments?page=1&limit=100`, 1, 100);
+  return listPage<CommentDto>(`${ENDPOINTS.tasks.comments(taskId)}?page=1&limit=100`, 1, 100);
 }
 
 export function createComment(taskId: string, body: string): Promise<CommentDto> {
-  return apiRequest<CommentDto>(`/tasks/${taskId}/comments`, { method: 'POST', body: { body } });
+  return apiRequest<CommentDto>(ENDPOINTS.tasks.comments(taskId), {
+    method: 'POST',
+    body: { body },
+  });
 }
 
 export function listHistory(taskId: string): Promise<Page<HistoryDto>> {
-  return listPage<HistoryDto>(`/tasks/${taskId}/history?page=1&limit=100`, 1, 100);
+  return listPage<HistoryDto>(`${ENDPOINTS.tasks.history(taskId)}?page=1&limit=100`, 1, 100);
 }

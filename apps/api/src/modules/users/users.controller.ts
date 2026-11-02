@@ -12,7 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role } from '@task-app/shared';
+import { ROUTES, Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -31,7 +31,7 @@ function toResponse(user: User): UserResponseDto {
 
 @ApiTags('Users')
 @ApiBearerAuth()
-@Controller('users')
+@Controller(ROUTES.users.controller)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -51,7 +51,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Get one user' })
-  @Get(':id')
+  @Get(ROUTES.users.byId)
   async findOne(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
@@ -68,7 +68,7 @@ export class UsersController {
 
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a user (Admin)' })
-  @Patch(':id')
+  @Patch(ROUTES.users.byId)
   async update(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
@@ -79,7 +79,7 @@ export class UsersController {
 
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Send a new setup link (Admin)' })
-  @Post(':id/resend-invite')
+  @Post(ROUTES.users.resendInvite)
   @HttpCode(HttpStatus.OK)
   async resendInvite(@Param('id', ParseUUIDPipe) id: string): Promise<null> {
     await this.usersService.resendInvite(id);
@@ -89,7 +89,7 @@ export class UsersController {
   /** Deactivates the user (spec 8). `PATCH` with `status` does the same and can also activate. */
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Deactivate a user (Admin)' })
-  @Delete(':id')
+  @Delete(ROUTES.users.byId)
   async deactivate(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,

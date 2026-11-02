@@ -13,6 +13,10 @@ NestJS + TypeORM + PostgreSQL backend. Routes are served under `/api/v1`.
 
 With `NODE_ENV` other than `production`, Swagger UI is at `http://localhost:3000/api/docs` (raw JSON at `/api/docs-json`) and lists every route under `/api/v1`. Log in with `POST /auth/login`, copy `accessToken`, press Authorize and paste it. The `@nestjs/swagger` CLI plugin (`nest-cli.json`) builds the schemas from the DTOs, so a new DTO property shows up without extra decorators; new controllers need `@ApiTags`, `@ApiBearerAuth` (private routes) and `@ApiOperation`. Every success response is wrapped as `{ success, data, meta? }` (see Response shape); the schemas describe `data` only. The HTML account pages (`/account/*`) are left out. Production serves no docs.
 
+## Route paths
+
+Controllers take the prefix, the version and every route pattern from `ROUTES`, `API_PREFIX` and `API_VERSION` in `@task-app/shared` (`packages/shared/src/api-routes.ts`) instead of string literals, so the API and both clients share one definition. Adding a route means adding it there first and running `yarn build:shared`.
+
 ## HTTP security
 
 `helmet` sets the standard security headers on every response (outside production its CSP also allows the inline scripts Swagger UI needs; the `/account/*` pages send their own stricter CSP). CORS allows only the `ADMIN_CORS_ORIGIN` origin with the `Authorization` and `Content-Type` headers; the mobile app is not a browser and is unaffected. Access tokens are signed and verified as HS256 only.

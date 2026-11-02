@@ -6,13 +6,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AppConfig } from './config/configuration';
+import { API_PREFIX, API_VERSION } from '@task-app/shared';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config = app.get<ConfigService<AppConfig, true>>(ConfigService);
 
-  app.setGlobalPrefix('api');
-  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+  app.setGlobalPrefix(API_PREFIX);
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: API_VERSION });
 
   const isProduction = config.get('nodeEnv', { infer: true }) === 'production';
 

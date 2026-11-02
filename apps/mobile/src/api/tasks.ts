@@ -1,4 +1,5 @@
 import type { Role, TaskAction, TaskPriority, TaskStatus } from '@task-app/shared';
+import { ENDPOINTS } from '@task-app/shared';
 import { apiEnvelope, apiRequest } from './client';
 
 /** Shapes below mirror the API's response DTOs; dates arrive as ISO strings. */
@@ -68,27 +69,34 @@ async function getPage<T>(path: string, page: number, limit: number): Promise<Pa
 }
 
 export function fetchTasks(status: TaskStatus | null, page: number): Promise<Page<Task>> {
-  return getPage<Task>(status ? `/tasks?status=${status}` : '/tasks', page, TASKS_PAGE_SIZE);
+  return getPage<Task>(
+    status ? `${ENDPOINTS.tasks.list}?status=${status}` : ENDPOINTS.tasks.list,
+    page,
+    TASKS_PAGE_SIZE,
+  );
 }
 
 export function fetchTaskSummary(): Promise<TaskSummary> {
-  return apiRequest<TaskSummary>('/tasks/summary');
+  return apiRequest<TaskSummary>(ENDPOINTS.tasks.summary);
 }
 
 export function fetchTask(id: string): Promise<Task> {
-  return apiRequest<Task>(`/tasks/${id}`);
+  return apiRequest<Task>(ENDPOINTS.tasks.byId(id));
 }
 
 export function fetchComments(taskId: string): Promise<Page<TaskComment>> {
-  return getPage<TaskComment>(`/tasks/${taskId}/comments`, 1, DETAIL_PAGE_SIZE);
+  return getPage<TaskComment>(ENDPOINTS.tasks.comments(taskId), 1, DETAIL_PAGE_SIZE);
 }
 
 export function fetchHistory(taskId: string): Promise<Page<TaskHistoryEntry>> {
-  return getPage<TaskHistoryEntry>(`/tasks/${taskId}/history`, 1, DETAIL_PAGE_SIZE);
+  return getPage<TaskHistoryEntry>(ENDPOINTS.tasks.history(taskId), 1, DETAIL_PAGE_SIZE);
 }
 
 export function postComment(taskId: string, body: string): Promise<TaskComment> {
-  return apiRequest<TaskComment>(`/tasks/${taskId}/comments`, { method: 'POST', body: { body } });
+  return apiRequest<TaskComment>(ENDPOINTS.tasks.comments(taskId), {
+    method: 'POST',
+    body: { body },
+  });
 }
 
 export function transitionTask(
@@ -96,7 +104,7 @@ export function transitionTask(
   action: TaskAction,
   comment?: string,
 ): Promise<Task> {
-  return apiRequest<Task>(`/tasks/${taskId}/transition`, {
+  return apiRequest<Task>(ENDPOINTS.tasks.transition(taskId), {
     method: 'POST',
     body: comment === undefined ? { action } : { action, comment },
   });
@@ -114,7 +122,7 @@ export interface TaskInput {
 
 export function createTask(input: TaskInput): Promise<Task> {
   const { description, dueDate, ...rest } = input;
-  return apiRequest<Task>('/tasks', {
+  return apiRequest<Task>(ENDPOINTS.tasks.list, {
     method: 'POST',
     body: {
       ...rest,
@@ -126,9 +134,9 @@ export function createTask(input: TaskInput): Promise<Task> {
 
 /** Sends only the fields that changed. */
 export function updateTask(taskId: string, changes: Partial<TaskInput>): Promise<Task> {
-  return apiRequest<Task>(`/tasks/${taskId}`, { method: 'PATCH', body: changes });
+  return apiRequest<Task>(ENDPOINTS.tasks.byId(taskId), { method: 'PATCH', body: changes });
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
-  await apiRequest<null>(`/tasks/${taskId}`, { method: 'DELETE' });
+  await apiRequest<null>(ENDPOINTS.tasks.byId(taskId), { method: 'DELETE' });
 }

@@ -21,6 +21,7 @@ Other script: `yarn workspace @task-app/mobile typecheck`.
 
 - `src/theme/`: design tokens from `docs/design-brief.md` (colours, type scale, spacing, radii, elevation, motion). Components use these only.
 - `src/hooks/use-window-class.ts`: `useWindowClass()` returns `compact` (below 600), `medium` (600 to 899) or `expanded` (900 and up), plus `isLandscape`. It is the only place those numbers live.
+- Constants have one home each; never hardcode them. API paths come from `ENDPOINTS` and `API_BASE_PATH` in `@task-app/shared`, screen names from `SCREENS` in `src/navigation/routes.ts`, and React Query keys from `taskKeys` and `userKeys` in `src/api/query-keys.ts` (built with `createQueryKeys` in `src/utils/queryKeyFactory.ts`).
 - `src/api/client.ts`: axios wrapper for `/api/v1` (15 s timeout; all API calls go through it). It unwraps the envelope, throws `ApiRequestError`, adds the Bearer token, and on a 401 refreshes once (one request at a time) and retries.
 - `src/auth/token-store.ts`: access token in memory, refresh token in the Android Keystore through `react-native-keychain`. `loadTokens()` runs once at startup (see `App.tsx`).
 - `src/auth/auth-provider.tsx` and `useAuth()` (`auth-context.ts`): `loading`, `signedOut` or `signedIn`. On start a stored refresh token is checked through `GET /auth/me`. Admin accounts are rejected on the phone ("Admin accounts sign in on the admin panel."). A network failure keeps the stored token.

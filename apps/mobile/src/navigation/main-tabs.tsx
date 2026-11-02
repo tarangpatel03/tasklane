@@ -8,6 +8,7 @@ import { ReviewScreen } from '../screens/review-screen';
 import { TasksScreen } from '../screens/tasks-screen';
 import { colors } from '../theme';
 import type { TabParamList } from './types';
+import { SCREENS } from './routes';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -28,9 +29,9 @@ export function MainTabs(): ReactNode {
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tab.Screen name="Tasks" component={TasksScreen} />
-      {isManager ? <Tab.Screen name="Review" component={ReviewScreen} /> : null}
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name={SCREENS.Tasks} component={TasksScreen} />
+      {isManager ? <Tab.Screen name={SCREENS.Review} component={ReviewScreen} /> : null}
+      <Tab.Screen name={SCREENS.Profile} component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

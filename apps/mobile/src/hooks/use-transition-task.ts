@@ -3,6 +3,7 @@ import { TaskAction } from '@task-app/shared';
 import { toMessage } from '../api/error-message';
 import { transitionTask, type Task } from '../api/tasks';
 import { useSnackbar } from '../components/snackbar';
+import { taskKeys } from '../api/query-keys';
 
 interface TransitionInput {
   taskId: string;
@@ -28,15 +29,15 @@ export function useTransitionTask(): UseMutationResult<Task, Error, TransitionIn
     mutationFn: (input: TransitionInput) =>
       transitionTask(input.taskId, input.action, input.comment),
     onSuccess: (updated, input) => {
-      queryClient.setQueryData(['tasks', 'detail', input.taskId], updated);
+      queryClient.setQueryData(taskKeys.detail(input.taskId), updated);
       // List, counts, review queue and history all depend on the status.
-      void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      void queryClient.invalidateQueries({ queryKey: taskKeys.all });
       snackbar.show(SUCCESS_MESSAGE[input.action]);
     },
     onError: (error) => {
       snackbar.show(toMessage(error));
       // The status may have changed elsewhere, so show the truth.
-      void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      void queryClient.invalidateQueries({ queryKey: taskKeys.all });
     },
   });
 }

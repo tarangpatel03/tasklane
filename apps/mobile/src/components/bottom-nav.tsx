@@ -21,8 +21,10 @@ import { colors, duration, easing, elevation, fontFamily, radii, spacing, tablet
 import { AppText } from './app-text';
 import { useNavHidden } from './nav-visibility';
 import { NewTaskButton } from './new-task-button';
+import { SCREENS } from '../navigation/routes';
+import { taskKeys } from '../api/query-keys';
 
-export type NavTarget = 'Tasks' | 'Review' | 'Profile';
+export type NavTarget = typeof SCREENS.Tasks | typeof SCREENS.Review | typeof SCREENS.Profile;
 
 /**
  * Bottom space a screen's content needs so the floating nav (and the New task button, for Managers)
@@ -105,7 +107,7 @@ function NavItem({ target, active, badge = 0, onPress }: NavItemProps): ReactNod
 }
 
 function isNavTarget(name: string): name is NavTarget {
-  return name === 'Tasks' || name === 'Review' || name === 'Profile';
+  return name === SCREENS.Tasks || name === SCREENS.Review || name === SCREENS.Profile;
 }
 
 /**
@@ -122,18 +124,18 @@ export function BottomNav({ state, navigation }: BottomTabBarProps): ReactNode {
   const hidden = useNavHidden();
   const isManager = user?.role === Role.MANAGER;
   const summary = useQuery({
-    queryKey: ['tasks', 'summary'],
+    queryKey: taskKeys.summary(),
     queryFn: fetchTaskSummary,
     enabled: isManager,
   });
 
   const index = state.index;
-  const active = state.routes[index]?.name ?? 'Tasks';
+  const active = state.routes[index]?.name ?? SCREENS.Tasks;
   const tabCount = state.routes.filter((route) => isNavTarget(route.name)).length;
   const expanded = windowClass === 'expanded';
   // In the split layout the nav sits inside the 420px list pane, except on Profile.
-  const inPane = expanded && active !== 'Profile';
-  const showButton = isManager && active !== 'Profile' && !hidden;
+  const inPane = expanded && active !== SCREENS.Profile;
+  const showButton = isManager && active !== SCREENS.Profile && !hidden;
 
   // Slot position of the pill (fractional while it slides) and the width of one slot.
   const position = useSharedValue(index);
@@ -197,7 +199,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps): ReactNode {
       <NewTaskButton
         visible={showButton}
         right={buttonRight}
-        onPress={() => navigation.navigate('TaskForm', {})}
+        onPress={() => navigation.navigate(SCREENS.TaskForm, {})}
       />
       <Animated.View
         accessibilityRole="tablist"
@@ -212,7 +214,9 @@ export function BottomNav({ state, navigation }: BottomTabBarProps): ReactNode {
                 key={route.key}
                 target={route.name}
                 active={active === route.name}
-                badge={route.name === 'Review' ? (summary.data?.[TaskStatus.IN_REVIEW] ?? 0) : 0}
+                badge={
+                  route.name === SCREENS.Review ? (summary.data?.[TaskStatus.IN_REVIEW] ?? 0) : 0
+                }
                 onPress={() => press(route.key, route.name, route.params)}
               />
             ) : null,

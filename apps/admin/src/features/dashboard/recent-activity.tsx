@@ -6,6 +6,7 @@ import { Skeleton } from '../../components/skeleton';
 import { STATUS_LABEL } from '../../components/task-badges';
 import { Panel, PanelEmpty } from './panel';
 import styles from './recent-activity.module.css';
+import { PATHS } from '../../app/paths';
 
 const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -45,7 +46,7 @@ export function RecentActivity({ items }: { items: Activity[] | null }): ReactNo
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.id}>
-              <Link to={`/tasks?task=${item.taskId}`} className={styles.item}>
+              <Link to={`${PATHS.tasks}?task=${item.taskId}`} className={styles.item}>
                 <Avatar name={item.actor.name} size={32} />
                 <span className={styles.text}>
                   <span className={styles.sentence}>

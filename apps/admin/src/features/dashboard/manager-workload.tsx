@@ -8,6 +8,7 @@ import { Skeleton } from '../../components/skeleton';
 import { STATUS_LABEL } from '../../components/task-badges';
 import { Panel, PanelEmpty } from './panel';
 import styles from './manager-workload.module.css';
+import { PATHS } from '../../app/paths';
 
 const FILL: Record<TaskStatus, string> = {
   [TaskStatus.TODO]: styles.todo,
@@ -59,7 +60,7 @@ function Row({ row }: { row: ManagerSummary }): ReactNode {
   return (
     <li>
       {row.manager ? (
-        <Link to={`/tasks?managerId=${row.manager.id}`} className={styles.row}>
+        <Link to={`${PATHS.tasks}?managerId=${row.manager.id}`} className={styles.row}>
           {body}
         </Link>
       ) : (

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Role } from '@task-app/shared';
+import { ENDPOINTS, Role } from '@task-app/shared';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ApiRequestError, apiRequest, onSessionExpired } from '../api/client';
 import { AuthContext, type AuthContextValue, type AuthStatus } from './auth-context';
@@ -12,7 +12,7 @@ async function revokeSession(): Promise<void> {
   const refreshToken = getRefreshToken();
   if (refreshToken) {
     try {
-      await apiRequest<null>('/auth/logout', { method: 'POST', body: { refreshToken } });
+      await apiRequest<null>(ENDPOINTS.auth.logout, { method: 'POST', body: { refreshToken } });
     } catch {
       // The local session is cleared either way; an expired token is already dead server-side.
     }
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }): ReactNode {
       }
       try {
         // No access token after a reload: the 401 triggers the refresh inside the client.
-        const me = await apiRequest<AuthUser>('/auth/me');
+        const me = await apiRequest<AuthUser>(ENDPOINTS.auth.me);
         if (cancelled) return;
         if (me.role !== Role.ADMIN) {
           await revokeSession();
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }): ReactNode {
   }, [reset]);
 
   const login = useCallback(async (email: string, password: string): Promise<void> => {
-    const result = await apiRequest<AuthTokens>('/auth/login', {
+    const result = await apiRequest<AuthTokens>(ENDPOINTS.auth.login, {
       method: 'POST',
       body: { email, password },
       public: true,

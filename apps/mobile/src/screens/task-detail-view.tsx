@@ -57,6 +57,8 @@ import {
   tablet,
 } from '../theme';
 import { dueText, isOverdue, relativeTime } from '../utils/task-format';
+import { SCREENS } from '../navigation/routes';
+import { taskKeys } from '../api/query-keys';
 
 /** Where the detail is shown: pushed screen, side sheet (medium) or right pane (expanded). */
 export type DetailVariant = 'screen' | 'sheet' | 'pane';
@@ -223,15 +225,15 @@ export function TaskDetailView({
   }, []);
 
   const task = useQuery({
-    queryKey: ['tasks', 'detail', taskId],
+    queryKey: taskKeys.detail(taskId),
     queryFn: () => fetchTask(taskId),
   });
   const comments = useQuery({
-    queryKey: ['tasks', 'comments', taskId],
+    queryKey: taskKeys.comments(taskId),
     queryFn: () => fetchComments(taskId),
   });
   const history = useQuery({
-    queryKey: ['tasks', 'history', taskId],
+    queryKey: taskKeys.history(taskId),
     queryFn: () => fetchHistory(taskId),
   });
 
@@ -242,8 +244,8 @@ export function TaskDetailView({
       setDeleteOpen(false);
       onDeleted();
       // Drop the cached task first so its queries do not refetch a 404.
-      queryClient.removeQueries({ queryKey: ['tasks', 'detail', taskId] });
-      void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.removeQueries({ queryKey: taskKeys.detail(taskId) });
+      void queryClient.invalidateQueries({ queryKey: taskKeys.all });
       snackbar.show('Task deleted');
     },
     onError: (error) => snackbar.show(toMessage(error)),
@@ -252,7 +254,7 @@ export function TaskDetailView({
   const addComment = async (body: string): Promise<void> => {
     try {
       await postComment(taskId, body);
-      await queryClient.invalidateQueries({ queryKey: ['tasks', 'comments', taskId] });
+      await queryClient.invalidateQueries({ queryKey: taskKeys.comments(taskId) });
     } catch (error) {
       snackbar.show(toMessage(error));
       throw error;
@@ -521,7 +523,7 @@ export function TaskDetailView({
                   <>
                     <Pressable
                       accessibilityRole="button"
-                      onPress={() => navigation.navigate('TaskForm', { taskId })}
+                      onPress={() => navigation.navigate(SCREENS.TaskForm, { taskId })}
                       style={styles.editPill}
                     >
                       <AppText variant="labelL" color={colors.onPrimaryContainer}>

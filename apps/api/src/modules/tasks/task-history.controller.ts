@@ -8,6 +8,7 @@ import { PaginatedResult } from '../../common/types/paginated-result';
 import { TaskHistoryResponseDto } from './dto/task-history-response.dto';
 import { TaskStatusHistory } from './entities/task-status-history.entity';
 import { TaskHistoryService } from './task-history.service';
+import { ROUTES } from '@task-app/shared';
 
 function toResponse(row: TaskStatusHistory): TaskHistoryResponseDto {
   return plainToInstance(TaskHistoryResponseDto, row, { excludeExtraneousValues: true });
@@ -15,7 +16,7 @@ function toResponse(row: TaskStatusHistory): TaskHistoryResponseDto {
 
 @ApiTags('Task history')
 @ApiBearerAuth()
-@Controller('tasks/:taskId/history')
+@Controller(ROUTES.taskHistory.controller)
 export class TaskHistoryController {
   constructor(private readonly historyService: TaskHistoryService) {}
 

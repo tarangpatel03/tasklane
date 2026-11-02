@@ -7,6 +7,7 @@ import { TaskDetailScreen } from '../screens/task-detail-screen';
 import { TaskFormScreen } from '../screens/task-form-screen';
 import { MainTabs } from './main-tabs';
 import type { RootStackParamList } from './types';
+import { SCREENS } from './routes';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -18,10 +19,10 @@ export function RootNavigator(): ReactNode {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {status === 'signedIn' ? (
         <>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+          <Stack.Screen name={SCREENS.Main} component={MainTabs} />
+          <Stack.Screen name={SCREENS.TaskDetail} component={TaskDetailScreen} />
           <Stack.Screen
-            name="TaskForm"
+            name={SCREENS.TaskForm}
             component={TaskFormScreen}
             // The screen draws its own scrim and card on wide windows, so the stack only has to be see-through.
             options={{ presentation: 'transparentModal', animation: 'fade' }}
@@ -29,8 +30,8 @@ export function RootNavigator(): ReactNode {
         </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name={SCREENS.Login} component={LoginScreen} />
+          <Stack.Screen name={SCREENS.ForgotPassword} component={ForgotPasswordScreen} />
         </>
       )}
     </Stack.Navigator>

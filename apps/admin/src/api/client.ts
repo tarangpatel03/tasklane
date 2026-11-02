@@ -1,11 +1,12 @@
 import axios, { type AxiosResponse } from 'axios';
+import { API_BASE_PATH, ENDPOINTS } from '@task-app/shared';
 import type { ApiError, ApiErrorDetail, ApiResponse } from '@task-app/shared';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../auth/token-store';
 import type { AuthTokens } from '../auth/types';
 
 // Statuses are inspected below (401 refresh, envelope errors), so axios must not throw on them.
 const http = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE_PATH,
   headers: { Accept: 'application/json' },
   validateStatus: () => true,
 });
@@ -82,7 +83,7 @@ async function doRefresh(): Promise<boolean> {
   if (!refreshToken) return false;
 
   try {
-    const response = await send('/auth/refresh', {
+    const response = await send(ENDPOINTS.auth.refresh, {
       method: 'POST',
       body: { refreshToken },
       public: true,

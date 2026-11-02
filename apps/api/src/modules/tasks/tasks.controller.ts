@@ -12,7 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role } from '@task-app/shared';
+import { ROUTES, Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -39,7 +39,7 @@ function toResponse(task: Task): TaskResponseDto {
 
 @ApiTags('Tasks')
 @ApiBearerAuth()
-@Controller('tasks')
+@Controller(ROUTES.tasks.controller)
 export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
@@ -63,13 +63,13 @@ export class TasksController {
 
   /** Declared before `:id`, otherwise "summary" would be parsed as a task id. */
   @ApiOperation({ summary: "Task count per status in the caller's scope" })
-  @Get('summary')
+  @Get(ROUTES.tasks.summary)
   summary(@CurrentUser() actor: AuthUser): Promise<TaskSummaryDto> {
     return this.tasksService.summary(actor);
   }
 
   @ApiOperation({ summary: 'Get one task' })
-  @Get(':id')
+  @Get(ROUTES.tasks.byId)
   async findOne(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
@@ -89,7 +89,7 @@ export class TasksController {
 
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Update a task (Admin, Manager)' })
-  @Patch(':id')
+  @Patch(ROUTES.tasks.byId)
   async update(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
@@ -100,7 +100,7 @@ export class TasksController {
 
   /** Open to every role: who may do which action is decided by the workflow service. */
   @ApiOperation({ summary: 'Move a task through the workflow' })
-  @Post(':id/transition')
+  @Post(ROUTES.tasks.transition)
   @HttpCode(HttpStatus.OK)
   async transition(
     @CurrentUser() actor: AuthUser,
@@ -112,7 +112,7 @@ export class TasksController {
 
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Soft-delete a task (Admin, Manager)' })
-  @Delete(':id')
+  @Delete(ROUTES.tasks.byId)
   async remove(
     @CurrentUser() actor: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,

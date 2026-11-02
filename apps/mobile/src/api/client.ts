@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import type { ApiError, ApiErrorDetail, ApiResponse } from '@task-app/shared';
+import { ENDPOINTS, type ApiError, type ApiErrorDetail, type ApiResponse } from '@task-app/shared';
 import { appConfig } from '../config/app-config';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../auth/token-store';
 import type { AuthTokens } from '../auth/types';
@@ -85,7 +85,7 @@ async function doRefresh(): Promise<boolean> {
   if (!refreshToken) return false;
 
   try {
-    const response = await send('/auth/refresh', {
+    const response = await send(ENDPOINTS.auth.refresh, {
       method: 'POST',
       body: { refreshToken },
       public: true,

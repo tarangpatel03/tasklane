@@ -35,9 +35,11 @@ import type { RootStackParamList, TabParamList } from '../navigation/types';
 import { colors, elevation, radii, sizes, spacing, tablet } from '../theme';
 import { ROLE_LABEL, STATUS_LABEL, STATUS_ORDER } from '../utils/task-format';
 import { TaskDetailView } from './task-detail-view';
+import { SCREENS } from '../navigation/routes';
+import { taskKeys } from '../api/query-keys';
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<TabParamList, 'Tasks'>,
+  BottomTabScreenProps<TabParamList, typeof SCREENS.Tasks>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
@@ -57,9 +59,9 @@ export function TasksScreen({ navigation, route }: Props): ReactNode {
   const [selectedId, setSelectedId] = useState<string | null>(route.params?.selectedId ?? null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const summary = useQuery({ queryKey: ['tasks', 'summary'], queryFn: fetchTaskSummary });
+  const summary = useQuery({ queryKey: taskKeys.summary(), queryFn: fetchTaskSummary });
   const list = useInfiniteQuery({
-    queryKey: ['tasks', 'list', filter],
+    queryKey: taskKeys.list(filter),
     queryFn: ({ pageParam }) => fetchTasks(filter, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
@@ -104,7 +106,7 @@ export function TasksScreen({ navigation, route }: Props): ReactNode {
       setSelectedId(taskId);
       setSheetOpen(true);
     } else {
-      navigation.navigate('TaskDetail', { taskId, from: 'Tasks' });
+      navigation.navigate(SCREENS.TaskDetail, { taskId, from: SCREENS.Tasks });
     }
   };
 

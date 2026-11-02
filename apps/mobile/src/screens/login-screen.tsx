@@ -14,13 +14,14 @@ import { TextButton } from '../components/text-button';
 import { TextField } from '../components/text-field';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, spacing } from '../theme';
+import { SCREENS } from '../navigation/routes';
 
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
 
 /** Email and password sign in. Errors show after the first submit. */
 export function LoginScreen({
   navigation,
-}: NativeStackScreenProps<RootStackParamList, 'Login'>): ReactNode {
+}: NativeStackScreenProps<RootStackParamList, typeof SCREENS.Login>): ReactNode {
   const { login } = useAuth();
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [email, setEmail] = useState('');
@@ -102,7 +103,7 @@ export function LoginScreen({
       <Entrance index={3} style={styles.forgot}>
         <TextButton
           label="Forgot password?"
-          onPress={() => navigation.navigate('ForgotPassword')}
+          onPress={() => navigation.navigate(SCREENS.ForgotPassword)}
         />
       </Entrance>
 

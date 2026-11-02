@@ -66,3 +66,5 @@ export interface ApiError {
   path: string;
   timestamp: string;
 }
+
+export * from './api-routes';

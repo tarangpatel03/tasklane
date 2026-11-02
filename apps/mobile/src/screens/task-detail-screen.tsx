@@ -6,8 +6,9 @@ import { useWindowClass } from '../hooks/use-window-class';
 import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme';
 import { TaskDetailView } from './task-detail-view';
+import { SCREENS } from '../navigation/routes';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'TaskDetail'>;
+type Props = NativeStackScreenProps<RootStackParamList, typeof SCREENS.TaskDetail>;
 
 /** Phone detail: a pushed screen around the shared detail view. */
 export function TaskDetailScreen({ navigation, route }: Props): ReactNode {
@@ -19,7 +20,7 @@ export function TaskDetailScreen({ navigation, route }: Props): ReactNode {
   useEffect(() => {
     if (windowClass !== 'expanded') return;
     if (from) {
-      navigation.popTo('Main', { screen: from, params: { selectedId: taskId } });
+      navigation.popTo(SCREENS.Main, { screen: from, params: { selectedId: taskId } });
     } else {
       navigation.goBack();
     }

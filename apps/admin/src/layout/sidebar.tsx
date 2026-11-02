@@ -3,11 +3,12 @@ import { NavLink } from 'react-router';
 import { CloseIcon, DashboardIcon, TasksIcon, UsersIcon } from '../components/icons';
 import { Logo } from '../components/logo';
 import styles from './sidebar.module.css';
+import { PATHS } from '../app/paths';
 
 export const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: <DashboardIcon />, end: true },
-  { to: '/tasks', label: 'Tasks', icon: <TasksIcon />, end: false },
-  { to: '/users', label: 'Users', icon: <UsersIcon />, end: false },
+  { to: PATHS.dashboard, label: 'Dashboard', icon: <DashboardIcon />, end: true },
+  { to: PATHS.tasks, label: 'Tasks', icon: <TasksIcon />, end: false },
+  { to: PATHS.users, label: 'Users', icon: <UsersIcon />, end: false },
 ];
 
 interface SidebarProps {

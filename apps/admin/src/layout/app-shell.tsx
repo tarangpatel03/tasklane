@@ -4,12 +4,15 @@ import { NAV_ITEMS, Sidebar } from './sidebar';
 import { TopBar } from './top-bar';
 import { useMediaQuery } from './use-media-query';
 import styles from './app-shell.module.css';
+import { PATHS } from '../app/paths';
 
 const SIDEBAR_ID = 'main-sidebar';
 
 function titleFor(pathname: string): string {
   const match = NAV_ITEMS.find((item) =>
-    item.to === '/' ? pathname === '/' : pathname === item.to || pathname.startsWith(`${item.to}/`),
+    item.to === PATHS.dashboard
+      ? pathname === PATHS.dashboard
+      : pathname === item.to || pathname.startsWith(`${item.to}/`),
   );
   return match?.label ?? 'Dashboard';
 }

@@ -13,13 +13,14 @@ import { Entrance } from '../components/entrance';
 import { TextField } from '../components/text-field';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, spacing } from '../theme';
+import { SCREENS } from '../navigation/routes';
 
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
 
 /** Asks for the email only; the new password is set on the web page from the emailed link. */
 export function ForgotPasswordScreen({
   navigation,
-}: NativeStackScreenProps<RootStackParamList, 'ForgotPassword'>): ReactNode {
+}: NativeStackScreenProps<RootStackParamList, typeof SCREENS.ForgotPassword>): ReactNode {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);

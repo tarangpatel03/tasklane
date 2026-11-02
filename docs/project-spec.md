@@ -25,6 +25,13 @@ docs/          this spec, design brief
 
 Mobile and admin make all API calls through axios (one instance per app in `src/api/client.ts`), never raw `fetch`.
 
+One source of truth for constants; never hardcode these strings in app code:
+
+- API paths, prefix and version: `packages/shared/src/api-routes.ts` (`ROUTES` for the NestJS controllers, `ENDPOINTS` and `API_BASE_PATH` for clients). New route: add it there first, run `yarn build:shared`, then use it.
+- Mobile screen names: `apps/mobile/src/navigation/routes.ts` (`SCREENS`).
+- Admin page paths: `apps/admin/src/app/paths.ts` (`PATHS`).
+- Mobile React Query keys: `apps/mobile/src/api/query-keys.ts`, built with `createQueryKeys` from `apps/mobile/src/utils/queryKeyFactory.ts`.
+
 Project rules live in `CLAUDE.md` and `.claude/skills/` (nest-backend, rn-responsive-ui, web-responsive-motion, ui-design-quality).
 
 ## 3. Roles, clients and task people

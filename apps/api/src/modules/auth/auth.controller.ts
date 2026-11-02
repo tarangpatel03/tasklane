@@ -13,9 +13,10 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ROUTES } from '@task-app/shared';
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller(ROUTES.auth.controller)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -25,7 +26,7 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Log in with email and password' })
-  @Post('login')
+  @Post(ROUTES.auth.login)
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     return this.authService.login(dto.email, dto.password);
@@ -34,7 +35,7 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: 'Exchange a refresh token for a new token pair' })
-  @Post('refresh')
+  @Post(ROUTES.auth.refresh)
   @HttpCode(HttpStatus.OK)
   refresh(@Body() dto: RefreshTokenDto): Promise<AuthResponseDto> {
     return this.authService.refresh(dto.refreshToken);
@@ -44,7 +45,7 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @ApiOperation({ summary: 'Email a password reset link' })
-  @Post('forgot-password')
+  @Post(ROUTES.auth.forgotPassword)
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<null> {
     await this.authService.forgotPassword(dto.email);
@@ -55,7 +56,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change the password and revoke all sessions' })
-  @Post('change-password')
+  @Post(ROUTES.auth.changePassword)
   @HttpCode(HttpStatus.OK)
   changePassword(
     @CurrentUser() user: AuthUser,
@@ -66,7 +67,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke a refresh token' })
-  @Post('logout')
+  @Post(ROUTES.auth.logout)
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user: AuthUser, @Body() dto: RefreshTokenDto): Promise<null> {
     await this.authService.logout(user.id, dto.refreshToken);
@@ -75,7 +76,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Current user' })
-  @Get('me')
+  @Get(ROUTES.auth.me)
   async me(@CurrentUser() user: AuthUser): Promise<UserResponseDto> {
     const found = await this.usersService.findById(user.id);
     return plainToInstance(UserResponseDto, found, { excludeExtraneousValues: true });

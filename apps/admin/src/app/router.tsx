@@ -6,18 +6,19 @@ import { LoginPage } from '../pages/login-page';
 import { NotFoundPage } from '../pages/not-found-page';
 import { TasksPage } from '../pages/tasks-page';
 import { UsersPage } from '../pages/users-page';
+import { PATHS } from './paths';
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <LoginPage /> },
+  { path: PATHS.login, element: <LoginPage /> },
   {
     element: <RequireAuth />,
     children: [
       {
         element: <AppShell />,
         children: [
-          { path: '/', element: <DashboardPage /> },
-          { path: '/tasks', element: <TasksPage /> },
-          { path: '/users', element: <UsersPage /> },
+          { path: PATHS.dashboard, element: <DashboardPage /> },
+          { path: PATHS.tasks, element: <TasksPage /> },
+          { path: PATHS.users, element: <UsersPage /> },
         ],
       },
     ],

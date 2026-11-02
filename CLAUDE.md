@@ -25,6 +25,7 @@ Stack:
 
 ## Code changes
 
+- Never hardcode route names, API paths or query keys. Use the central constants (see docs/project-spec.md, section 2) and add new ones there first.
 - Make the smallest change that solves the task. No refactors, renames, reordering or cleanup I didn't ask for.
 - No new dependencies, abstractions or config for hypothetical needs. Ask before adding any dependency.
 - Match the patterns already used in the file/folder.

@@ -8,6 +8,7 @@ import { useToast } from '../../components/toast-context';
 import { UserStatus } from '@task-app/shared';
 import { useUpdateUser } from './use-users';
 import styles from './deactivate-dialog.module.css';
+import { PATHS } from '../../app/paths';
 
 interface DeactivateDialogProps {
   /** The user to deactivate, or null when closed. Kept while the dialog fades out. */
@@ -83,7 +84,7 @@ function DeactivateBody({ user, onClose }: { user: UserDto; onClose: () => void 
           <Button variant="outlined" compact onClick={onClose}>
             Close
           </Button>
-          <Link to="/tasks" className={styles.link} onClick={onClose}>
+          <Link to={PATHS.tasks} className={styles.link} onClick={onClose}>
             Go to Tasks
           </Link>
         </div>

@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '@task-app/shared';
 import type { Role, TaskPriority, TaskStatus } from '@task-app/shared';
 import { apiRequest } from './client';
 
@@ -45,5 +46,5 @@ export interface DashboardSummary {
 }
 
 export function getDashboardSummary(): Promise<DashboardSummary> {
-  return apiRequest<DashboardSummary>('/dashboard/summary');
+  return apiRequest<DashboardSummary>(ENDPOINTS.dashboard.summary);
 }

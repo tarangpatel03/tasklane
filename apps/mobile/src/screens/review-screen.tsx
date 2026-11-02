@@ -32,9 +32,11 @@ import { useWindowClass } from '../hooks/use-window-class';
 import type { RootStackParamList, TabParamList } from '../navigation/types';
 import { colors, duration, easing, fontFamily, radii, spacing, tablet } from '../theme';
 import { TaskDetailView } from './task-detail-view';
+import { SCREENS } from '../navigation/routes';
+import { taskKeys } from '../api/query-keys';
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<TabParamList, 'Review'>,
+  BottomTabScreenProps<TabParamList, typeof SCREENS.Review>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
@@ -61,9 +63,9 @@ export function ReviewScreen({ navigation, route }: Props): ReactNode {
   const [selectedId, setSelectedId] = useState<string | null>(route.params?.selectedId ?? null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const summary = useQuery({ queryKey: ['tasks', 'summary'], queryFn: fetchTaskSummary });
+  const summary = useQuery({ queryKey: taskKeys.summary(), queryFn: fetchTaskSummary });
   const list = useInfiniteQuery({
-    queryKey: ['tasks', 'list', TaskStatus.IN_REVIEW],
+    queryKey: taskKeys.list(TaskStatus.IN_REVIEW),
     queryFn: ({ pageParam }) => fetchTasks(TaskStatus.IN_REVIEW, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
@@ -107,7 +109,7 @@ export function ReviewScreen({ navigation, route }: Props): ReactNode {
       setSelectedId(taskId);
       setSheetOpen(true);
     } else {
-      navigation.navigate('TaskDetail', { taskId, from: 'Review' });
+      navigation.navigate(SCREENS.TaskDetail, { taskId, from: SCREENS.Review });
     }
   };
 

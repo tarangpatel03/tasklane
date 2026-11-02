@@ -6,6 +6,7 @@ import { EntityManager, IsNull, MoreThan, Repository } from 'typeorm';
 import { AppConfig } from '../../config/configuration';
 import { AuthTokenType } from './auth-token-type';
 import { AuthToken } from './entities/auth-token.entity';
+import { API_BASE_PATH, ROUTES } from '@task-app/shared';
 
 export const SETUP_TOKEN_VALID_HOURS = 48;
 export const RESET_TOKEN_VALID_MINUTES = 60;
@@ -84,7 +85,7 @@ export class AuthTokensService {
 
   buildUrl(type: AuthTokenType, rawToken: string): string {
     const baseUrl = this.config.get('publicBaseUrl', { infer: true });
-    return `${baseUrl}/api/v1/account/${type}?token=${encodeURIComponent(rawToken)}`;
+    return `${baseUrl}${API_BASE_PATH}/${ROUTES.account.controller}/${type}?token=${encodeURIComponent(rawToken)}`;
   }
 
   private repositoryFor(manager?: EntityManager): Repository<AuthToken> {

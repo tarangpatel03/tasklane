@@ -7,6 +7,7 @@ import { AlertIcon } from '../components/icons';
 import { Logo } from '../components/logo';
 import { TextField } from '../components/text-field';
 import styles from './login-page.module.css';
+import { PATHS } from '../app/paths';
 
 interface LocationState {
   from?: { pathname: string };
@@ -27,7 +28,7 @@ export function LoginPage(): ReactNode {
   if (status === 'authenticated') {
     // Location state is set by RequireAuth, so this narrowing cast is safe.
     const from = (location.state as LocationState | null)?.from?.pathname;
-    return <Navigate to={from ?? '/'} replace />;
+    return <Navigate to={from ?? PATHS.dashboard} replace />;
   }
 
   const emailError =

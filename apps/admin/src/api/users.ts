@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '@task-app/shared';
 import type { ApiMeta, Role, UserStatus } from '@task-app/shared';
 import { apiEnvelope, apiRequest } from './client';
 
@@ -42,7 +43,9 @@ export async function listUsers(params: ListUsersParams): Promise<UserList> {
   if (params.status) query.set('status', params.status);
   if (params.search) query.set('search', params.search);
 
-  const { data, meta } = await apiEnvelope<UserDto[]>(`/users?${query.toString()}`);
+  const { data, meta } = await apiEnvelope<UserDto[]>(
+    `${ENDPOINTS.users.list}?${query.toString()}`,
+  );
   return {
     items: data,
     meta: meta ?? { page: params.page, limit: params.limit, total: data.length, totalPages: 1 },
@@ -50,13 +53,13 @@ export async function listUsers(params: ListUsersParams): Promise<UserList> {
 }
 
 export function createUser(body: CreateUserBody): Promise<UserDto> {
-  return apiRequest<UserDto>('/users', { method: 'POST', body });
+  return apiRequest<UserDto>(ENDPOINTS.users.list, { method: 'POST', body });
 }
 
 export function updateUser(id: string, body: UpdateUserBody): Promise<UserDto> {
-  return apiRequest<UserDto>(`/users/${id}`, { method: 'PATCH', body });
+  return apiRequest<UserDto>(ENDPOINTS.users.byId(id), { method: 'PATCH', body });
 }
 
 export function resendInvite(id: string): Promise<null> {
-  return apiRequest<null>(`/users/${id}/resend-invite`, { method: 'POST' });
+  return apiRequest<null>(ENDPOINTS.users.resendInvite(id), { method: 'POST' });
 }

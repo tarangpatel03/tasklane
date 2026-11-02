@@ -6,6 +6,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { AuthTokenType } from '../auth-tokens/auth-token-type';
 import { renderInvalidLink, renderPasswordForm, renderSuccess } from './account-pages.html';
 import { AuthService } from './auth.service';
+import { ROUTES } from '@task-app/shared';
 
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
@@ -37,32 +38,32 @@ function asText(value: unknown): string {
  * JSON envelope, so they handle every outcome themselves and never throw.
  */
 @ApiExcludeController()
-@Controller('account')
+@Controller(ROUTES.account.controller)
 export class AccountPagesController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Get('setup')
+  @Get(ROUTES.account.setup)
   showSetup(@Query('token') token: unknown, @Res() res: Response): Promise<void> {
     return this.showForm(AuthTokenType.SETUP, token, res);
   }
 
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  @Post('setup')
+  @Post(ROUTES.account.setup)
   submitSetup(@Body() body: unknown, @Res() res: Response): Promise<void> {
     return this.submit(AuthTokenType.SETUP, body, res);
   }
 
   @Public()
-  @Get('reset')
+  @Get(ROUTES.account.reset)
   showReset(@Query('token') token: unknown, @Res() res: Response): Promise<void> {
     return this.showForm(AuthTokenType.RESET, token, res);
   }
 
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  @Post('reset')
+  @Post(ROUTES.account.reset)
   submitReset(@Body() body: unknown, @Res() res: Response): Promise<void> {
     return this.submit(AuthTokenType.RESET, body, res);
   }

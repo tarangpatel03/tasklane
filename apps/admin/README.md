@@ -20,6 +20,7 @@ The dev server proxies `/api` to the API, so the browser sees one origin and no 
 
 ## How it works
 
+- Constants have one home each; never hardcode them. API paths come from `ENDPOINTS` and `API_BASE_PATH` in `@task-app/shared`, page paths from `PATHS` in `src/app/paths.ts`.
 - `src/api/client.ts`: axios wrapper for `/api/v1` (all API calls go through it). It unwraps the response envelope, throws `ApiRequestError` (with field `details`), adds the Bearer token, and on a 401 refreshes the session once (single request at a time, because refresh tokens rotate) and retries.
 - `src/auth/`: `AuthProvider` and `useAuth` (login, logout, current user), `RequireAuth` route guard, token store. The access token is kept in memory only. The refresh token is kept in `sessionStorage`, so a reload keeps the session but closing the tab ends it. A non-Admin account is signed out again right after login.
 - `src/app/router.tsx`: routes. `/login` is public; everything else sits behind `RequireAuth`.

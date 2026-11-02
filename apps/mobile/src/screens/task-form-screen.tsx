@@ -33,8 +33,10 @@ import { useWindowClass } from '../hooks/use-window-class';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, elevation, radii, sizes, spacing, tablet } from '../theme';
 import { formatDate } from '../utils/task-format';
+import { SCREENS } from '../navigation/routes';
+import { taskKeys, userKeys } from '../api/query-keys';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'TaskForm'>;
+type Props = NativeStackScreenProps<RootStackParamList, typeof SCREENS.TaskForm>;
 
 const COLUMN_MAX_WIDTH = 560;
 
@@ -116,11 +118,11 @@ export function TaskFormScreen({ navigation, route }: Props): ReactNode {
   const [created, setCreated] = useState(false);
 
   const existing = useQuery({
-    queryKey: ['tasks', 'detail', taskId],
+    queryKey: taskKeys.detail(taskId ?? ''),
     queryFn: () => fetchTask(taskId ?? ''),
     enabled: editing,
   });
-  const employees = useQuery({ queryKey: ['users', 'employees'], queryFn: fetchEmployees });
+  const employees = useQuery({ queryKey: userKeys.employees(), queryFn: fetchEmployees });
 
   // The form is filled once, when the task arrives; later refetches must not overwrite typing.
   useEffect(() => {
@@ -143,7 +145,7 @@ export function TaskFormScreen({ navigation, route }: Props): ReactNode {
     mutationFn: () =>
       editing ? updateTask(taskId, changedFields(values, initial)) : createTask(toInput(values)),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      void queryClient.invalidateQueries({ queryKey: taskKeys.all });
       if (editing) {
         snackbar.show('Task updated');
         navigation.goBack();
@@ -390,7 +392,7 @@ export function TaskFormScreen({ navigation, route }: Props): ReactNode {
                 <AppButton
                   label="Back to review queue"
                   onPress={() => {
-                    navigation.popTo('Main', { screen: 'Review' });
+                    navigation.popTo(SCREENS.Main, { screen: SCREENS.Review });
                   }}
                 />
               </Entrance>

@@ -6,6 +6,7 @@ import { Skeleton } from '../../components/skeleton';
 import { PriorityTag } from '../../components/task-badges';
 import { Panel, PanelEmpty } from './panel';
 import styles from './overdue-list.module.css';
+import { PATHS } from '../../app/paths';
 
 const SHOWN = 5;
 const DAY_MS = 86_400_000;
@@ -33,7 +34,7 @@ export function OverdueList({
       note={tasks ? String(count) : undefined}
       action={
         count > shown.length ? (
-          <Link to="/tasks" className={styles.viewAll}>
+          <Link to={PATHS.tasks} className={styles.viewAll}>
             View all tasks
           </Link>
         ) : undefined
@@ -51,7 +52,7 @@ export function OverdueList({
         <ul className={styles.list}>
           {shown.map((task) => (
             <li key={task.id}>
-              <Link to={`/tasks?task=${task.id}`} className={styles.row}>
+              <Link to={`${PATHS.tasks}?task=${task.id}`} className={styles.row}>
                 <span className={styles.main}>
                   <span className={styles.name}>{task.title}</span>
                   <span className={styles.meta}>{task.manager?.name ?? 'No Manager'}</span>

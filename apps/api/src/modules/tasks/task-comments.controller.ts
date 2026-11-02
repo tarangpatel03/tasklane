@@ -9,6 +9,7 @@ import { CommentResponseDto } from './dto/comment-response.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { TaskComment } from './entities/task-comment.entity';
 import { TaskCommentsService } from './task-comments.service';
+import { ROUTES } from '@task-app/shared';
 
 function toResponse(comment: TaskComment): CommentResponseDto {
   return plainToInstance(CommentResponseDto, comment, { excludeExtraneousValues: true });
@@ -16,7 +17,7 @@ function toResponse(comment: TaskComment): CommentResponseDto {
 
 @ApiTags('Task comments')
 @ApiBearerAuth()
-@Controller('tasks/:taskId/comments')
+@Controller(ROUTES.taskComments.controller)
 export class TaskCommentsController {
   constructor(private readonly commentsService: TaskCommentsService) {}
 
