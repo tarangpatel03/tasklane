@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { AuthTokenType } from '../auth-token-type';
+import { AuthTokenType } from '../authTokenType.enum';
 
 @Entity('auth_tokens')
 export class AuthToken {

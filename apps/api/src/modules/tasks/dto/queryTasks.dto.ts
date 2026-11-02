@@ -1,7 +1,7 @@
 import { TaskPriority, TaskStatus } from '@task-app/shared';
 import { Transform } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { PaginationQueryDto } from '../../../common/dto/paginationQuery.dto';
 import { trim } from '../../users/dto/transforms';
 
 export class QueryTasksDto extends PaginationQueryDto {

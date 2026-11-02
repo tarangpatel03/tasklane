@@ -15,7 +15,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { trim } from '../../users/dto/transforms';
-import { MAX_ASSIGNEES } from './create-task.dto';
+import { MAX_ASSIGNEES } from './createTask.dto';
 
 /** `null` clears `description`, `dueDate` and `managerId`; `IsOptional` lets both `null` and a missing field through. */
 export class UpdateTaskDto {

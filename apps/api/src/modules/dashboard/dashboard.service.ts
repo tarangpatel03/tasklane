@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Role, TaskStatus, UserStatus } from '@task-app/shared';
 import { DataSource, In, LessThan, Not, SelectQueryBuilder } from 'typeorm';
-import { TaskStatusHistory } from '../tasks/entities/task-status-history.entity';
+import { TaskStatusHistory } from '../tasks/entities/taskStatusHistory.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { User } from '../users/entities/user.entity';
 import {
@@ -10,7 +10,7 @@ import {
   ManagerSummaryDto,
   OverdueTaskDto,
   StatusCounts,
-} from './dto/dashboard-summary-response.dto';
+} from './dto/dashboardSummaryResponse.dto';
 
 const OVERDUE_LIST_SIZE = 10;
 const ACTIVITY_LIST_SIZE = 8;

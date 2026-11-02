@@ -4,8 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomBytes } from 'crypto';
 import { EntityManager, IsNull, MoreThan, Repository } from 'typeorm';
 import { AppConfig } from '../../config/configuration';
-import { AuthTokenType } from './auth-token-type';
-import { AuthToken } from './entities/auth-token.entity';
+import { AuthTokenType } from './authTokenType.enum';
+import { AuthToken } from './entities/authToken.entity';
 import { API_BASE_PATH, ROUTES } from '@task-app/shared';
 
 export const SETUP_TOKEN_VALID_HOURS = 48;

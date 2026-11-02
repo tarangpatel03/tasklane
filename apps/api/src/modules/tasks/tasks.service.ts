@@ -7,16 +7,16 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApiErrorDetail, Role, TaskStatus, UserStatus } from '@task-app/shared';
 import { DataSource, In, Repository, SelectQueryBuilder } from 'typeorm';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { escapeLike } from '../../common/utils/escape-like';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { escapeLike } from '../../common/utils/escapeLike.util';
 import { UsersService } from '../users/users.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { QueryTasksDto } from './dto/query-tasks.dto';
-import { TaskSummaryDto } from './dto/task-summary.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskAssignee } from './entities/task-assignee.entity';
-import { TaskStatusHistory } from './entities/task-status-history.entity';
+import { CreateTaskDto } from './dto/createTask.dto';
+import { QueryTasksDto } from './dto/queryTasks.dto';
+import { TaskSummaryDto } from './dto/taskSummary.dto';
+import { UpdateTaskDto } from './dto/updateTask.dto';
+import { TaskAssignee } from './entities/taskAssignee.entity';
+import { TaskStatusHistory } from './entities/taskStatusHistory.entity';
 import { Task } from './entities/task.entity';
 
 const TASK_NOT_FOUND = 'Task not found';

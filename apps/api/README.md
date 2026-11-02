@@ -132,7 +132,7 @@ Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_a
 ## Scripts
 
 - `yarn workspace @task-app/api build | start | start:dev | typecheck`
-- `yarn workspace @task-app/api typeorm <command> -d src/database/data-source.ts`: raw TypeORM CLI. `synchronize` is off, so schema changes go through migrations in `src/database/migrations/`.
+- `yarn workspace @task-app/api typeorm <command> -d src/database/dataSource.ts`: raw TypeORM CLI. `synchronize` is off, so schema changes go through migrations in `src/database/migrations/`.
 - `yarn workspace @task-app/api migration:generate src/database/migrations/<Name>`, `migration:run`, `migration:revert`. Read generated SQL before running. TypeORM cannot generate expression indexes (such as `lower(email)`), so add those by hand.
 - `yarn workspace @task-app/api seed:admin`: creates the first Admin from `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` (min 8 characters) in the root `.env`. It does nothing if an Admin already exists.
 - After `yarn add`, run `yarn install` once more if `tsc` reports a TypeScript 6 error. `@nestjs/cli` ships its own TypeScript 6, and `yarn add` can relink `tsc` to it.

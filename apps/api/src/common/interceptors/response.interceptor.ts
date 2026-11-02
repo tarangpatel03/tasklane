@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { ApiResponse } from '@task-app/shared';
 import { Observable, map } from 'rxjs';
-import { PaginatedResult } from '../types/paginated-result';
+import { PaginatedResult } from '../types/paginatedResult.types';
 
 /** Wraps every successful response in the shared `{ success: true, data, meta? }` envelope. */
 @Injectable()

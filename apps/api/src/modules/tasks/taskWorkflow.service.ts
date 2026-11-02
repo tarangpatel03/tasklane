@@ -8,15 +8,15 @@ import {
 } from '@nestjs/common';
 import { Role, TaskAction, TaskStatus, UserStatus } from '@task-app/shared';
 import { DataSource, EntityManager } from 'typeorm';
-import { AuthUser } from '../../common/types/auth-user';
+import { AuthUser } from '../../common/types/authUser.types';
 import { MailService } from '../mail/mail.service';
-import { reviewResultEmail } from '../mail/templates/review-result.template';
-import { submittedForReviewEmail } from '../mail/templates/submitted-for-review.template';
+import { reviewResultEmail } from '../mail/templates/reviewResult.template';
+import { submittedForReviewEmail } from '../mail/templates/submittedForReview.template';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
-import { TransitionTaskDto } from './dto/transition-task.dto';
-import { TaskAssignee } from './entities/task-assignee.entity';
-import { TaskStatusHistory } from './entities/task-status-history.entity';
+import { TransitionTaskDto } from './dto/transitionTask.dto';
+import { TaskAssignee } from './entities/taskAssignee.entity';
+import { TaskStatusHistory } from './entities/taskStatusHistory.entity';
 import { Task } from './entities/task.entity';
 import { TasksService } from './tasks.service';
 

@@ -2,18 +2,18 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, TaskStatus, UserStatus } from '@task-app/shared';
 import { DataSource, EntityManager, In, Repository, SelectQueryBuilder } from 'typeorm';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { AuthUser } from '../../common/types/auth-user';
-import { escapeLike } from '../../common/utils/escape-like';
-import { AuthTokenType } from '../auth-tokens/auth-token-type';
-import { AuthTokensService, SETUP_TOKEN_VALID_HOURS } from '../auth-tokens/auth-tokens.service';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { AuthUser } from '../../common/types/authUser.types';
+import { escapeLike } from '../../common/utils/escapeLike.util';
+import { AuthTokenType } from '../auth-tokens/authTokenType.enum';
+import { AuthTokensService, SETUP_TOKEN_VALID_HOURS } from '../auth-tokens/authTokens.service';
 import { MailService } from '../mail/mail.service';
-import { accountCreatedEmail } from '../mail/templates/account-created.template';
-import { RefreshTokensService } from '../refresh-tokens/refresh-tokens.service';
+import { accountCreatedEmail } from '../mail/templates/accountCreated.template';
+import { RefreshTokensService } from '../refresh-tokens/refreshTokens.service';
 import { Task } from '../tasks/entities/task.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { QueryUsersDto } from './dto/query-users.dto';
-import { SettableStatus, UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/createUser.dto';
+import { QueryUsersDto } from './dto/queryUsers.dto';
+import { SettableStatus, UpdateUserDto } from './dto/updateUser.dto';
 import { User } from './entities/user.entity';
 
 const EMAIL_TAKEN = 'A user with this email already exists';

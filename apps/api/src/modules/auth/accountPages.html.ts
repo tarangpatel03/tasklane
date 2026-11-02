@@ -1,5 +1,5 @@
-import { escapeHtml } from '../../common/utils/escape-html';
-import { AuthTokenType } from '../auth-tokens/auth-token-type';
+import { escapeHtml } from '../../common/utils/escapeHtml.util';
+import { AuthTokenType } from '../auth-tokens/authTokenType.enum';
 
 /**
  * The pages behind the invite and reset links. Plain HTML and CSS, no scripts: the form is a normal

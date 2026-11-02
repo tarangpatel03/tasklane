@@ -3,8 +3,8 @@ import { ApiExcludeController } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
-import { AuthTokenType } from '../auth-tokens/auth-token-type';
-import { renderInvalidLink, renderPasswordForm, renderSuccess } from './account-pages.html';
+import { AuthTokenType } from '../auth-tokens/authTokenType.enum';
+import { renderInvalidLink, renderPasswordForm, renderSuccess } from './accountPages.html';
 import { AuthService } from './auth.service';
 import { ROUTES } from '@task-app/shared';
 

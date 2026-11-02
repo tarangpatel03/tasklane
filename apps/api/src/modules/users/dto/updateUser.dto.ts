@@ -1,7 +1,7 @@
 import { UserStatus } from '@task-app/shared';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-import { ASSIGNABLE_ROLES, AssignableRole } from './create-user.dto';
+import { ASSIGNABLE_ROLES, AssignableRole } from './createUser.dto';
 import { normalizeEmail, trim } from './transforms';
 
 /** `invited` is not settable: a user becomes active by setting up their account. */

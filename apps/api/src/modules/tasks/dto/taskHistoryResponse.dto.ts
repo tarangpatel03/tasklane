@@ -1,6 +1,6 @@
 import { TaskStatus } from '@task-app/shared';
 import { Expose, Type } from 'class-transformer';
-import { UserSummaryDto } from './task-response.dto';
+import { UserSummaryDto } from './taskResponse.dto';
 
 /** One status change. `fromStatus` is null for the row that records the task's creation. */
 export class TaskHistoryResponseDto {

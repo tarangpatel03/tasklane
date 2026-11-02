@@ -8,10 +8,10 @@
     "start:dev": "nest start --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
-    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
-    "seed:admin": "ts-node src/database/seeds/seed-admin.ts"
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/dataSource.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/dataSource.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/dataSource.ts",
+    "seed:admin": "ts-node src/database/seeds/seedAdmin.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.3.2",

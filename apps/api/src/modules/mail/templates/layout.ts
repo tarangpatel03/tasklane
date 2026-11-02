@@ -1,4 +1,4 @@
-import { escapeHtml } from '../../../common/utils/escape-html';
+import { escapeHtml } from '../../../common/utils/escapeHtml.util';
 
 const DAY_FORMAT: Intl.DateTimeFormatOptions = {
   day: 'numeric',

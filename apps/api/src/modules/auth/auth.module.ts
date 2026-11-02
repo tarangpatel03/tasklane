@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { AppConfig } from '../../config/configuration';
-import { AuthTokensModule } from '../auth-tokens/auth-tokens.module';
+import { AuthTokensModule } from '../auth-tokens/authTokens.module';
 import { MailModule } from '../mail/mail.module';
-import { RefreshTokensModule } from '../refresh-tokens/refresh-tokens.module';
+import { RefreshTokensModule } from '../refresh-tokens/refreshTokens.module';
 import { UsersModule } from '../users/users.module';
-import { AccountPagesController } from './account-pages.controller';
+import { AccountPagesController } from './accountPages.controller';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 

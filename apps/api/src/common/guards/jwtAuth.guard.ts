@@ -5,7 +5,7 @@ import { UserStatus } from '@task-app/shared';
 import { Request } from 'express';
 import { UsersService } from '../../modules/users/users.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { AuthUser } from '../types/auth-user';
+import { AuthUser } from '../types/authUser.types';
 
 interface AccessTokenPayload {
   sub: string;

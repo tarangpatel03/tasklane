@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { CommentResponseDto } from './dto/comment-response.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { TaskComment } from './entities/task-comment.entity';
-import { TaskCommentsService } from './task-comments.service';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
+import { PaginationQueryDto } from '../../common/dto/paginationQuery.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { CommentResponseDto } from './dto/commentResponse.dto';
+import { CreateCommentDto } from './dto/createComment.dto';
+import { TaskComment } from './entities/taskComment.entity';
+import { TaskCommentsService } from './taskComments.service';
 import { ROUTES } from '@task-app/shared';
 
 function toResponse(comment: TaskComment): CommentResponseDto {

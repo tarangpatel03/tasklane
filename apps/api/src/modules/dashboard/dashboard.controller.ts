@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ROUTES, Role } from '@task-app/shared';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { DashboardService } from './dashboard.service';
-import { DashboardSummaryResponseDto } from './dto/dashboard-summary-response.dto';
+import { DashboardSummaryResponseDto } from './dto/dashboardSummaryResponse.dto';
 
 @ApiTags('Dashboard')
 @ApiBearerAuth()

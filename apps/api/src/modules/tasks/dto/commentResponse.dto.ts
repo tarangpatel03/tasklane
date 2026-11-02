@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { UserSummaryDto } from './task-response.dto';
+import { UserSummaryDto } from './taskResponse.dto';
 
 export class CommentResponseDto {
   @Expose()

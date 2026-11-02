@@ -1,13 +1,13 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { TaskHistoryResponseDto } from './dto/task-history-response.dto';
-import { TaskStatusHistory } from './entities/task-status-history.entity';
-import { TaskHistoryService } from './task-history.service';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
+import { PaginationQueryDto } from '../../common/dto/paginationQuery.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { TaskHistoryResponseDto } from './dto/taskHistoryResponse.dto';
+import { TaskStatusHistory } from './entities/taskStatusHistory.entity';
+import { TaskHistoryService } from './taskHistory.service';
 import { ROUTES } from '@task-app/shared';
 
 function toResponse(row: TaskStatusHistory): TaskHistoryResponseDto {

@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Role } from '@task-app/shared';
 import { Request } from 'express';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { AuthUser } from '../types/auth-user';
+import { AuthUser } from '../types/authUser.types';
 
 /** Global guard, runs after JwtAuthGuard. Routes without `@Roles()` allow any authenticated user. */
 @Injectable()

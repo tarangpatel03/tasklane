@@ -2,17 +2,17 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/commo
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { plainToInstance } from 'class-transformer';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { AuthUser } from '../../common/types/auth-user';
-import { UserResponseDto } from '../users/dto/user-response.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { UserResponseDto } from '../users/dto/userResponse.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { AuthResponseDto } from './dto/auth-response.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { AuthResponseDto } from './dto/authResponse.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { ROUTES } from '@task-app/shared';
 
 @ApiTags('Auth')

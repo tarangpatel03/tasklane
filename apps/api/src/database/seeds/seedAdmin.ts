@@ -3,7 +3,7 @@ import { Role, UserStatus } from '@task-app/shared';
 import * as argon2 from 'argon2';
 import { loadSeedEnv } from '../../config/env.validation';
 import { User } from '../../modules/users/entities/user.entity';
-import dataSource from '../data-source';
+import dataSource from '../dataSource';
 
 const logger = new Logger('SeedAdmin');
 

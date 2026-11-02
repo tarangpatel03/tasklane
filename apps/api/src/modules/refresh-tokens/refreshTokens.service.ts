@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomBytes } from 'crypto';
 import { EntityManager, IsNull, Repository } from 'typeorm';
 import { AppConfig } from '../../config/configuration';
-import { RefreshToken } from './entities/refresh-token.entity';
+import { RefreshToken } from './entities/refreshToken.entity';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

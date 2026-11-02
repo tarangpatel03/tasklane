@@ -14,18 +14,18 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ROUTES, Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { QueryTasksDto } from './dto/query-tasks.dto';
-import { TaskResponseDto } from './dto/task-response.dto';
-import { TaskSummaryDto } from './dto/task-summary.dto';
-import { TransitionTaskDto } from './dto/transition-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { CreateTaskDto } from './dto/createTask.dto';
+import { QueryTasksDto } from './dto/queryTasks.dto';
+import { TaskResponseDto } from './dto/taskResponse.dto';
+import { TaskSummaryDto } from './dto/taskSummary.dto';
+import { TransitionTaskDto } from './dto/transitionTask.dto';
+import { UpdateTaskDto } from './dto/updateTask.dto';
 import { Task } from './entities/task.entity';
-import { TaskWorkflowService } from './task-workflow.service';
+import { TaskWorkflowService } from './taskWorkflow.service';
 import { TasksService } from './tasks.service';
 
 /** Flattens the assignee join rows to plain users before exposing only the allowed fields. */

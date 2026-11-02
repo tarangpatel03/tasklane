@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { TaskComment } from './entities/task-comment.entity';
+import { PaginationQueryDto } from '../../common/dto/paginationQuery.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { CreateCommentDto } from './dto/createComment.dto';
+import { TaskComment } from './entities/taskComment.entity';
 import { TasksService } from './tasks.service';
 
 @Injectable()

@@ -12,9 +12,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { TaskAssignee } from './task-assignee.entity';
-import { TaskComment } from './task-comment.entity';
-import { TaskStatusHistory } from './task-status-history.entity';
+import { TaskAssignee } from './taskAssignee.entity';
+import { TaskComment } from './taskComment.entity';
+import { TaskStatusHistory } from './taskStatusHistory.entity';
 
 @Entity('tasks')
 @Index(['managerId', 'status'])

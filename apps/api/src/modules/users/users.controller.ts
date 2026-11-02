@@ -14,14 +14,14 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ROUTES, Role } from '@task-app/shared';
 import { plainToInstance } from 'class-transformer';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthUser } from '../../common/types/auth-user';
-import { PaginatedResult } from '../../common/types/paginated-result';
-import { CreateUserDto } from './dto/create-user.dto';
-import { QueryUsersDto } from './dto/query-users.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { AuthUser } from '../../common/types/authUser.types';
+import { PaginatedResult } from '../../common/types/paginatedResult.types';
+import { CreateUserDto } from './dto/createUser.dto';
+import { QueryUsersDto } from './dto/queryUsers.dto';
+import { UpdateUserDto } from './dto/updateUser.dto';
+import { UserResponseDto } from './dto/userResponse.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
