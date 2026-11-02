@@ -99,7 +99,7 @@ The invite and password reset emails carry a one-time link to a small web page s
 - Pages (public, plain HTML, no scripts): `GET` and `POST /api/v1/account/setup?token=...` for invites (valid 48 hours) and `/api/v1/account/reset?token=...` for resets (valid 1 hour). A link works once, and a newer link for the same user replaces the older one. A reset signs the user out everywhere.
 - Opening the page does not use up the link, so a mail client previewing it is harmless. The token is 256 random bits and only its SHA-256 is stored (`auth_tokens`).
 - The link host comes from `PUBLIC_BASE_URL`. The default `http://localhost:3000` works when the email is opened on the same PC as the API. To open it on a phone, set `PUBLIC_BASE_URL=http://<your PC's LAN IP>:3000`, restart the API and allow port 3000 through the Windows firewall.
-- The page is deliberately plain: the design brief is still empty. Its colours, spacing and sizes are tokens at the top of `src/modules/auth/account-pages.html.ts`.
+- The page is deliberately plain: the design brief is still empty. Its colours, spacing and sizes are tokens at the top of `src/modules/auth/accountPages.html.ts`.
 
 ## Tasks
 

@@ -23,14 +23,16 @@ packages/shared  shared types: Role, TaskStatus, TaskPriority, response envelope
 docs/          this spec, design brief
 ```
 
-Mobile and admin make all API calls through axios (one instance per app in `src/api/client.ts`), never raw `fetch`.
+Mobile and admin make all API calls through axios (one instance per app in `src/api/client.api.ts`), never raw `fetch`.
+
+File names: screens and components (and their CSS modules) are PascalCase (`TaskDetailView.tsx`, `TaskDetail.module.css`); every other file is camelCase with a role suffix where one applies (`authTokens.service.ts`, `auth.types.ts`, `tasks.api.ts`, `taskFormat.util.ts`, `token.store.ts`). Hooks are `useX.ts`. Entry files (`main.ts`, `App.tsx`, `index.ts`), config files, platform folders (`android/`, `ios/`) and migrations keep their generated names.
 
 One source of truth for constants; never hardcode these strings in app code:
 
 - API paths, prefix and version: `packages/shared/src/api-routes.ts` (`ROUTES` for the NestJS controllers, `ENDPOINTS` and `API_BASE_PATH` for clients). New route: add it there first, run `yarn build:shared`, then use it.
 - Mobile screen names: `apps/mobile/src/navigation/routes.ts` (`SCREENS`).
 - Admin page paths: `apps/admin/src/app/paths.ts` (`PATHS`).
-- Mobile React Query keys: `apps/mobile/src/api/query-keys.ts`, built with `createQueryKeys` from `apps/mobile/src/utils/queryKeyFactory.ts`.
+- Mobile React Query keys: `apps/mobile/src/api/queryKeys.api.ts`, built with `createQueryKeys` from `apps/mobile/src/utils/queryKeyFactory.util.ts`.
 
 Project rules live in `CLAUDE.md` and `.claude/skills/` (nest-backend, rn-responsive-ui, web-responsive-motion, ui-design-quality).
 

@@ -13,7 +13,7 @@ Use current APIs: TypeORM 0.3+ (`DataSource`, `findOneBy`, `FindOptionsWhere`), 
 src/
   main.ts, app.module.ts
   config/          env validation + typed config
-  database/        data-source.ts, migrations/
+  database/        dataSource.ts, migrations/
   common/          decorators/ filters/ guards/ interceptors/ pipes/ dto/ types/   (generic, feature-agnostic only)
   modules/
     <feature>/
@@ -26,7 +26,7 @@ src/
 ```
 
 - Everything a feature owns lives in its folder. No global `controllers/` or `services/` folders.
-- kebab-case file names with a suffix (`.controller.ts`, `.service.ts`, `.dto.ts`, `.entity.ts`, `.guard.ts`). PascalCase classes.
+- camelCase file names with a role suffix (`authTokens.service.ts`, `createUser.dto.ts`, `jwtAuth.guard.ts`; also `.controller.ts`, `.module.ts`, `.entity.ts`, `.types.ts`, `.enum.ts`, `.util.ts`). PascalCase classes. Feature folder names stay kebab-case; migration files keep TypeORM's `<timestamp>-<Name>.ts` format.
 - A module exports only what others need (usually the service). Never inject another module's repository: import its module and use its service.
 - Avoid circular imports. Needing `forwardRef` means the design should change first.
 
@@ -72,7 +72,7 @@ One envelope everywhere. A global `ResponseInterceptor` wraps successes and a gl
 
 ## TypeORM + PostgreSQL
 
-- `TypeOrmModule.forRootAsync` with `ConfigService`, plus a separate `database/data-source.ts` for the CLI. `synchronize: false` always. Schema changes only through migrations: generate, read the SQL, commit. Never edit a migration that has been applied.
+- `TypeOrmModule.forRootAsync` with `ConfigService`, plus a separate `database/dataSource.ts` for the CLI. `synchronize: false` always. Schema changes only through migrations: generate, read the SQL, commit. Never edit a migration that has been applied.
 - Entities: `@Entity('plural_snake_case')`, `@PrimaryGeneratedColumn('uuid')`, `@CreateDateColumn({ type: 'timestamptz' })`, `@UpdateDateColumn({ type: 'timestamptz' })`. Use `@DeleteDateColumn` only when soft delete is required. Column names snake_case: set `name:` explicitly, or ask before adding a naming-strategy package.
 - Money is `numeric` (string in TypeScript), never float. JSON data is `jsonb`. Enums: a shared TS enum plus a Postgres enum or varchar.
 - Put constraints in the database: `nullable`, `unique`, foreign keys with explicit `onDelete`. Index foreign keys and columns used in frequent filters or sorting (`@Index`).
