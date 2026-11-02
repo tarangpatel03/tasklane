@@ -45,16 +45,13 @@ export class DashboardService {
    */
   async getSummary(): Promise<DashboardSummaryResponseDto> {
     const now = new Date();
-    const [totalsRaw, groupsRaw, overdueTasks, overdueCount, recentActivity] = await Promise.all([
+    const [totalsRaw, groupsRaw, overdueTasks, recentActivity] = await Promise.all([
       this.countQuery().getRawOne<RawCounts>(),
       this.countQuery()
         .addSelect('task.managerId', 'managerId')
         .groupBy('task.managerId')
         .getRawMany<RawCounts>(),
       this.findOverdue(now),
-      this.dataSource
-        .getRepository(Task)
-        .countBy({ status: Not(TaskStatus.COMPLETED), dueDate: LessThan(now) }),
       this.findRecentActivity(),
     ]);
 
@@ -63,7 +60,7 @@ export class DashboardService {
         total: Number(totalsRaw?.total ?? 0),
         byStatus: totalsRaw ? toStatusCounts(totalsRaw) : toStatusCounts(zeroCounts()),
       },
-      overdue: { count: overdueCount, tasks: overdueTasks },
+      overdue: { count: Number(totalsRaw?.overdue ?? 0), tasks: overdueTasks },
       perManager: await this.buildPerManager(groupsRaw),
       recentActivity,
     };

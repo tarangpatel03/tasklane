@@ -1,11 +1,13 @@
 import { join } from 'path';
-import { EnvVars, validateEnv } from './env.validation';
+import { EnvVars, LogLevel, validateEnv } from './env.validation';
 
 /** The single .env lives at the repo root, shared by all apps. */
 export const ENV_FILE_PATH = join(__dirname, '..', '..', '..', '..', '.env');
 
 export interface AppConfig {
   nodeEnv: EnvVars['NODE_ENV'];
+  /** Minimum level written to the log. `LOG_LEVEL`, else `info` in production and `debug` elsewhere. */
+  logLevel: LogLevel;
   port: number;
   adminCorsOrigin: string;
   /** Host that email links point to, without a trailing slash. */
@@ -35,6 +37,7 @@ export interface AppConfig {
 export function buildConfig(env: EnvVars): AppConfig {
   return {
     nodeEnv: env.NODE_ENV,
+    logLevel: env.LOG_LEVEL ?? (env.NODE_ENV === 'production' ? 'info' : 'debug'),
     port: env.API_PORT,
     adminCorsOrigin: env.ADMIN_CORS_ORIGIN,
     publicBaseUrl: (env.PUBLIC_BASE_URL ?? `http://localhost:${env.API_PORT}`).replace(/\/+$/, ''),

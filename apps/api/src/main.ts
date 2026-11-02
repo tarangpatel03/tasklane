@@ -4,12 +4,16 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { REQUEST_ID_HEADER } from './common/logging/appLogger.module';
 import { AppConfig } from './config/configuration';
 import { API_PREFIX, API_VERSION } from '@task-app/shared';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  // Buffered so startup messages are written by pino too, not by Nest's default logger.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
   const config = app.get<ConfigService<AppConfig, true>>(ConfigService);
 
   app.setGlobalPrefix(API_PREFIX);
@@ -37,7 +41,8 @@ async function bootstrap(): Promise<void> {
   // The mobile app is not a browser, so only the admin panel origin needs CORS.
   app.enableCors({
     origin: config.get('adminCorsOrigin', { infer: true }),
-    allowedHeaders: ['Authorization', 'Content-Type'],
+    allowedHeaders: ['Authorization', 'Content-Type', REQUEST_ID_HEADER],
+    exposedHeaders: [REQUEST_ID_HEADER],
   });
 
   // Docs list every route and the DTO shapes; they stay off in production.

@@ -2,6 +2,23 @@
 
 NestJS + TypeORM + PostgreSQL backend. Routes are served under `/api/v1`.
 
+## Modules (`src/modules/`)
+
+Each feature owns its controller, service, DTOs and entities. Cross-cutting pieces (guards, filter, interceptor, pipe, logging, decorators) live in `src/common/`; env validation and typed config in `src/config/`; the TypeORM data source, migrations and the admin seed in `src/database/`.
+
+| Module           | Responsibility                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| `auth`           | Login, refresh, logout, change password, forgot password, `/auth/me`, the HTML account pages |
+| `auth-tokens`    | One-time setup and reset links (hashed tokens)                                               |
+| `refresh-tokens` | Hashed rotating refresh tokens and their daily cleanup                                       |
+| `users`          | Admin user management and role-scoped user lists                                             |
+| `tasks`          | Tasks, assignees, comments, status history and the transition workflow                       |
+| `dashboard`      | Admin summary counts                                                                         |
+| `mail`           | SMTP sending and email templates                                                             |
+| `health`         | Health check                                                                                 |
+
+Task workflow: `TasksService` owns create, list, update and soft delete with role scoping. `TaskWorkflowService` owns status transitions: it locks the task row inside a transaction (`pessimistic_write`), checks who may act and the current status, writes the new status and a `task_status_history` row, and sends emails after the commit. Rules are in the Tasks section below.
+
 ## Setup
 
 1. `yarn install` at the repo root, then `yarn build:shared`.
@@ -29,22 +46,42 @@ Every login and every token refresh inserts a row into `refresh_tokens`. `Refres
 
 Validated at startup (the app refuses to start if one is missing or invalid).
 
-| Variable            | Default                       | Notes                                       |
-| ------------------- | ----------------------------- | ------------------------------------------- |
-| `NODE_ENV`          | `development`                 | `development`, `production`, `test`         |
-| `API_PORT`          | `3000`                        |                                             |
-| `ADMIN_CORS_ORIGIN` | required                      | Only origin allowed by CORS (admin panel)   |
-| `DB_HOST`           | required                      |                                             |
-| `DB_PORT`           | `5432`                        |                                             |
-| `DB_USER`           | required                      |                                             |
-| `DB_PASSWORD`       | required                      |                                             |
-| `DB_NAME`           | required                      |                                             |
-| `JWT_ACCESS_SECRET` | required                      | At least 32 characters                      |
-| `JWT_ACCESS_TTL`    | `15m`                         | Access token lifetime                       |
-| `REFRESH_TTL_DAYS`  | `7`                           | Refresh token lifetime in days              |
-| `PUBLIC_BASE_URL`   | `http://localhost:<API_PORT>` | Host used in email links, see Account links |
+| Variable            | Default                            | Notes                                                        |
+| ------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| `NODE_ENV`          | `development`                      | `development`, `production`, `test`                          |
+| `LOG_LEVEL`         | `info` in production, else `debug` | `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `silent` |
+| `API_PORT`          | `3000`                             |                                                              |
+| `ADMIN_CORS_ORIGIN` | required                           | Only origin allowed by CORS (admin panel)                    |
+| `DB_HOST`           | required                           |                                                              |
+| `DB_PORT`           | `5432`                             |                                                              |
+| `DB_USER`           | required                           |                                                              |
+| `DB_PASSWORD`       | required                           |                                                              |
+| `DB_NAME`           | required                           |                                                              |
+| `JWT_ACCESS_SECRET` | required                           | At least 32 characters                                       |
+| `JWT_ACCESS_TTL`    | `15m`                              | Access token lifetime                                        |
+| `REFRESH_TTL_DAYS`  | `7`                                | Refresh token lifetime in days                               |
+| `PUBLIC_BASE_URL`   | `http://localhost:<API_PORT>`      | Host used in email links, see Account links                  |
 
 Mail variables are all optional (see Mail below). The seed variables in `.env.example` are only read by `seed:admin` (`SEED_ADMIN_*`).
+
+## Logging
+
+Structured logging uses `pino` through `nestjs-pino` (`src/common/logging/appLogger.module.ts`, registered in `AppModule`; `main.ts` installs it as Nest's logger, so `Logger` calls in services use it too).
+
+- **Format:** one readable line per entry outside production (`pino-pretty`, a dev dependency), JSON in production. Set the minimum level with `LOG_LEVEL`.
+- **Correlation id:** every request gets an id, logged as `reqId` on every line written while it is handled, and returned in the `X-Request-Id` response header. A caller-supplied `X-Request-Id` is reused only if it is 1 to 64 letters, digits, `-`, `_` or `.`; otherwise a UUID is generated. CORS allows and exposes the header.
+- **Levels:** one request line per response: `info` for 2xx and 3xx, `warn` for 4xx, `error` for 5xx. Unexpected errors are logged with their stack by `AllExceptionsFilter`; clients only get the generic error body.
+- **Sensitive data:** the request log keeps only the id, method and path. Headers, bodies and the query string are not logged (account links carry a one-time `?token=`). Authorization and cookie headers and fields named `password`, `currentPassword`, `newPassword`, `token`, `accessToken` and `refreshToken` are also redacted as a safety net. Do not log request bodies or credentials in new code.
+- Mail failures are logged by subject and reason only.
+
+## Rate limiting
+
+`@nestjs/throttler` (`ThrottlerGuard` is the first global guard, then JWT, then roles). Counters are per client IP, in memory.
+
+- All routes: 100 requests per minute.
+- Stricter per-route limits (per minute): `POST /auth/login` 5, `POST /auth/refresh` 10, `POST /auth/forgot-password` 3, `POST /auth/change-password` 5, and the `POST` of the `/account/setup` and `/account/reset` pages 10.
+- Exceeding a limit returns 429 in the standard error shape (`{ success: false, statusCode: 429, ... }`, the throttler error goes through `AllExceptionsFilter`), plus the `Retry-After` header.
+- Limits are set in code (`app.module.ts` and the `@Throttle` decorators), not through env variables. There is no `trust proxy` setting: behind a reverse proxy all clients would share the proxy's IP, so configure Express `trust proxy` before deploying behind one. Counters reset on restart and are not shared between instances.
 
 ## Mail
 
@@ -128,6 +165,17 @@ Migration `CreateTasks` adds `tasks` (soft delete through `deleted_at`), `task_a
 ## Dashboard
 
 `GET /api/v1/dashboard/summary` (Admin only) returns `totals` (task count and a count for each status), `overdue` (count plus the 10 oldest-due tasks that are not completed) and `perManager` (one row per active Manager, even with no tasks, plus any other Manager who still has tasks, and a last row with `manager: null` for tasks without a Manager; each row has `total`, `byStatus` and `overdue`). It also returns `recentActivity`: the 8 latest status changes (`taskId`, `taskTitle`, `fromStatus`, `toStatus`, `actor`, `comment`, `createdAt`, newest first) on tasks that still exist. Soft-deleted tasks are not counted.
+
+## Database and migrations
+
+Tables (all ids are uuid, all timestamps `timestamptz`):
+
+- `users` (unique `lower(email)`), `refresh_tokens` and `auth_tokens` (both reference `users` with `ON DELETE CASCADE`, unique `token_hash`, index on `user_id`).
+- `tasks`: `manager_id` (nullable) and `created_by` reference `users` (`RESTRICT`); soft delete through `deleted_at`. Indexes: `(manager_id, status)`, `created_by`, `due_date`.
+- `task_assignees`: primary key `(task_id, user_id)`, `task_id` cascades from `tasks`, `user_id` references `users` (`RESTRICT`), index on `user_id`. A task has many assignees.
+- `task_comments` and `task_status_history`: `task_id` cascades from `tasks`, `author_id` / `actor_id` reference `users` (`RESTRICT`); index `(task_id, created_at)` on both.
+
+Migrations in `src/database/migrations/`, oldest first: `CreateUsers`, `CreateRefreshTokens`, `CreateAuthTokens`, `CreateTasks`. `synchronize` is off; schema changes are migrations only (see Scripts). Never edit a migration that has been applied; add a new one. List queries load a page of task ids first and then the relations, and every list is capped at 100 rows per page. Indexes were chosen from query shape, not from measured query plans.
 
 ## Scripts
 

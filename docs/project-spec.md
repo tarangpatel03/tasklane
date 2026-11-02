@@ -1,6 +1,6 @@
 # Task Management App - Project spec
 
-Status: planning. This file is the source of truth for scope. If code and this spec disagree, or the spec is unclear, ask before coding.
+Status: the scope in sections 1 to 11 is implemented (section 12 lists what is not, section 15 the known limitations). This file is the source of truth for scope. If code and this spec disagree, or the spec is unclear, ask before coding. Sections 8 and 9 summarise the API and data model as built; the READMEs describe each app in detail.
 
 ## 1. Overview
 
@@ -20,12 +20,22 @@ apps/api       NestJS + TypeORM + PostgreSQL
 apps/mobile    React Native CLI (Android first)
 apps/admin     React + TypeScript (Vite recommended; confirm at checkpoint 4.1)
 packages/shared  shared types: Role, TaskStatus, TaskPriority, response envelope
-docs/          this spec, design brief
+docs/          this spec, design brief, screenshots
 ```
+
+How the apps talk to each other: the admin panel and the mobile app are separate clients of the same REST API (`/api/v1`); they never call each other and share only `packages/shared` (enums, response envelope, route constants). Each app has its own axios client. The API is the only code that touches PostgreSQL.
 
 Mobile and admin make all API calls through axios (one instance per app in `src/api/client.api.ts`), never raw `fetch`.
 
 File names: screens and components (and their CSS modules) are PascalCase (`TaskDetailView.tsx`, `TaskDetail.module.css`); every other file is camelCase with a role suffix where one applies (`authTokens.service.ts`, `auth.types.ts`, `tasks.api.ts`, `taskFormat.util.ts`, `token.store.ts`). Hooks are `useX.ts`. Folders: files with a similar purpose go together in a purpose-named subfolder (all buttons in `components/buttons/`, animation hooks in `hooks/animation/`); a file that shares its purpose with no other stays flat. Imports are direct paths, no barrel files. Entry files (`main.ts`, `App.tsx`, `index.ts`), config files, platform folders (`android/`, `ios/`) and migrations keep their generated names.
+
+Screen and page organization (admin and mobile): every page (`apps/admin/src/pages/<Name>Page/`) and screen (`apps/mobile/src/screens/<Name>Screen/`) is a folder with `index.tsx` as the entry, which is the component itself (no barrel re-exports), and `subcomponents/` for the parts of that screen. A subcomponent with parts of its own gets its own nested `subcomponents/`. The folder keeps the component's name, so the router and navigators import the folder path. Rules:
+
+- Used by one screen only: it lives in that screen's `subcomponents/` (with its CSS module on the admin side).
+- Used by more than one screen: it stays in the shared folder (`components/`). A larger shared piece gets its own folder there, for example `apps/mobile/src/components/task/TaskDetailView/` (used by Tasks, Review and TaskDetail).
+- Hooks, helpers and CSS modules used by several subcomponents of one page sit beside that page's `index.tsx` (for example `useTasks.ts`).
+- A small screen (Login, NotFound, ForgotPassword) is just `index.tsx`; add `subcomponents/` only when something meaningful splits out.
+- This is source organization only: no dynamic imports and no `React.lazy`.
 
 Function style: React (admin) and React Native (mobile) code uses arrow functions for components, hooks, handlers and helpers (`export const TaskCard = ({ task }: Props): ReactNode => { ... }`), not `function` declarations. Explicit return types on exported functions still apply. The NestJS API keeps class methods.
 
@@ -109,7 +119,7 @@ Sent after the request succeeds. A mail failure is logged and never breaks the r
 
 SMTP settings come from env variables (Gmail with an App Password); without them the API uses an Ethereal test mailbox and logs a preview URL. Templates are simple HTML with a plain-text fallback.
 
-## 8. API (draft)
+## 8. API (as built)
 
 Prefix `/api/v1`. Response envelope and error shape follow the `nest-backend` skill.
 
@@ -120,7 +130,7 @@ Prefix `/api/v1`. Response envelope and error shape follow the `nest-backend` sk
 - Comments: `GET /tasks/:id/comments`, `POST /tasks/:id/comments`.
 - Dashboard (Admin): `GET /dashboard/summary`.
 
-## 9. Data model (draft)
+## 9. Data model (as built)
 
 - `users`: id (uuid), name, email, password_hash (nullable until set), role, status (invited, active, deactivated), timestamps.
 - `tasks`: fields in section 5.
@@ -154,8 +164,8 @@ All timestamps are `timestamptz` (UTC). Indexes: `users(lower(email))` unique, `
 
 - Role and ownership checks happen on the server for every endpoint.
 - Validation whitelist on all input; no stack traces or SQL in responses.
-- CORS limited to the admin panel origin; login rate-limited.
-- No secrets, tokens or passwords in logs or the repo; `.env.example` stays current.
+- CORS limited to the admin panel origin; login rate-limited (global limit plus stricter per-route limits on auth routes, see `apps/api/README.md`).
+- Structured logging with a request id on every log line (`X-Request-Id`); no secrets, tokens, passwords, auth headers or query strings in logs or the repo; `.env.example` stays current.
 - Migrations only, `synchronize` off.
 - Every app has a README. The API has Swagger docs.
 - No automated tests unless requested.
@@ -216,3 +226,12 @@ Work one checkpoint at a time. After each, report `Checkpoint X.Y done. Proceed 
 - Admin panel bundler (Vite recommended) and token storage (checkpoint 4.1)
 - Secure storage library and navigation library for mobile (checkpoint 5.1)
 - Mail library for the API (checkpoint 2.1)
+
+## 15. Known limitations
+
+- Rate-limit counters live in memory and are per client IP as Express sees it. They reset on restart and are not shared between several API instances. No `trust proxy` setting exists, so behind a reverse proxy every client would share the proxy's IP; configure it before deploying behind one.
+- No automated tests, by project rule. There is no ESLint config or lint script; checks are `tsc`, the Vite build and Prettier.
+- PostgreSQL is the only supported database, and there is no docker-compose or deployment setup.
+- Index choices are based on query shape, not on measured query plans; run `EXPLAIN` on realistic data before adding more.
+- Emails are sent in the request's background and not retried; a failure is only logged.
+- Mobile is Android first; iOS is not built or tested. Mobile `ReviewScreen` renders its queue without list virtualization.

@@ -37,8 +37,18 @@ apps/api         NestJS API (see apps/api/README.md)
 apps/admin       Admin panel (see apps/admin/README.md)
 apps/mobile      Mobile app (see apps/mobile/README.md)
 packages/shared  Shared enums and response types (see packages/shared/README.md)
-docs/            Spec, design brief, build progress, screenshots
+docs/            Spec, design brief, screenshots
 ```
+
+## How the pieces fit
+
+- The admin panel and the mobile app are separate clients of the same REST API (`/api/v1`). They never call each other and each has its own axios client. Only the API talks to PostgreSQL.
+- `packages/shared` is the one thing the three apps share: enums, the response envelope and the route constants. Run `yarn build:shared` after changing it.
+- Auth: the API issues a short-lived access token and a rotating refresh token. Admin signs in on the web panel, Managers and Employees on the phone. Roles are enforced on the server; the clients only hide what a role cannot use.
+- Errors always come back as `{ success: false, statusCode, error, message, details?, path, timestamp }`; successes as `{ success: true, data, meta? }`.
+- Logs are structured and carry a request id (`X-Request-Id`); auth routes have stricter rate limits. Details in [apps/api/README.md](apps/api/README.md).
+- Screens: every admin page and mobile screen is a folder with `index.tsx` and a `subcomponents/` folder for its own parts; shared pieces stay in `components/`. Rules in [docs/project-spec.md](docs/project-spec.md) (section 2). React and React Native code uses arrow functions.
+- Not built yet and known limitations (no tests, in-memory rate limits, no proxy setting, Android only): [docs/project-spec.md](docs/project-spec.md) sections 12 and 15.
 
 ## Quick start
 

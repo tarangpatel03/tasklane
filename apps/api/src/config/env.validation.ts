@@ -1,7 +1,11 @@
 import * as Joi from 'joi';
 
+export const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
+export type LogLevel = (typeof LOG_LEVELS)[number];
+
 export interface EnvVars {
   NODE_ENV: 'development' | 'production' | 'test';
+  LOG_LEVEL?: LogLevel;
   API_PORT: number;
   ADMIN_CORS_ORIGIN: string;
   PUBLIC_BASE_URL?: string;
@@ -22,6 +26,10 @@ export interface EnvVars {
 
 const envSchema = Joi.object<EnvVars>({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  // Empty counts as unset: the default depends on NODE_ENV and is applied in `buildConfig`.
+  LOG_LEVEL: Joi.string()
+    .valid(...LOG_LEVELS)
+    .empty(''),
   API_PORT: Joi.number().port().default(3000),
   ADMIN_CORS_ORIGIN: Joi.string().uri().required(),
   PUBLIC_BASE_URL: Joi.string().uri().empty(''),
