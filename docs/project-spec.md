@@ -23,6 +23,8 @@ packages/shared  shared types: Role, TaskStatus, TaskPriority, response envelope
 docs/          this spec, design brief
 ```
 
+Mobile and admin make all API calls through axios (one instance per app in `src/api/client.ts`), never raw `fetch`.
+
 Project rules live in `CLAUDE.md` and `.claude/skills/` (nest-backend, rn-responsive-ui, web-responsive-motion, ui-design-quality).
 
 ## 3. Roles, clients and task people

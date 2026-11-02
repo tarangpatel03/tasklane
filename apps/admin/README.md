@@ -20,7 +20,7 @@ The dev server proxies `/api` to the API, so the browser sees one origin and no 
 
 ## How it works
 
-- `src/api/client.ts`: fetch wrapper for `/api/v1`. It unwraps the response envelope, throws `ApiRequestError` (with field `details`), adds the Bearer token, and on a 401 refreshes the session once (single request at a time, because refresh tokens rotate) and retries.
+- `src/api/client.ts`: axios wrapper for `/api/v1` (all API calls go through it). It unwraps the response envelope, throws `ApiRequestError` (with field `details`), adds the Bearer token, and on a 401 refreshes the session once (single request at a time, because refresh tokens rotate) and retries.
 - `src/auth/`: `AuthProvider` and `useAuth` (login, logout, current user), `RequireAuth` route guard, token store. The access token is kept in memory only. The refresh token is kept in `sessionStorage`, so a reload keeps the session but closing the tab ends it. A non-Admin account is signed out again right after login.
 - `src/app/router.tsx`: routes. `/login` is public; everything else sits behind `RequireAuth`.
 - `src/features/users/` and `pages/users-page.tsx`: the Users screen (filters, table and cards, create and edit drawer, resend invite, deactivate and reactivate). `src/features/dashboard/` and `pages/dashboard-page.tsx`: the Dashboard (status tiles that link to the filtered task list, overdue list, tasks per Manager as stacked bars, recent activity), all from one `GET /dashboard/summary` call.

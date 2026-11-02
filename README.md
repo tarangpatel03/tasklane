@@ -25,8 +25,8 @@ A task has one Manager and one or more Employees. Status flow: `TODO` to `WORKIN
 ## Stack
 
 - API: NestJS, TypeORM, PostgreSQL, JWT access and rotating refresh tokens, Swagger
-- Admin panel: React, TypeScript, Vite, TanStack Query
-- Mobile app: React Native CLI (Android first), TypeScript, React Navigation, Reanimated
+- Admin panel: React, TypeScript, Vite, TanStack Query, axios
+- Mobile app: React Native CLI (Android first), TypeScript, React Navigation, Reanimated, TanStack Query, axios
 - Shared types: `packages/shared`
 - Yarn classic workspaces monorepo
 

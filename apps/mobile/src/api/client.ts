@@ -1,3 +1,4 @@
+import axios, { type AxiosResponse } from 'axios';
 import type { ApiError, ApiErrorDetail, ApiResponse } from '@task-app/shared';
 import { appConfig } from '../config/app-config';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../auth/token-store';
@@ -34,12 +35,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-async function readJson(response: Response): Promise<unknown> {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
+// Statuses are inspected below (401 refresh, envelope errors), so axios must not throw on them.
+// Network failures and timeouts still reject, which the UI reports as "can't reach the server".
+const http = axios.create({
+  baseURL: appConfig.apiBaseUrl,
+  timeout: 15000,
+  headers: { Accept: 'application/json' },
+  validateStatus: () => true,
+});
+
+function isOk(response: AxiosResponse): boolean {
+  return response.status >= 200 && response.status < 300;
 }
 
 function toError(status: number, body: unknown): ApiRequestError {
@@ -51,16 +57,16 @@ function toError(status: number, body: unknown): ApiRequestError {
   return new ApiRequestError(status, 'Something went wrong. Please try again.');
 }
 
-async function send(path: string, options: RequestOptions): Promise<Response> {
+function send(path: string, options: RequestOptions): Promise<AxiosResponse<unknown>> {
   const headers: Record<string, string> = {};
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   const token = getAccessToken();
   if (!options.public && token) headers.Authorization = `Bearer ${token}`;
 
-  return fetch(`${appConfig.apiBaseUrl}${path}`, {
+  return http.request<unknown>({
+    url: path,
     method: options.method ?? 'GET',
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    data: options.body,
   });
 }
 
@@ -84,8 +90,8 @@ async function doRefresh(): Promise<boolean> {
       body: { refreshToken },
       public: true,
     });
-    const body = await readJson(response);
-    if (!response.ok || !isRecord(body) || body.success !== true) {
+    const body = response.data;
+    if (!isOk(response) || !isRecord(body) || body.success !== true) {
       // Only a definite rejection ends the session; a network blip keeps the stored token.
       await clearTokens();
       return false;
@@ -116,8 +122,8 @@ export async function apiEnvelope<T>(
     }
   }
 
-  const body = await readJson(response);
-  if (!response.ok || !isRecord(body) || body.success !== true) {
+  const body = response.data;
+  if (!isOk(response) || !isRecord(body) || body.success !== true) {
     throw toError(response.status, body);
   }
   // Success envelope shape is the shared ApiResponse contract.
