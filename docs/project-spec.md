@@ -25,7 +25,7 @@ docs/          this spec, design brief
 
 Mobile and admin make all API calls through axios (one instance per app in `src/api/client.api.ts`), never raw `fetch`.
 
-File names: screens and components (and their CSS modules) are PascalCase (`TaskDetailView.tsx`, `TaskDetail.module.css`); every other file is camelCase with a role suffix where one applies (`authTokens.service.ts`, `auth.types.ts`, `tasks.api.ts`, `taskFormat.util.ts`, `token.store.ts`). Hooks are `useX.ts`. Entry files (`main.ts`, `App.tsx`, `index.ts`), config files, platform folders (`android/`, `ios/`) and migrations keep their generated names.
+File names: screens and components (and their CSS modules) are PascalCase (`TaskDetailView.tsx`, `TaskDetail.module.css`); every other file is camelCase with a role suffix where one applies (`authTokens.service.ts`, `auth.types.ts`, `tasks.api.ts`, `taskFormat.util.ts`, `token.store.ts`). Hooks are `useX.ts`. Folders: files with a similar purpose go together in a purpose-named subfolder (all buttons in `components/buttons/`, animation hooks in `hooks/animation/`); a file that shares its purpose with no other stays flat. Imports are direct paths, no barrel files. Entry files (`main.ts`, `App.tsx`, `index.ts`), config files, platform folders (`android/`, `ios/`) and migrations keep their generated names.
 
 One source of truth for constants; never hardcode these strings in app code:
 

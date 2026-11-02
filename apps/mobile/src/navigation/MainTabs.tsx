@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Role } from '@task-app/shared';
 import type { ReactNode } from 'react';
 import { useAuth } from '../auth/auth.context';
-import { BottomNav } from '../components/BottomNav';
+import { BottomNav } from '../components/navigation/BottomNav';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
 import { TasksScreen } from '../screens/TasksScreen';

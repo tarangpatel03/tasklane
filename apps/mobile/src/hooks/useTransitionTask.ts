@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import { TaskAction } from '@task-app/shared';
 import { toMessage } from '../api/errorMessage.api';
 import { transitionTask, type Task } from '../api/tasks.api';
-import { useSnackbar } from '../components/Snackbar';
+import { useSnackbar } from '../components/feedback/Snackbar';
 import { taskKeys } from '../api/queryKeys.api';
 
 interface TransitionInput {

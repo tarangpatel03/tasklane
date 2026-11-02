@@ -6,9 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from './src/auth/auth.context';
 import { AuthProvider } from './src/auth/AuthProvider';
 import { loadTokens } from './src/auth/token.store';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
-import { Splash } from './src/components/Splash';
-import { SnackbarProvider } from './src/components/Snackbar';
+import { ErrorBoundary } from './src/components/feedback/ErrorBoundary';
+import { Splash } from './src/components/feedback/Splash';
+import { SnackbarProvider } from './src/components/feedback/Snackbar';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { colors } from './src/theme';
 
