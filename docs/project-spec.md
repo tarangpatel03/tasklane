@@ -27,6 +27,8 @@ Mobile and admin make all API calls through axios (one instance per app in `src/
 
 File names: screens and components (and their CSS modules) are PascalCase (`TaskDetailView.tsx`, `TaskDetail.module.css`); every other file is camelCase with a role suffix where one applies (`authTokens.service.ts`, `auth.types.ts`, `tasks.api.ts`, `taskFormat.util.ts`, `token.store.ts`). Hooks are `useX.ts`. Folders: files with a similar purpose go together in a purpose-named subfolder (all buttons in `components/buttons/`, animation hooks in `hooks/animation/`); a file that shares its purpose with no other stays flat. Imports are direct paths, no barrel files. Entry files (`main.ts`, `App.tsx`, `index.ts`), config files, platform folders (`android/`, `ios/`) and migrations keep their generated names.
 
+Function style: React (admin) and React Native (mobile) code uses arrow functions for components, hooks, handlers and helpers (`export const TaskCard = ({ task }: Props): ReactNode => { ... }`), not `function` declarations. Explicit return types on exported functions still apply. The NestJS API keeps class methods.
+
 One source of truth for constants; never hardcode these strings in app code:
 
 - API paths, prefix and version: `packages/shared/src/api-routes.ts` (`ROUTES` for the NestJS controllers, `ENDPOINTS` and `API_BASE_PATH` for clients). New route: add it there first, run `yarn build:shared`, then use it.

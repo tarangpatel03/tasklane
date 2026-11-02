@@ -26,6 +26,7 @@ Stack:
 ## Code changes
 
 - File names: screens and components are PascalCase; everything else is camelCase with a role suffix (`.service.ts`, `.types.ts`, `.api.ts`, `.util.ts`). Group files of similar purpose into a purpose-named subfolder (e.g. `components/buttons/`); a file with no peers stays flat. Details in docs/project-spec.md, section 2.
+- React and React Native code (components, hooks, handlers, helpers) uses arrow functions (`export const Foo = (): ReactNode => {}`), not `function` declarations. Existing code is not converted unless asked.
 - Never hardcode route names, API paths or query keys. Use the central constants (see docs/project-spec.md, section 2) and add new ones there first.
 - Make the smallest change that solves the task. No refactors, renames, reordering or cleanup I didn't ask for.
 - No new dependencies, abstractions or config for hypothetical needs. Ask before adding any dependency.
