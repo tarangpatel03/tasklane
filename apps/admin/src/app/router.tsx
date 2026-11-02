@@ -1,11 +1,11 @@
 import { createBrowserRouter } from 'react-router';
-import { RequireAuth } from '../auth/require-auth';
-import { AppShell } from '../layout/app-shell';
-import { DashboardPage } from '../pages/dashboard-page';
-import { LoginPage } from '../pages/login-page';
-import { NotFoundPage } from '../pages/not-found-page';
-import { TasksPage } from '../pages/tasks-page';
-import { UsersPage } from '../pages/users-page';
+import { RequireAuth } from '../auth/RequireAuth';
+import { AppShell } from '../layout/AppShell';
+import { DashboardPage } from '../pages/DashboardPage';
+import { LoginPage } from '../pages/LoginPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
+import { TasksPage } from '../pages/TasksPage';
+import { UsersPage } from '../pages/UsersPage';
 import { PATHS } from './paths';
 
 export const router = createBrowserRouter([

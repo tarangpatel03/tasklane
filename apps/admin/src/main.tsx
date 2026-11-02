@@ -3,8 +3,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router/dom';
 import { router } from './app/router';
-import { AuthProvider } from './auth/auth-provider';
-import { ToastProvider } from './components/toast-provider';
+import { AuthProvider } from './auth/AuthProvider';
+import { ToastProvider } from './components/ToastProvider';
 import './styles/tokens.css';
 import './styles/global.css';
 
