@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomBytes } from 'crypto';
 import { EntityManager, IsNull, Repository } from 'typeorm';
@@ -7,6 +8,9 @@ import { AppConfig } from '../../config/configuration';
 import { RefreshToken } from './entities/refresh-token.entity';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Revoked rows stay this long so reuse of a rotated (possibly stolen) token is still detected. */
+const REVOKED_RETENTION_DAYS = 7;
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -18,6 +22,8 @@ function hashToken(token: string): string {
  */
 @Injectable()
 export class RefreshTokensService {
+  private readonly logger = new Logger(RefreshTokensService.name);
+
   constructor(
     @InjectRepository(RefreshToken) private readonly tokens: Repository<RefreshToken>,
     private readonly config: ConfigService<AppConfig, true>,
@@ -69,6 +75,22 @@ export class RefreshTokensService {
       { userId, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
+  }
+
+  /** Every refresh and login adds a row, so unusable ones are removed daily to keep the table small. */
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async purgeStale(): Promise<number> {
+    const now = new Date();
+    const revokedBefore = new Date(now.getTime() - REVOKED_RETENTION_DAYS * MS_PER_DAY);
+    const result = await this.tokens
+      .createQueryBuilder()
+      .delete()
+      .where('expires_at < :now', { now })
+      .orWhere('revoked_at < :revokedBefore', { revokedBefore })
+      .execute();
+    const deleted = result.affected ?? 0;
+    this.logger.log(`Purged ${deleted} stale refresh tokens`);
+    return deleted;
   }
 
   private repositoryFor(manager?: EntityManager): Repository<RefreshToken> {

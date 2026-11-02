@@ -17,6 +17,10 @@ With `NODE_ENV` other than `production`, Swagger UI is at `http://localhost:3000
 
 Controllers take the prefix, the version and every route pattern from `ROUTES`, `API_PREFIX` and `API_VERSION` in `@task-app/shared` (`packages/shared/src/api-routes.ts`) instead of string literals, so the API and both clients share one definition. Adding a route means adding it there first and running `yarn build:shared`.
 
+## Refresh token cleanup
+
+Every login and every token refresh inserts a row into `refresh_tokens`. `RefreshTokensService.purgeStale()` runs daily at 03:00 (server time, through `@nestjs/schedule`) and deletes rows that have expired, and rows revoked more than 7 days ago. The 7 days keep reuse of a rotated token detectable.
+
 ## HTTP security
 
 `helmet` sets the standard security headers on every response (outside production its CSP also allows the inline scripts Swagger UI needs; the `/account/*` pages send their own stricter CSP). CORS allows only the `ADMIN_CORS_ORIGIN` origin with the `Authorization` and `Content-Type` headers; the mobile app is not a browser and is unaffected. Access tokens are signed and verified as HS256 only.
