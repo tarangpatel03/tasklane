@@ -3,13 +3,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useAuth } from './src/auth/auth-context';
-import { AuthProvider } from './src/auth/auth-provider';
-import { loadTokens } from './src/auth/token-store';
-import { ErrorBoundary } from './src/components/error-boundary';
-import { Splash } from './src/components/splash';
-import { SnackbarProvider } from './src/components/snackbar';
-import { RootNavigator } from './src/navigation/root-navigator';
+import { useAuth } from './src/auth/auth.context';
+import { AuthProvider } from './src/auth/AuthProvider';
+import { loadTokens } from './src/auth/token.store';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { Splash } from './src/components/Splash';
+import { SnackbarProvider } from './src/components/Snackbar';
+import { RootNavigator } from './src/navigation/RootNavigator';
 import { colors } from './src/theme';
 
 const queryClient = new QueryClient({
